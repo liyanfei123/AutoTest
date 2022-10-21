@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.testframe.autotest.core.repository.mapper.SceneDetailMapper" >
+  <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SceneDetail" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="sceneName" property="sceneName" jdbcType="VARCHAR" />
+    <result column="sceneDesc" property="sceneDesc" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="waitType" property="waitType" jdbcType="INTEGER" />
+    <result column="waitTime" property="waitTime" jdbcType="INTEGER" />
+    <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
+    <result column="createBy" property="createBy" jdbcType="BIGINT" />
+    <result column="createTime" property="createTime" jdbcType="BIGINT" />
+    <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sceneName, sceneDesc, type, url, waitType, waitTime, isDelete, createBy, createTime, 
+    updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SCENE_DETAIL
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+
+  <select id="selectByTitle" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SCENE_DETAIL
+    where sceneName = #{title,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from AUTO_TEST_SCENE_DETAIL
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SCENE_DETAIL (sceneName, sceneDesc, type, 
+      url, waitType, waitTime, 
+      isDelete, createBy, createTime, 
+      updateTime)
+    values (#{sceneName,jdbcType=VARCHAR}, #{sceneDesc,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{url,jdbcType=VARCHAR}, #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, 
+      #{isDelete,jdbcType=INTEGER}, #{createBy,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, 
+      #{updateTime,jdbcType=BIGINT})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SCENE_DETAIL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="sceneName != null" >
+        sceneName,
+      </if>
+      <if test="sceneDesc != null" >
+        sceneDesc,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="waitType != null" >
+        waitType,
+      </if>
+      <if test="waitTime != null" >
+        waitTime,
+      </if>
+      <if test="isDelete != null" >
+        isDelete,
+      </if>
+      <if test="createBy != null" >
+        createBy,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="sceneName != null" >
+        #{sceneName,jdbcType=VARCHAR},
+      </if>
+      <if test="sceneDesc != null" >
+        #{sceneDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="waitType != null" >
+        #{waitType,jdbcType=INTEGER},
+      </if>
+      <if test="waitTime != null" >
+        #{waitTime,jdbcType=INTEGER},
+      </if>
+      <if test="isDelete != null" >
+        #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
+    update AUTO_TEST_SCENE_DETAIL
+    <set >
+      <if test="sceneName != null" >
+        sceneName = #{sceneName,jdbcType=VARCHAR},
+      </if>
+      <if test="sceneDesc != null" >
+        sceneDesc = #{sceneDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="waitType != null" >
+        waitType = #{waitType,jdbcType=INTEGER},
+      </if>
+      <if test="waitTime != null" >
+        waitTime = #{waitTime,jdbcType=INTEGER},
+      </if>
+      <if test="isDelete != null" >
+        isDelete = #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        createBy = #{createBy,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
+    update AUTO_TEST_SCENE_DETAIL
+    set sceneName = #{sceneName,jdbcType=VARCHAR},
+      sceneDesc = #{sceneDesc,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      url = #{url,jdbcType=VARCHAR},
+      waitType = #{waitType,jdbcType=INTEGER},
+      waitTime = #{waitTime,jdbcType=INTEGER},
+      isDelete = #{isDelete,jdbcType=INTEGER},
+      createBy = #{createBy,jdbcType=BIGINT},
+      createTime = #{createTime,jdbcType=BIGINT},
+      updateTime = #{updateTime,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

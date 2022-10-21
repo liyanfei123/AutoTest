@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true" scanPeroid="60 seconds">
+    <property name="log.path" value="/Users/liyanfei01/Desktop/st/AutoTest/logs/autoTest"/>
+    <property name="log.level" value="debug"/>
+    <property name="log.maxSize" value="500MB"/>
+    <property name="log.pattern"
+              value="{time=%d{yyyy-MM-dd HH:mm:ss.SSS}, level=%p} [%logger{1}] [%c{0}] [%file : %line] - %msg%n"></property>
+
+    <appender name="CONSOLE"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="stdout" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <fileNamePattern>${log.path}/stdout.log.%d{yyyy-MM-dd}
+            </fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="stderr" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <fileNamePattern>${log.path}/stderr.log.%d{yyyy-MM-dd}
+            </fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <logger name="com.testframe.autotest" additivity="false" level="${log.level}">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="stderr"/>
+    </logger>
+
+    <!-- 日志输出级别 -->
+    <root level="${log.level}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="stderr"/>
+    </root>
+
+
+</configuration>

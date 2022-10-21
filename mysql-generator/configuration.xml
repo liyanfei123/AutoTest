@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+
+    <!--指定连接数据库的JDBC驱动包所在位置，本机上的-->
+    <classPathEntry
+            location="/Users/liyanfei01/software/mysql-connector-java-8.0.30/mysql-connector-java-8.0.30.jar"/>
+
+    <!--配置table表信息内容体，targetRuntime指定采用MyBatis3版本-->
+    <context id="MysqlTables" targetRuntime="MyBatis3">
+        <!--抑制生成注释，由于生成的注释都是英文的，可以不让它生成-->
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+        <!--配置数据库连接-->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/AUTOTEST"
+                        userId="root"
+                        password="199624">
+        </jdbcConnection>
+
+        <!--生成Model类，targetPackage指定model类的包名，
+        targetProject指定生成的model放在哪个工程下-->
+        <javaModelGenerator targetPackage="com.testframe.autotest.core.meta.po"
+                            targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!--生成MyBatis的Mapper.xml文件，targetPackage指定Mapper.xml类的包名，
+        targetProject指定生成的Mapper.xml放在哪个工程下-->
+        <sqlMapGenerator targetPackage="mapper/"
+                         targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!--生成MyBatis的Mapper接口文件，targetPackage指定Mapper接口类的包名，
+        targetProject指定生成的Mapper接口放在哪个工程下-->
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="com.testframe.autotest.core.repository.mapper"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!--数据库表名及对应的Java模型类名-->
+        <!--数据库中的表名-->
+        <!--实体类的名字，即Model中的名字-->
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_SCENE_DETAIL"-->
+<!--               domainObjectName="SceneDetail"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_STEP_DETAIL"-->
+<!--               domainObjectName="StepDetail"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_SCENE_EXECUTE_RECORD"-->
+<!--               domainObjectName="SceneRecord"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_STEP_EXECUTE_RECORD"-->
+<!--               domainObjectName="StepRecord"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_SCENE_STEP"-->
+<!--               domainObjectName="SceneStep"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+        <table schema="AUTOTEST" tableName="AUTO_TEST_STEP_ORDER"
+               domainObjectName="StepOrder"
+               enableSelectByExample="false" enableDeleteByExample="false"
+               enableCountByExample="false"  enableUpdateByExample="false"
+               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+    </context>
+
+</generatorConfiguration>

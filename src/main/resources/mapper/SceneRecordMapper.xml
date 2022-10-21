@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.testframe.autotest.core.repository.mapper.SceneRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SceneRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
+    <result column="sceneName" property="sceneName" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="waitType" property="waitType" jdbcType="INTEGER" />
+    <result column="waitTime" property="waitTime" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="orderList" property="orderList" jdbcType="VARCHAR" />
+    <result column="extInfo" property="extInfo" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sceneId, sceneName, url, waitType, waitTime, status, orderList, extInfo, createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SCENE_EXECUTE_RECORD
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from AUTO_TEST_SCENE_EXECUTE_RECORD
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SCENE_EXECUTE_RECORD (sceneId, sceneName, url, 
+      waitType, waitTime, status, 
+      orderList, extInfo, createTime
+      )
+    values (#{sceneId,jdbcType=BIGINT}, #{sceneName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, 
+      #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{orderList,jdbcType=VARCHAR}, #{extInfo,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SCENE_EXECUTE_RECORD
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="sceneId != null" >
+        sceneId,
+      </if>
+      <if test="sceneName != null" >
+        sceneName,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="waitType != null" >
+        waitType,
+      </if>
+      <if test="waitTime != null" >
+        waitTime,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="orderList != null" >
+        orderList,
+      </if>
+      <if test="extInfo != null" >
+        extInfo,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="sceneId != null" >
+        #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="sceneName != null" >
+        #{sceneName,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="waitType != null" >
+        #{waitType,jdbcType=INTEGER},
+      </if>
+      <if test="waitTime != null" >
+        #{waitTime,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="orderList != null" >
+        #{orderList,jdbcType=VARCHAR},
+      </if>
+      <if test="extInfo != null" >
+        #{extInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
+    update AUTO_TEST_SCENE_EXECUTE_RECORD
+    <set >
+      <if test="sceneId != null" >
+        sceneId = #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="sceneName != null" >
+        sceneName = #{sceneName,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="waitType != null" >
+        waitType = #{waitType,jdbcType=INTEGER},
+      </if>
+      <if test="waitTime != null" >
+        waitTime = #{waitTime,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="orderList != null" >
+        orderList = #{orderList,jdbcType=VARCHAR},
+      </if>
+      <if test="extInfo != null" >
+        extInfo = #{extInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
+    update AUTO_TEST_SCENE_EXECUTE_RECORD
+    set sceneId = #{sceneId,jdbcType=BIGINT},
+      sceneName = #{sceneName,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      waitType = #{waitType,jdbcType=INTEGER},
+      waitTime = #{waitTime,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      orderList = #{orderList,jdbcType=VARCHAR},
+      extInfo = #{extInfo,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
