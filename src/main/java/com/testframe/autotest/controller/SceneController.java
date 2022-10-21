@@ -1,9 +1,13 @@
 package com.testframe.autotest.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.command.SceneCreateCmd;
 import com.testframe.autotest.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
+import com.testframe.autotest.core.meta.po.StepDetail;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.meta.dto.StepInfoDto;
+import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.service.impl.SceneDetailImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -53,5 +57,10 @@ public class SceneController {
     @GetMapping("/execute")
     public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId) {
         return null;
+    }
+
+    public static void main(String[] args) {
+        StepDetail stepDetail = new StepDetail();
+        JSON.parseObject(stepDetail.getStepInfo(), StepInfoModel.class);
     }
 }
