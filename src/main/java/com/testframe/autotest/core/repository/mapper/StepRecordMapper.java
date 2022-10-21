@@ -5,6 +5,8 @@ import com.testframe.autotest.core.meta.po.StepRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface StepRecordMapper {
     int deleteByPrimaryKey(Long id);
@@ -18,4 +20,6 @@ public interface StepRecordMapper {
     int updateByPrimaryKeySelective(StepRecord record);
 
     int updateByPrimaryKey(StepRecord record);
+
+    List<StepRecord> getStepRecordByRecordId(@Param("recordId") Long recordId);
 }

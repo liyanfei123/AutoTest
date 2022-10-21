@@ -1,4 +1,41 @@
 package com.testframe.autotest.core.repository;
 
+
+import com.testframe.autotest.core.meta.convertor.StepExecuteRecordConverter;
+import com.testframe.autotest.core.meta.po.StepRecord;
+import com.testframe.autotest.core.repository.dao.StepExecuteRecordDao;
+import com.testframe.autotest.meta.bo.SceneExecuteRecord;
+import com.testframe.autotest.meta.bo.StepExecuteRecord;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+@Slf4j
 public class StepExecuteRecordRepository {
+
+    @Autowired
+    private StepExecuteRecordDao stepExecuteRecordDao;
+
+    @Autowired
+    private StepExecuteRecordConverter stepExecuteRecordConverter;
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveStepExecuteRecord(StepExecuteRecord stepExecuteRecord) {
+        StepRecord stepRecord = stepExecuteRecordConverter.toPo(stepExecuteRecord);
+        return stepExecuteRecordDao.saveStepExecuteRecord(stepRecord);
+    }
+
+    public List<StepExecuteRecord> queryStepExecuteRecordByRecordId(Long recordId) {
+        List<StepRecord> stepRecords = stepExecuteRecordDao.getStepRecordsByRecordId(recordId);
+        List<StepExecuteRecord> stepExecuteRecords = stepRecords.stream().map(stepExecuteRecordConverter::toStepRecord)
+                .collect(Collectors.toList());
+        return stepExecuteRecords;
+    }
+
+
 }

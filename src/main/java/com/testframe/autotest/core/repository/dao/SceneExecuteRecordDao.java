@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class SceneExecuteRecordDao {
@@ -13,9 +15,14 @@ public class SceneExecuteRecordDao {
     @Autowired
     private SceneRecordMapper sceneRecordMapper;
 
-    public Boolean saveSceneExecuteRecord(SceneRecord sceneRecord) {
+    public Long saveSceneExecuteRecord(SceneRecord sceneRecord) {
         Long currentTime = System.currentTimeMillis();
         sceneRecord.setCreateTime(currentTime);
-        return sceneRecordMapper.insert(sceneRecord) > 0 ? true : false;
+        sceneRecordMapper.insert(sceneRecord);
+        return sceneRecord.getId();
+    }
+
+    public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, Long offset, Integer size) {
+        return sceneRecordMapper.getRecordBySceneId(sceneId, offset, size);
     }
 }
