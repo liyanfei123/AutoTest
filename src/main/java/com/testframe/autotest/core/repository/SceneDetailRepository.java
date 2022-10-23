@@ -40,7 +40,7 @@ public class SceneDetailRepository {
     public boolean update(Scene sceneUpdate) {
         SceneDetail sceneDetail = sceneDetailConvertor.toPO(sceneUpdate);
         if (!sceneDao.updateScene(sceneDetail)) {
-            return false;
+            throw new AutoTestException("场景更新失败");
         }
         return true;
     }

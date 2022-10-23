@@ -37,7 +37,7 @@ public class SceneUpdateCmd {
     private Integer waitTime;
 
     // 场景步骤详细信息
-    private List<String> stepsInfo;
+    private List<StepUpdateCmd> stepUpdateCmds;
 
 
 }

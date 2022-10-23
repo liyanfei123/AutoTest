@@ -25,4 +25,13 @@ public enum StepStatusEnum {
         return name;
     }
 
+    public static StepStatusEnum getByType(int type) {
+        for (StepStatusEnum stepStatusEnum : values()) {
+            if (stepStatusEnum.getType() == type) {
+                return stepStatusEnum;
+            }
+        }
+        return null;
+    }
+
 }

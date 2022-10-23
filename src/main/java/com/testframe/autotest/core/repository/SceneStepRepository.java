@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,25 @@ public class SceneStepRepository {
            log.error("[SceneStepRepository:batchSaveSceneStep] save scene-steps error, reason ={}", e.getMessage());
            return false;
        }
+    }
+
+    public Boolean updateSceneStep(SceneStepRel sceneStepRel) {
+        SceneStep sceneStep = sceneStepConverter.toPO(sceneStepRel);
+        return sceneStepDao.updateSceneStep(sceneStep);
+    }
+
+    public List<SceneStepRel> querySceneStepsBySceneId(Long sceneId) {
+        List<SceneStep> sceneSteps = sceneStepDao.queryBySceneId(sceneId);
+        List<SceneStepRel> sceneStepRels = new ArrayList<>();
+        sceneSteps.forEach(sceneStep -> {
+            SceneStepRel sceneStepRel = new SceneStepRel();
+            sceneStepRel.setId(sceneStep.getId());
+            sceneStepRel.setStepId(sceneStep.getStepId());
+            sceneStepRel.setStatus(sceneStepRel.getStatus());
+            sceneStepRel.setIsDelete(sceneStepRel.getIsDelete());
+            sceneStepRels.add(sceneStepRel);
+        });
+        return sceneStepRels;
     }
 
 

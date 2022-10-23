@@ -23,13 +23,13 @@ public class StepDetailDao {
         return null;
     }
 
-    public Boolean updateStepDetail(StepDetail stepDetail) {
+    public Long updateStepDetail(StepDetail stepDetail) {
         Long currentTime = System.currentTimeMillis();
         stepDetail.setUpdateTime(currentTime);
         if (stepDetailMapper.updateByPrimaryKey(stepDetail) > 0) {
-            return true;
+            return stepDetail.getId();
         }
-        return false;
+        return null;
 
     }
 

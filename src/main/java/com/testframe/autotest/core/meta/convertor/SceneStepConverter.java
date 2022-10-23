@@ -13,8 +13,11 @@ public class SceneStepConverter {
         SceneStep sceneStep = new SceneStep();
         sceneStep.setSceneId(sceneStep.getSceneId());
         sceneStep.setStepId(sceneStep.getStepId());
-        sceneStep.setIsDelete(0);
-        sceneStep.setStatus(StepStatusEnum.OPEN.getType());
+        sceneStep.setIsDelete(sceneStepRel.getIsDelete());
+        if (sceneStep.getIsDelete() == null) {
+            sceneStep.setIsDelete(0);
+        }
+        sceneStep.setStatus(sceneStepRel.getStatus());
         return sceneStep;
     }
 

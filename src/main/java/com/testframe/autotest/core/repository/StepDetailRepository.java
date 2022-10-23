@@ -30,9 +30,9 @@ public class StepDetailRepository {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean update(Step step) {
+    public Long update(Step step) {
         StepDetail stepDetail = stepDetailConvertor.toPo(step);
-        return !stepDetailDao.updateStepDetail(stepDetail) ? false : true;
+        return stepDetailDao.updateStepDetail(stepDetail);
     }
 
     public Step queryStepById(Long stepId) {

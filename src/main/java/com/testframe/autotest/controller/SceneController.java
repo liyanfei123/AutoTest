@@ -42,8 +42,10 @@ public class SceneController {
     @PostMapping("/update")
     public HttpResult<Long> createScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
         sceneUpdateCmd.setType(SceneTypeEnum.UI.getType());
-        sceneDetail.update(sceneUpdateCmd);
-        return HttpResult.ok();
+        if (sceneDetail.update(sceneUpdateCmd)) {
+            return  HttpResult.ok();
+        }
+        return HttpResult.error();
     }
 
     @GetMapping("/list")
