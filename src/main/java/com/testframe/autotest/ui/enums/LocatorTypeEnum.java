@@ -12,7 +12,8 @@ public enum LocatorTypeEnum {
     ByLinkText(5, "根据链接全部文字定位"),
     ByPartialLinkText(6, "根据链接部分文字定位"),
     ByCssSelector(7, "根据CSS选择器定位"),
-    ByXpath(8, "根据xpath定位");
+    ByXpath(8, "根据xpath定位"),
+    ByJQuery(9, "根据jquery定位");
 
     private int type;
 
