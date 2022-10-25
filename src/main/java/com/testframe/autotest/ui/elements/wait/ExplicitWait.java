@@ -2,18 +2,11 @@ package com.testframe.autotest.ui.elements.wait;
 
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.ui.enums.WaitEnum;
-import com.testframe.autotest.ui.meta.context.WebDriverContext;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Description:
@@ -23,13 +16,13 @@ import java.util.List;
  * @author: lyf
  */
 @Slf4j
-public class ExplicitPresenceWait extends BaseWait implements WaitElementI {
+public class ExplicitWait extends BaseWait implements WaitElementI{
 
-    public ExplicitPresenceWait(WebDriver driver) {
+    public ExplicitWait(WebDriver driver) {
         super(driver);
     }
 
-    public ExplicitPresenceWait(WebDriver driver, Long time) {
+    public ExplicitWait(WebDriver driver, Integer time) {
         super(driver, time);
     }
 

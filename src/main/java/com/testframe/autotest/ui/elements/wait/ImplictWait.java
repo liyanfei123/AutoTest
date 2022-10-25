@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +20,15 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class ImplictWait implements WaitElementI {
+public class ImplictWait extends BaseWait implements WaitElementI {
+
+    public ImplictWait(WebDriver driver) {
+        super(driver);
+    }
+
+    public ImplictWait(WebDriver driver, Integer time) {
+        super(driver, time);
+    }
 
     @Override
     public String waitIdentity() {
@@ -27,16 +36,10 @@ public class ImplictWait implements WaitElementI {
     }
 
     @Override
-    public WebElement wait(By by) {
-        WebDriver driver = WebDriverContext.getDriverThreadLocal();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        return driver.findElement(by);
+    public void wait(By by) {
+        return;
     }
 
-    @Override
-    public List<WebElement> waits(By by) {
-        WebDriver driver = WebDriverContext.getDriverThreadLocal();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        return driver.findElements(by);
-    }
+
+
 }

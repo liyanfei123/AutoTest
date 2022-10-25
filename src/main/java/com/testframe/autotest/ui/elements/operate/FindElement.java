@@ -2,6 +2,8 @@ package com.testframe.autotest.ui.elements.operate;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.ui.elements.wait.ExplicitWait;
+import com.testframe.autotest.ui.elements.wait.ImplictWait;
 import com.testframe.autotest.ui.elements.wait.WaitElementI;
 import com.testframe.autotest.ui.elements.wait.WaitTypeFactory;
 import com.testframe.autotest.ui.enums.LocatorTypeEnum;
@@ -12,9 +14,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -30,41 +34,57 @@ public class FindElement {
     @Autowired
     private WaitTypeFactory waitTypeFactory;
 
+    private WaitElementI waitStyle;
+
     private WebElement element;
 
     private List<WebElement> elements;
 
     // 目前只支持显式等待
-    public WebElement findElementByType(LocatorInfo locatorInfo) {
+    public WebElement findElementsByType(LocatorInfo locatorInfo) {
+        WebDriver driver = locatorInfo.getDriver();
         LocatorTypeEnum locatorType = locatorInfo.getLocatedType();
         String express = locatorInfo.getExpression();
         WaitEnum waitType = locatorInfo.getWaitType();
-        WaitElementI waitFactory = waitTypeFactory.getWaitType(waitType.getWaitIdentity());
+        if (waitType == WaitEnum.Explicit_Wait) {
+            waitStyle = new ExplicitWait(driver, locatorInfo.getWaitTime());
+        } else {
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(locatorInfo.getWaitTime()));
+            waitStyle = new ImplictWait(driver, locatorInfo.getWaitTime());
+        }
         try {
             switch (locatorType) {
                 case ById:
-                    element = waitFactory.wait(By.id(express));
+                    waitStyle.wait(By.id(express));
+                    elements = driver.findElements(By.id(express));
                     break;
                 case ByName:
-                    element = waitFactory.wait(By.name(express));
+                    waitStyle.wait(By.name(express));
+                    elements = driver.findElements(By.name(express));
                     break;
                 case ByClassName:
-                    element = waitFactory.wait(By.className(express));
+                    waitStyle.wait(By.className(express));
+                    elements = driver.findElements(By.className(express));
                     break;
                 case ByTagName:
-                    element = waitFactory.wait(By.tagName(express));
+                    waitStyle.wait(By.tagName(express));
+                    elements = driver.findElements(By.tagName(express));
                     break;
                 case ByLinkText:
-                    element = waitFactory.wait(By.linkText(express));
+                    waitStyle.wait(By.linkText(express));
+                    elements = driver.findElements(By.linkText(express));
                     break;
                 case ByPartialLinkText:
-                    element = waitFactory.wait(By.partialLinkText(express));
+                    waitStyle.wait(By.partialLinkText(express));
+                    elements = driver.findElements(By.partialLinkText(express));
                     break;
                 case ByCssSelector:
-                    element = waitFactory.wait(By.cssSelector(express));
+                    waitStyle.wait(By.cssSelector(express));
+                    elements = driver.findElements(By.cssSelector(express));
                     break;
                 case ByXpath:
-                    element = waitFactory.wait(By.xpath(express));
+                    waitStyle.wait(By.xpath(express));
+                    elements = driver.findElements(By.xpath(express));
                     break;
                 case ByJQuery:
                     // todo:增加jquery验证
