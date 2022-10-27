@@ -8,7 +8,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 /**
  * Description:
- *
+ * 定位方式
  * @date:2022/10/24 21:17
  * @author: lyf
  */

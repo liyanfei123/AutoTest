@@ -29,7 +29,7 @@ public class ExplicitPresenceWait extends BaseWait implements WaitElementI {
         super(driver);
     }
 
-    public ExplicitPresenceWait(WebDriver driver, Long time) {
+    public ExplicitPresenceWait(WebDriver driver, Integer time) {
         super(driver, time);
     }
 

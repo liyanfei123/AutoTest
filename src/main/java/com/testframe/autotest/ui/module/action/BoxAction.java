@@ -1,12 +1,10 @@
 package com.testframe.autotest.ui.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
-import com.testframe.autotest.ui.module.ExtraData;
+import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Description:
@@ -23,7 +21,7 @@ public class BoxAction implements ActionI {
      * @param element
      * @param data
      */
-    public static void beSelected(WebDriver driver, WebElement element, ExtraData data) {
+    public static void beSelected(WebDriver driver, WebElement element, OperateData data) {
         try {
             if (element == null || element.isSelected()) {
                 return;
@@ -41,7 +39,7 @@ public class BoxAction implements ActionI {
      * @param element
      * @param data
      */
-    public static void notBeSelected(WebDriver driver, WebElement element, ExtraData data) {
+    public static void notBeSelected(WebDriver driver, WebElement element, OperateData data) {
         try {
             if (element == null || !element.isSelected()) {
                 return;
@@ -50,6 +48,74 @@ public class BoxAction implements ActionI {
         } catch (Exception e) {
             e.printStackTrace();
             throw new ActionExpection("取消单选框选中失败");
+        }
+    }
+
+
+    /**
+     * 单选选中下拉列表中的元素
+     * @param driver
+     * @param element
+     * @param data
+     */
+    public static void selectDropList(WebDriver driver, WebElement element, OperateData data) {
+        Boolean selected = true;
+        try {
+            if (element == null) {
+                return;
+            }
+            Select dropList = new Select(element);
+            if (data.getIndexs() != null) {
+                dropList.selectByIndex(data.getIndexs().get(0));
+                return;
+            }
+            if (data.getAttr() != null) {
+                dropList.selectByValue(data.getAttr());
+                return;
+            }
+            if (data.getValue() != null) {
+                dropList.selectByVisibleText(data.getValue());
+                return;
+            }
+            selected = false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ActionExpection("单选列表选择失败");
+        } finally {
+            if (selected == false) {
+                throw new ActionExpection("无法选择当前指定的元素，请提供合适的选择方式");
+            }
+        }
+    }
+
+
+    /**
+     * 多选下拉列表选择元素
+     * @param driver
+     * @param element
+     * @param data
+     */
+    public static void selectMultiDropList(WebDriver driver, WebElement element, OperateData data) {
+        // 多选暂时仅支持索引的方式
+        // TODO: 2022/10/27 拓展支持多种选择方式
+        Boolean selected = true;
+        try {
+            if (element == null) {
+                return;
+            }
+            Select dropList = new Select(element);
+            dropList.deselectAll(); // 取消所有选中态
+            if (!dropList.isMultiple()) {
+                throw new ActionExpection("当前不是多选下拉列表，不支持该操作");
+            }
+            if (data.getIndexs() != null) {
+                for (Integer index : data.getIndexs()) {
+                    dropList.selectByIndex(index);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ActionExpection("多选列表选择失败");
         }
     }
 

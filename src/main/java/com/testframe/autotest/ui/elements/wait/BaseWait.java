@@ -15,6 +15,8 @@ public class BaseWait {
 
     public WebDriverWait driverWait;
 
+    public Integer time;
+
     public BaseWait() {}
 
     public BaseWait(WebDriver driver) {

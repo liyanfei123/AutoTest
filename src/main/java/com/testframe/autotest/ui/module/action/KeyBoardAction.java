@@ -1,8 +1,7 @@
 package com.testframe.autotest.ui.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
-import com.testframe.autotest.ui.module.ExtraData;
-import com.testframe.autotest.ui.module.action.ActionI;
+import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -27,27 +26,27 @@ public class KeyBoardAction implements ActionI {
         }
     }
 
-    public static void ctrl(WebDriver driver, WebElement element, ExtraData data) {
+    public static void ctrl(WebDriver driver, WebElement element, OperateData data) {
         robot.keyPress(KeyEvent.VK_CONTROL);
         robot.keyRelease(KeyEvent.VK_CONTROL);
     }
 
-    public static void shift(WebDriver driver, WebElement element, ExtraData data) {
+    public static void shift(WebDriver driver, WebElement element, OperateData data) {
         robot.keyPress(KeyEvent.VK_SHIFT);
         robot.keyRelease(KeyEvent.VK_SHIFT);
     }
 
-    public static void alt(WebDriver driver, WebElement element, ExtraData data) {
+    public static void alt(WebDriver driver, WebElement element, OperateData data) {
         robot.keyPress(KeyEvent.VK_ALT);
         robot.keyRelease(KeyEvent.VK_ALT);
     }
 
-    public static void enter(WebDriver driver, WebElement element, ExtraData data) {
+    public static void enter(WebDriver driver, WebElement element, OperateData data) {
         robot.keyPress(KeyEvent.VK_ENTER);
         robot.keyRelease(KeyEvent.VK_ENTER);
     }
 
-    public static void ctrlCV(WebDriver driver, WebElement element, ExtraData data) {
+    public static void ctrlCV(WebDriver driver, WebElement element, OperateData data) {
         robot.keyPress(KeyEvent.VK_CONTROL);
         robot.keyPress(KeyEvent.VK_V);
         robot.keyRelease(KeyEvent.VK_V);
@@ -60,7 +59,7 @@ public class KeyBoardAction implements ActionI {
      * @param element
      * @param data
      */
-    public static void input(WebDriver driver, WebElement element,  ExtraData data) {
+    public static void input(WebDriver driver, WebElement element,  OperateData data) {
         try {
             if (element == null) {
                 return;
