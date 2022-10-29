@@ -11,8 +11,4 @@ public interface SceneDetailInter {
 
     public Boolean update(SceneUpdateCmd sceneUpdateCmd);
 
-    public Long save();
-
-    // 批量保存
-    public Long batchStepSave();
 }

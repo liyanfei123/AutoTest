@@ -14,6 +14,7 @@ import com.testframe.autotest.meta.bo.SceneStepOrder;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.service.SceneDetailInter;
+import com.testframe.autotest.service.SceneStepInter;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +47,13 @@ public class SceneDetailImpl implements SceneDetailInter {
     private SceneStepRepository sceneStepRepository;
 
     @Autowired
-    private StepOrderRepository stepOrderRepository;
+    private SceneStepInterImpl sceneStepInter;
 
     @Autowired
-    private StepDetailImpl stepDetail;
+    private StepOrderImpl stepOrder;
+
+
+
 
     // 创建测试场景
     @Override
@@ -86,63 +90,15 @@ public class SceneDetailImpl implements SceneDetailInter {
                 stepIds.add(stepUpdateCmd.getStepId());
             }
             sceneDetailRepository.update(sceneUpdate);
-            // 查询当前场景下关联的步骤
-            List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
-            // 把已有的进行更新，新增的内容单独进行新增
-            for (SceneStepRel sceneStepRel : sceneStepRels) {
-                log.info("[SceneDetailImpl:update] update step in sceneId-stepId {}-{}, sceneStepRel = {}", sceneId, sceneStepRel.getStepId(), JSON.toJSONString(sceneStepRel));
-                if (sceneStepRel.getIsDelete() > 0) {
-                    continue;
-                }
-                Step step = steps.get(sceneStepRel.getStepId());
-                stepDetailRepository.update(step);
-                sceneStepRel.setStatus(step.getStatus());
-                sceneStepRepository.updateSceneStep(sceneStepRel);
-                steps.remove(sceneStepRel.getStepId());
-            }
-            if (!steps.isEmpty()) {
-                // 还有内容没有被操作过，代表是新增的步骤
-                steps.forEach((stepId, step) -> {
-                    log.info("[SceneDetailImpl:update] add step in sceneId {}, step = {}", sceneId, JSON.toJSONString(step));
-                    stepDetailRepository.saveStep(step);
-                    sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, step));
-                });
-            }
-            List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
-            sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType());
-            SceneStepOrder sceneStepOrder;
-            Integer len = sceneStepOrders.size();
-            switch (len) {
-                case 0:
-                    // 新增
-                    sceneStepOrder = SceneStepOrder.build(sceneId, stepIds.toString());
-                    stepOrderRepository.saveSceneStepOrder(sceneStepOrder);
-                    break;
-                case 1:
-                    // 更新
-                    sceneStepOrder = sceneStepOrders.get(0);
-                    sceneStepOrder.setOrderList(stepIds.toString());
-                    stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
-                    break;
-                default:
-                    throw new AutoTestException("当前执行顺序表存在脏数据");
-            }
+            // 更新场景下的所有步骤
+            sceneStepInter.updateSceneStep(sceneId, steps);
+            // 更新执行步骤顺序
+            stepOrder.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:update] update scene error, reason: {}", e.getMessage());
             return false;
         }
         return true;
-    }
-
-
-    @Override
-    public Long save() {
-        return null;
-    }
-
-    @Override
-    public Long batchStepSave() {
-        return null;
     }
 
     private List<Long> orderListStr(String stepIdsStr) {

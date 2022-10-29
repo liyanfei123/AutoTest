@@ -123,4 +123,11 @@
           isDelete = 0
   </select>
 
+  <select id="queryStepByStepId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select *
+    from AUTO_TEST_SCENE_STEP
+    where stepId = #{stepId,jdbcType=BIGINT} AND
+      isDelete = 0
+  </select>
+
 </mapper>

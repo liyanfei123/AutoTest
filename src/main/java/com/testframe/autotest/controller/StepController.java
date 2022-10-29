@@ -2,6 +2,7 @@ package com.testframe.autotest.controller;
 
 
 import com.testframe.autotest.command.StepUpdateCmd;
+import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.service.impl.StepDetailImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,14 @@ public class StepController {
     // 单步骤删除
     @GetMapping("/deleteStep")
     public HttpResult<Boolean> deleteStep(Long stepId) {
-        return null;
+        if (stepId == null) {
+            return HttpResult.error("请输入步骤id");
+        }
+        try {
+
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+        return HttpResult.ok();
     }
 }
