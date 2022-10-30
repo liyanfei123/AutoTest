@@ -1,11 +1,9 @@
-package com.testframe.autotest.command;
+package com.testframe.autotest.meta.command;
 
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.meta.bo.Step;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 @Accessors(chain = true)

@@ -23,9 +23,13 @@ public class SceneExecuteRecord {
 
     private Integer waitTime;
 
+    private Integer status;
+
+    private Long executeTime;
+
 //    private String extInfo;
 
     // 根据步骤执行顺序来存放每个步骤的执行状态
-    private List<StepExecuteRecord> steSpRecords;
+    private List<StepExecuteRecord> stepRecords;
 
 }

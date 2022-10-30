@@ -172,4 +172,44 @@
       updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+
+  <select id="queryScenesBySceneIds" resultMap="BaseResultMap"><![CDATA[
+    select *
+    from AUTO_TEST_SCENE_DETAIL
+    where id < #{lastId} and isDelete = 0 and id in
+    <foreach collection="sceneIds" index="i" item="sceneId" close=")" open="(" separator=",">
+      #{sceneId}
+    </foreach>
+    limit #{pageQry.offset}, #{pageQry.size}
+    ]]></select>
+
+  <select id="queryScenes" resultMap="BaseResultMap"><![CDATA[
+    select *
+    from AUTO_TEST_SCENE_DETAIL
+    where id < #{pageQry.lastId} and isDelete = 0
+    order by id
+    limit #{pageQry.offset}, #{pageQry.size}
+  ]]></select>
+
+  <select id="querySceneLikeTitle" resultMap="BaseResultMap"><![CDATA[
+    select *
+    from AUTO_TEST_SCENE_DETAIL
+    where id < #{pageQry.lastId} and isDelete = 0 and sceneName like '%' + #{scenenName} '%'
+    order by id
+      limit #{pageQry.offset}, #{pageQry.size}
+    ]]></select>
+
+  <select id="countScenes" resultMap="BaseResultMap">
+    select count(*)
+    from AUTO_TEST_SCENE_DETAIL
+    where isDelete = 0
+    <if test="sceneName != null" >
+      and sceneName like '%' + #{scenenName} '%'
+    </if>
+    <if test="sceneId != null" >
+      and id= #{scenenId}
+    </if>
+    </select>
+
 </mapper>

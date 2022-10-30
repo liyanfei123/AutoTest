@@ -10,7 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,9 @@ public class StepOrderRepository {
         List<StepOrder> stepOrders = stepOrderDao.getStepOrderBySceneId(sceneId);
         List<SceneStepOrder> sceneStepOrders = stepOrders.stream().map(sceneStepOrderConverter::PoToDo)
                 .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(sceneStepOrders)) {
+            return Collections.EMPTY_LIST;
+        }
         return sceneStepOrders;
     }
 

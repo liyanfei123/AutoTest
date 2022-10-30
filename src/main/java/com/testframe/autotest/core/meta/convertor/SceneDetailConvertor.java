@@ -1,6 +1,5 @@
 package com.testframe.autotest.core.meta.convertor;
 
-import com.testframe.autotest.command.SceneCreateCmd;
 import com.testframe.autotest.core.meta.po.SceneDetail;
 import com.testframe.autotest.meta.bo.Scene;
 import org.springframework.stereotype.Component;

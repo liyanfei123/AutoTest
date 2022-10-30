@@ -1,20 +1,15 @@
 package com.testframe.autotest.service.impl;
 
-import com.testframe.autotest.command.SceneCreateCmd;
-import com.testframe.autotest.command.SceneUpdateCmd;
-import com.testframe.autotest.command.StepUpdateCmd;
-import com.testframe.autotest.core.enums.StepOrderEnum;
+import com.testframe.autotest.meta.command.SceneCreateCmd;
+import com.testframe.autotest.meta.command.SceneUpdateCmd;
+import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
-import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneStepOrder;
-import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.service.SceneDetailInter;
-import com.testframe.autotest.service.SceneStepInter;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -79,19 +73,21 @@ public class SceneDetailImpl implements SceneDetailInter {
         log.info("[SceneDetailImpl:update] update scene, sceneUpdateCmd = {}", JSON.toJSONString(sceneUpdateCmd));
         Long sceneId = sceneUpdateCmd.getId();
         try {
+            // 更新场景概要
             sceneValidator.checkSceneUpdate(sceneUpdateCmd);
             Scene sceneUpdate = build(sceneUpdateCmd);
-            HashMap<Long, Step> steps = new HashMap<>();
-            List<Long> stepIds = new ArrayList<>();
+            sceneDetailRepository.update(sceneUpdate);
+            if (sceneUpdateCmd.getStepUpdateCmds().isEmpty()) {
+                return true;
+            }
+            List<Step> steps = new ArrayList<>();
             for (StepUpdateCmd stepUpdateCmd : sceneUpdateCmd.getStepUpdateCmds()) {
                 stepValidator.checkStepUpdate(stepUpdateCmd);
                 Step step = StepUpdateCmd.toStep(stepUpdateCmd);
-                steps.put(stepUpdateCmd.getStepId(), step);
-                stepIds.add(stepUpdateCmd.getStepId());
+                steps.add(step);
             }
-            sceneDetailRepository.update(sceneUpdate);
             // 更新场景下的所有步骤
-            sceneStepInter.updateSceneStep(sceneId, steps);
+            List<Long> stepIds = sceneStepInter.updateSceneStep(sceneId, steps);
             // 更新执行步骤顺序
             stepOrder.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {

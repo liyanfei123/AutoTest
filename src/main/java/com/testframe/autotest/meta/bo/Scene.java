@@ -29,6 +29,6 @@ public class Scene  {
     // 场景创建人
     private Long createBy;
 
-
+    private Integer isDelete;
 
 }

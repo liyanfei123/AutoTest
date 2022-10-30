@@ -6,7 +6,9 @@ import com.testframe.autotest.core.repository.mapper.SceneStepMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -38,7 +40,11 @@ public class SceneStepDao {
     }
 
     public List<SceneStep> queryBySceneId(Long sceneId) {
-        return sceneStepMapper.queryStepsBySceneId(sceneId);
+        List<SceneStep> sceneSteps = sceneStepMapper.queryStepsBySceneId(sceneId);
+        if (CollectionUtils.isEmpty(sceneSteps)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneSteps;
     }
 
     public SceneStep queryByStepId(Long stepId) {

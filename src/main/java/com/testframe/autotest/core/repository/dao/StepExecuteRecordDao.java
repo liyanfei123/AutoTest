@@ -5,7 +5,9 @@ import com.testframe.autotest.core.repository.mapper.StepRecordMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -26,6 +28,10 @@ public class StepExecuteRecordDao {
     }
 
     public List<StepRecord> getStepRecordsByRecordId(Long recordId) {
-        return stepRecordMapper.getStepRecordByRecordId(recordId);
+        List<StepRecord> stepRecords = stepRecordMapper.getStepRecordByRecordId(recordId);
+        if (CollectionUtils.isEmpty(stepRecords)) {
+            return Collections.EMPTY_LIST;
+        }
+        return stepRecords;
     }
 }

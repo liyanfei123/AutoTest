@@ -1,7 +1,7 @@
 package com.testframe.autotest.validator;
 
-import com.testframe.autotest.command.SceneCreateCmd;
-import com.testframe.autotest.command.SceneUpdateCmd;
+import com.testframe.autotest.meta.command.SceneCreateCmd;
+import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;

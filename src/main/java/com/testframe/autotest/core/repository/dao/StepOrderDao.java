@@ -5,7 +5,9 @@ import com.testframe.autotest.core.repository.mapper.StepOrderMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -32,6 +34,10 @@ public class StepOrderDao {
     }
 
     public List<StepOrder> getStepOrderBySceneId(Long sceneId) {
-        return stepOrderMapper.getStepOrderBySceneId(sceneId);
+        List<StepOrder> stepOrders = stepOrderMapper.getStepOrderBySceneId(sceneId);
+        if (CollectionUtils.isEmpty(stepOrders)) {
+            return Collections.EMPTY_LIST;
+        }
+        return stepOrders;
     }
 }

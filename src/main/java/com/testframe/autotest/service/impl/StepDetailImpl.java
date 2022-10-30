@@ -1,10 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.command.SceneUpdateCmd;
-import com.testframe.autotest.command.StepCreateCmd;
-import com.testframe.autotest.command.StepUpdateCmd;
-import com.testframe.autotest.core.enums.StepStatusEnum;
+import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,8 +36,10 @@ public class StepDetailImpl implements StepDetailInter {
             stepValidator.checkStepUpdate(stepUpdateCmd);
             Step step = StepUpdateCmd.toStep(stepUpdateCmd);
             if (stepUpdateCmd.getStepId() == null) {
+                // 新增
                 return stepDetailRepository.saveStep(step);
             } else {
+                // 更新
                 // 判断当前场景是否还存在
                 if (sceneDetailRepository.querySceneById(stepUpdateCmd.getSceneId()) == null) {
                     throw new AutoTestException("当前场景已被删除，无法修改");

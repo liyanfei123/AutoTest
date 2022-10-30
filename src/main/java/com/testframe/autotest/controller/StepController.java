@@ -1,9 +1,10 @@
 package com.testframe.autotest.controller;
 
 
-import com.testframe.autotest.command.StepUpdateCmd;
+import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.service.impl.SceneStepInterImpl;
 import com.testframe.autotest.service.impl.StepDetailImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -20,6 +21,9 @@ public class StepController {
 
     @Autowired
     private StepDetailImpl stepDetail;
+
+    @Autowired
+    private SceneStepInterImpl sceneStepInter;
 
     // 单场景步骤保存/更新
     @PostMapping("/save")
@@ -39,15 +43,20 @@ public class StepController {
 
     // 单步骤删除
     @GetMapping("/deleteStep")
-    public HttpResult<Boolean> deleteStep(Long stepId) {
+    public HttpResult<Boolean> deleteStep(@RequestParam(required = true) Long stepId) {
         if (stepId == null) {
             return HttpResult.error("请输入步骤id");
         }
         try {
-
+            sceneStepInter.removeSceneStepRel(stepId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
+        return HttpResult.ok();
+    }
+
+    @GetMapping("/copy")
+    public HttpResult<Long> copyStep(@RequestParam(required = true) Long stepId) {
         return HttpResult.ok();
     }
 }

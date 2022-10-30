@@ -7,11 +7,7 @@ import java.util.List;
 
 public interface SceneStepInter {
 
-    public Boolean stepSave();
+    public List<Long> updateSceneStep(Long sceneId, List<Step> steps);
 
-    // 批量保存
-    public Boolean batchStepSave();
-
-
-    public void updateSceneStep(Long sceneId, HashMap<Long, Step> steps);
+    public void removeSceneStepRel(Long step);
 }

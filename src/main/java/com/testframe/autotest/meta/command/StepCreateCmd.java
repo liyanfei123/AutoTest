@@ -1,4 +1,4 @@
-package com.testframe.autotest.command;
+package com.testframe.autotest.meta.command;
 
 import lombok.Data;
 

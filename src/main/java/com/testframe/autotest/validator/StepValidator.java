@@ -1,9 +1,7 @@
 package com.testframe.autotest.validator;
 
 
-import com.testframe.autotest.command.SceneUpdateCmd;
-import com.testframe.autotest.command.StepCreateCmd;
-import com.testframe.autotest.command.StepUpdateCmd;
+import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;

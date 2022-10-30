@@ -1,6 +1,5 @@
 package com.testframe.autotest.meta.bo;
 
-import com.testframe.autotest.command.StepUpdateCmd;
 import lombok.Data;
 
 @Data

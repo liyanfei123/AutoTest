@@ -90,4 +90,16 @@
       updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="queryStepByIds" resultMap="BaseResultMap">
+    select *
+    from AUTO_TEST_STEP_DETAIL
+    where id in
+    <foreach collection="stepIds" index="i" item="stepId" close=")" open="(" separator=",">
+      #{stepId}
+    </foreach>
+    order by id desc 
+    limit #{offset}, #{size}
+   </select>
+
 </mapper>

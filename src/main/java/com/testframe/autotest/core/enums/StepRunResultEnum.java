@@ -7,8 +7,9 @@ public enum StepRunResultEnum {
 
     SUCCESS(0, "成功"),
     FAIL(1, "失败"),
-    STOP(2, "暂停"),
-    CLOSE(3, "终止"); // 因为失败导致未执行
+    RUN(2, "执行中"),
+    STOP(3, "暂停"),
+    CLOSE(4, "终止"); // 因为失败导致未执行
 
     private int type;
 

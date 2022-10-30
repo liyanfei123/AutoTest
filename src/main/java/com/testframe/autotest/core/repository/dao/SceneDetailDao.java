@@ -1,11 +1,17 @@
 package com.testframe.autotest.core.repository.dao;
 
 import com.testframe.autotest.core.meta.po.SceneDetail;
+import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.meta.request.PageRequest;
 import com.testframe.autotest.core.repository.mapper.SceneDetailMapper;
 import com.testframe.autotest.meta.bo.Scene;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collections;
+import java.util.List;
 
 
 @Slf4j
@@ -20,6 +26,14 @@ public class SceneDetailDao {
             return false;
         }
         return true;
+    }
+
+    public List<SceneDetail> querySceneLikeTitle(String sceneName, PageQry pageQry) {
+        List<SceneDetail> sceneDetailList = sceneDetailMapper.queryScenesLikeTitle(sceneName, pageQry);
+        if (CollectionUtils.isEmpty(sceneDetailList)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneDetailList;
     }
 
     public Long saveScene(SceneDetail sceneDetail) {
@@ -43,4 +57,15 @@ public class SceneDetailDao {
         return sceneDetail;
     }
 
+    public List<SceneDetail> queryScenes(PageQry pageQry) {
+        List<SceneDetail> sceneDetails = sceneDetailMapper.queryScenes(pageQry);
+        if (CollectionUtils.isEmpty(sceneDetails)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneDetails;
+    }
+
+    public Long countScenes(Long sceneId, String sceneName) {
+        return sceneDetailMapper.countScenes(sceneId, sceneName);
+    }
 }

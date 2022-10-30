@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,9 +37,6 @@ public class SceneStepRepository {
     @Transactional(rollbackFor = Exception.class)
     public Boolean batchSaveSceneStep(List<SceneStepRel> sceneStepRels) {
         List<SceneStep> sceneSteps = sceneStepRels.stream().map(sceneStepConverter::toPO).collect(Collectors.toList());
-//        List<SceneStep> sceneSteps = sceneStepRels.stream().map(sceneStepRel -> {
-//                    return sceneStepConverter.toPO(sceneStepRel);
-//                }).collect(Collectors.toList());
        try {
            for (SceneStep sceneStep : sceneSteps) {
                sceneStepDao.saveSceneStep(sceneStep);
@@ -49,6 +48,20 @@ public class SceneStepRepository {
        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean batchUpdateSceneStep(List<SceneStepRel> sceneStepRels) {
+        List<SceneStep> sceneSteps = sceneStepRels.stream().map(sceneStepConverter::toPO).collect(Collectors.toList());
+        try {
+            for (SceneStep sceneStep : sceneSteps) {
+                sceneStepDao.updateSceneStep(sceneStep);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("[SceneStepRepository:batchUpdateSceneStep] update scene-steps error, reason ={}", e.getMessage());
+            return false;
+        }
+    }
+
     public Boolean updateSceneStep(SceneStepRel sceneStepRel) {
         SceneStep sceneStep = sceneStepConverter.toPO(sceneStepRel);
         return sceneStepDao.updateSceneStep(sceneStep);
@@ -56,6 +69,9 @@ public class SceneStepRepository {
 
     public List<SceneStepRel> querySceneStepsBySceneId(Long sceneId) {
         List<SceneStep> sceneSteps = sceneStepDao.queryBySceneId(sceneId);
+        if (CollectionUtils.isEmpty(sceneSteps)) {
+            return Collections.EMPTY_LIST;
+        }
         List<SceneStepRel> sceneStepRels = new ArrayList<>();
         sceneSteps.forEach(sceneStep -> {
             SceneStepRel sceneStepRel = build(sceneStep);

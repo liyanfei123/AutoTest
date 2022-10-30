@@ -1,7 +1,6 @@
 package com.testframe.autotest.service;
 
-import com.testframe.autotest.command.StepCreateCmd;
-import com.testframe.autotest.command.StepUpdateCmd;
+import com.testframe.autotest.meta.command.StepUpdateCmd;
 
 import java.util.List;
 

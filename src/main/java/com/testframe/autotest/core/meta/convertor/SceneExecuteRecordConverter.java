@@ -28,7 +28,7 @@ public class SceneExecuteRecordConverter {
         sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
         sceneRecord.setExtInfo(null);
         List<Long> stepIds = new ArrayList<>();
-        for (StepExecuteRecord stepExecuteRecord : sceneExecuteRecord.getSteSpRecords()) {
+        for (StepExecuteRecord stepExecuteRecord : sceneExecuteRecord.getStepRecords()) {
             stepIds.add(stepExecuteRecord.getStepId());
         }
         String stepOrders = stepIds.toString();
@@ -38,11 +38,13 @@ public class SceneExecuteRecordConverter {
 
     public SceneExecuteRecord toSceneExecuteRecord(SceneRecord sceneRecord) {
         SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();
-        sceneExecuteRecord.setSceneId(sceneExecuteRecord.getSceneId());
-        sceneExecuteRecord.setSceneName(sceneExecuteRecord.getSceneName());
-        sceneExecuteRecord.setUrl(sceneExecuteRecord.getUrl());
-        sceneExecuteRecord.setWaitType(sceneExecuteRecord.getWaitType());
-        sceneExecuteRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
+        sceneExecuteRecord.setSceneId(sceneRecord.getSceneId());
+        sceneExecuteRecord.setSceneName(sceneRecord.getSceneName());
+        sceneExecuteRecord.setUrl(sceneRecord.getUrl());
+        sceneExecuteRecord.setWaitType(sceneRecord.getWaitType());
+        sceneExecuteRecord.setWaitTime(sceneRecord.getWaitTime());
+        sceneExecuteRecord.setStatus(sceneRecord.getStatus());
+        sceneExecuteRecord.setExecuteTime(sceneRecord.getCreateTime());
         return sceneExecuteRecord;
     }
 

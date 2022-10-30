@@ -1,9 +1,7 @@
 package com.testframe.autotest.service;
 
-import com.testframe.autotest.command.SceneCreateCmd;
-import com.testframe.autotest.command.SceneUpdateCmd;
-
-import java.util.List;
+import com.testframe.autotest.meta.command.SceneCreateCmd;
+import com.testframe.autotest.meta.command.SceneUpdateCmd;
 
 public interface SceneDetailInter {
 

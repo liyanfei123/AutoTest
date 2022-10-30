@@ -1,5 +1,8 @@
 package com.testframe.autotest.core.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 场景执行状态
  */
@@ -27,5 +30,12 @@ public enum SceneStatusEnum {
         return desc;
     }
 
+    public static List<Integer> getTypes() {
+        List<Integer> allTypes = new ArrayList<>();
+        for (SceneStatusEnum sceneStatusEnum : values()) {
+            allTypes.add(sceneStatusEnum.type);
+        }
+        return allTypes;
+    }
 
 }
