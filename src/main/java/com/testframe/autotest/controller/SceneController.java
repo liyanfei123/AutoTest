@@ -7,6 +7,7 @@ import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.query.SceneQry;
 import com.testframe.autotest.meta.vo.SceneListVO;
+import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.service.impl.SceneDetailImpl;
 import com.testframe.autotest.service.impl.SceneListInterImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,9 @@ public class SceneController {
 
     @Autowired
     private SceneListInterImpl sceneListInter;
+
+    @Autowired
+    private CopyServiceImpl sceneCopyService;
 
     // 创建场景
     @PostMapping("/create")
@@ -66,8 +70,14 @@ public class SceneController {
 
     @GetMapping("/copy")
     public HttpResult<Object> copyScene(@RequestParam(required = true) Long sceneId) {
-        return HttpResult.ok(123L);
+        try {
+            Long newSceneId = sceneCopyService.sceneCopy(sceneId);
+            return HttpResult.ok(newSceneId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
     }
+
     // 执行场景
     @GetMapping("/execute")
     public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId) {

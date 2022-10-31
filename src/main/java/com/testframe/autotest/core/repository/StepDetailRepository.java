@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,15 +64,27 @@ public class StepDetailRepository {
         if (stepDetail == null) {
             return null;
         } else {
-            Step step = new Step();
-            step.setStepId(stepId);
-            step.setStepName(stepDetail.getStepName());
-            step.setStepInfo(stepDetail.getStepInfo());
-            return step;
+            return build(stepDetail);
         }
     }
 
-    public List<Step> querySteps() {
-        return null;
+    public List<Step> queryStepByIds(List<Long> stepIds) {
+        List<StepDetail> stepDetails = stepDetailDao.queryByStepIds(stepIds);
+        if (CollectionUtils.isEmpty(stepDetails)) {
+            return Collections.EMPTY_LIST;
+        }
+        List<Step> steps = stepDetails.stream().map(this::build).collect(Collectors.toList());
+        return steps;
+    }
+
+    private Step build(StepDetail stepDetail) {
+        if (stepDetail == null) {
+            return null;
+        }
+        Step step = new Step();
+        step.setStepId(stepDetail.getId());
+        step.setStepName(stepDetail.getStepName());
+        step.setStepInfo(stepDetail.getStepInfo());
+        return step;
     }
 }

@@ -4,6 +4,7 @@ package com.testframe.autotest.controller;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.service.impl.SceneStepInterImpl;
 import com.testframe.autotest.service.impl.StepDetailImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,9 @@ public class StepController {
 
     @Autowired
     private SceneStepInterImpl sceneStepInter;
+
+    @Autowired
+    private CopyServiceImpl stepCopyService;
 
     // 单场景步骤保存/更新
     @PostMapping("/save")
