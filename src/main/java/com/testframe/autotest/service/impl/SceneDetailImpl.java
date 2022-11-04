@@ -9,7 +9,7 @@ import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.bo.Step;
-import com.testframe.autotest.service.SceneDetailInter;
+import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SceneDetailImpl implements SceneDetailInter {
+public class SceneDetailImpl implements SceneDetailService {
 
     @Autowired
     private SceneValidator sceneValidator;

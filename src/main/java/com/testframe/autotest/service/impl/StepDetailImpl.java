@@ -6,7 +6,7 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.Step;
-import com.testframe.autotest.service.StepDetailInter;
+import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class StepDetailImpl implements StepDetailInter {
+public class StepDetailImpl implements StepDetailService {
 
     @Autowired
     private StepValidator stepValidator;

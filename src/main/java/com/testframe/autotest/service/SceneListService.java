@@ -5,7 +5,7 @@ import com.testframe.autotest.meta.vo.SceneListVO;
 
 import java.util.List;
 
-public interface SceneListInter {
+public interface SceneListService {
 
     public SceneListVO queryScenes(SceneQry sceneQry);
 

@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +30,16 @@ public class SceneStepOrder {
                 .sceneId(sceneId)
                 .orderList(orderList)
                 .type(StepOrderEnum.BEFORE.getType()).build();
+    }
+
+    public static List<Long> orderToList(String orderStr) {
+        orderStr = orderStr.substring(1, orderStr.length()-1);
+        String[] orders = orderStr.split(",");
+        List<Long> orderList = new ArrayList<>();
+        for (String order : orders) {
+            orderList.add(Long.parseLong(order));
+        }
+        return orderList;
     }
 
 }

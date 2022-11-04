@@ -20,12 +20,10 @@ import com.testframe.autotest.meta.dto.SceneInfoDto;
 import com.testframe.autotest.meta.dto.SceneSimpleInfoDto;
 import com.testframe.autotest.meta.query.SceneQry;
 import com.testframe.autotest.meta.vo.SceneListVO;
-import com.testframe.autotest.service.SceneListInter;
-import io.swagger.models.auth.In;
+import com.testframe.autotest.service.SceneListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +40,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SceneListInterImpl implements SceneListInter {
+public class SceneListInterImpl implements SceneListService {
 
     @Autowired
     private SceneDetailRepository sceneDetailRepository;

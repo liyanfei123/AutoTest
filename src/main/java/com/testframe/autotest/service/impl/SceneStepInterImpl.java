@@ -2,12 +2,11 @@ package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.meta.po.SceneStep;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
-import com.testframe.autotest.service.SceneStepInter;
+import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SceneStepInterImpl implements SceneStepInter {
+public class SceneStepInterImpl implements SceneStepService {
 
     @Autowired
     private SceneStepRepository sceneStepRepository;

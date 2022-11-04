@@ -3,7 +3,7 @@ package com.testframe.autotest.service;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 
-public interface SceneDetailInter {
+public interface SceneDetailService {
 
     public Long create(SceneCreateCmd sceneCreateCmd);
 

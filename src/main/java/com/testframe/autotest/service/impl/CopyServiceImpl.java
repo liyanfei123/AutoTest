@@ -1,5 +1,6 @@
 package com.testframe.autotest.service.impl;
 
+import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
@@ -7,12 +8,14 @@ import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.meta.bo.Scene;
+import com.testframe.autotest.meta.bo.SceneStepOrder;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.service.CopyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +44,7 @@ public class CopyServiceImpl implements CopyService {
     @Autowired
     private StepDetailRepository stepDetailRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Long sceneCopy(Long sceneId) {
         log.info("[SceneCopyServiceImpl:copy] copy scene {}", sceneId);
@@ -70,6 +74,12 @@ public class CopyServiceImpl implements CopyService {
                 newSceneStepRels.add(sceneStepRel);
             }
             sceneStepRepository.batchSaveSceneStep(newSceneStepRels);
+            // 保存执行步骤
+            SceneStepOrder sceneStepOrder = new SceneStepOrder();
+            sceneStepOrder.setSceneId(newSceneId);
+            sceneStepOrder.setOrderList(newStepIds.toString());
+            sceneStepOrder.setType(StepOrderEnum.BEFORE.getType());
+            stepOrderRepository.saveSceneStepOrder(sceneStepOrder);
             return newSceneId;
         } catch (Exception e) {
             log.error("[SceneCopyServiceImpl:copy] copy scene {} error, reason = {}", sceneId, e.getStackTrace());
@@ -77,15 +87,42 @@ public class CopyServiceImpl implements CopyService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Long stepCopy(Long sceneId, Long stepId) {
-
-        // 复制步骤
-
-        // 绑定关联关系
-
-        // 更新执行顺序
-
-        return null;
+        log.info("[CopyServiceImpl:stepCopy] copy step in sceneId {} with stepId {}", sceneId, stepId);
+        try {
+            // 复制步骤
+            Step copyStep = stepDetailRepository.queryStepById(stepId);
+            copyStep.setStepId(null);
+            Long newStepId = stepDetailRepository.saveStep(copyStep);
+            copyStep.setStepId(newStepId);
+            // 绑定关联关系
+            sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, copyStep));
+            // 更新场景的执行顺序
+            List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
+            sceneStepOrders.stream().filter(sceneStepOrder -> sceneStepOrder.getType().equals(
+                    StepOrderEnum.BEFORE.getType()
+            ));
+            SceneStepOrder newSceneStepOrder;
+            if (sceneStepOrders.isEmpty()) {
+                List<Long> stepIds = new ArrayList<>();
+                stepIds.add(newStepId);
+                newSceneStepOrder = SceneStepOrder.build(sceneId, stepIds.toString());
+                stepOrderRepository.saveSceneStepOrder(newSceneStepOrder);
+            } else {
+                newSceneStepOrder = sceneStepOrders.get(0);
+                List<Long> orderList = SceneStepOrder.orderToList(newSceneStepOrder.getOrderList());
+                int index = orderList.indexOf(stepId);
+                orderList.add(index+1, newStepId);
+                newSceneStepOrder.setOrderList(orderList.toString());
+                stepOrderRepository.updateSceneStepOrder(newSceneStepOrder);
+            }
+            return newStepId;
+        } catch (Exception e) {
+            log.error("[CopyServiceImpl:stepCopy] copy step {} error, reason",
+                    stepId, e.getStackTrace());
+            throw new AutoTestException("步骤复制失败");
+        }
     }
 }

@@ -2,7 +2,7 @@ package com.testframe.autotest.service;
 
 import java.util.List;
 
-public interface StepOrderInter {
+public interface StepOrderService {
 
     public void updateStepOrder(Long sceneId, List<Long> stepIds);
 

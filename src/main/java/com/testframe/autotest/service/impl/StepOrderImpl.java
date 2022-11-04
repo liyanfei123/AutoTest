@@ -5,12 +5,11 @@ import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.meta.bo.SceneStepOrder;
-import com.testframe.autotest.service.StepOrderInter;
+import com.testframe.autotest.service.StepOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class StepOrderImpl implements StepOrderInter  {
+public class StepOrderImpl implements StepOrderService {
 
     @Autowired
     private StepOrderRepository stepOrderRepository;
@@ -52,16 +51,10 @@ public class StepOrderImpl implements StepOrderInter  {
         if (stepOrder == null || stepOrder.equals("")) {
             throw new AutoTestException("当前场景无可删除步骤");
         }
-        stepOrder = stepOrder.substring(1, stepOrder.length()-1);
-        String[] oldOrder = stepOrder.split(",");
-        List<Long> newOrder = new ArrayList<>();
-        for (String order : oldOrder) {
-            if (Long.parseLong(order) != stepId) {
-                newOrder.add(Long.parseLong(order));
-            }
-        }
+        List<Long> newOrder = SceneStepOrder.orderToList(stepOrder);
+        newOrder.stream().filter(sId -> !sId.equals(stepId));
         log.info("[StepOrderImpl:removeStepId] update step run order, oldOrder = {}, newOrder = {}",
-                JSON.toJSONString(oldOrder), JSON.toJSONString(newOrder));
+                JSON.toJSONString(stepOrder), JSON.toJSONString(newOrder));
         sceneStepOrder.setOrderList(newOrder.toString());
         stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
     }

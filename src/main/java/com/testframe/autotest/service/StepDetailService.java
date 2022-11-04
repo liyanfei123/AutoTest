@@ -4,7 +4,7 @@ import com.testframe.autotest.meta.command.StepUpdateCmd;
 
 import java.util.List;
 
-public interface StepDetailInter {
+public interface StepDetailService {
 
     public Long saveStepDetail(StepUpdateCmd stepUpdateCmd);
 

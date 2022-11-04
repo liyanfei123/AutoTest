@@ -60,7 +60,14 @@ public class StepController {
     }
 
     @GetMapping("/copy")
-    public HttpResult<Long> copyStep(@RequestParam(required = true) Long stepId) {
-        return HttpResult.ok();
+    public HttpResult<Long> copyStep(@RequestParam(required = true) Long sceneId,
+                                     @RequestParam(required = true) Long stepId) {
+        try {
+            Long newSceneId = stepCopyService.stepCopy(sceneId, stepId);
+            return HttpResult.ok(newSceneId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+
     }
 }

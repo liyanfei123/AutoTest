@@ -72,3 +72,5 @@ CREATE TABLE AUTO_TEST_STEP_EXECUTE_RECORD(
   PRIMARY KEY (id)
 ) COMMENT = '步骤执行记录表 ';
 
+
+-- 步骤执行记录表中需增加步骤名称，用于返回执行结果记录

@@ -5,7 +5,7 @@ import com.testframe.autotest.meta.bo.Step;
 import java.util.HashMap;
 import java.util.List;
 
-public interface SceneStepInter {
+public interface SceneStepService {
 
     public List<Long> updateSceneStep(Long sceneId, List<Step> steps);
 
