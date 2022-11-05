@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SceneListInterImpl implements SceneListService {
+public class SceneListImpl implements SceneListService {
 
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
@@ -146,20 +146,6 @@ public class SceneListInterImpl implements SceneListService {
             log.error("[SceneListInterImpl:deleteScene] delete scene {} error, reason = {}", sceneId, JSON.toJSONString(e.getStackTrace()));
             throw new AutoTestException(e.getMessage());
         }
-    }
-
-
-    private HashMap<Long, SceneInfoDto> batchGetSceneInfo(PageQry pageQry) {
-        return null;
-    }
-
-    /**
-     * 批量获取场景信息
-     * @param sceneIds
-     * @return
-     */
-    private HashMap<Long, SceneInfoDto> batchGetSceneInfo(List<Long> sceneIds) {
-        return null;
     }
 
 

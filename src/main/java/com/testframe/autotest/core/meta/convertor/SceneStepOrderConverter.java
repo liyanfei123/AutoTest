@@ -13,7 +13,7 @@ public class SceneStepOrderConverter {
         StepOrder stepOrder = new StepOrder();
         stepOrder.setId(sceneStepOrder.getId());
         stepOrder.setSceneId(stepOrder.getSceneId());
-        if (sceneStepOrder.getOrderList() == null || sceneStepOrder.getOrderList() == "") {
+        if (sceneStepOrder.getOrderStr() == null || sceneStepOrder.getOrderStr() == "") {
             stepOrder.setOrderList(null);
         } else {
             stepOrder.setOrderList(stepOrder.getOrderList());
@@ -29,7 +29,7 @@ public class SceneStepOrderConverter {
     public SceneStepOrder PoToDo(StepOrder stepOrder) {
         SceneStepOrder sceneStepOrder = new SceneStepOrder();
         sceneStepOrder.setSceneId(stepOrder.getSceneId());
-        sceneStepOrder.setOrderList(stepOrder.getOrderList());
+        sceneStepOrder.setOrderStr(stepOrder.getOrderList());
         sceneStepOrder.setType(stepOrder.getType());
         sceneStepOrder.setId(null);
         return sceneStepOrder;

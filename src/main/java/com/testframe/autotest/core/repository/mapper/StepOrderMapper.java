@@ -22,4 +22,6 @@ public interface StepOrderMapper {
     int updateByPrimaryKey(StepOrder record);
 
     List<StepOrder> getStepOrderBySceneId(@Param("sceneId") Long sceneId);
+
+    StepOrder getStepOrderByRecordId(@Param("recordId") Long sceneId);
 }

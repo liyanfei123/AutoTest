@@ -5,6 +5,7 @@
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="recordId" property="recordId" jdbcType="BIGINT" />
     <result column="stepId" property="stepId" jdbcType="BIGINT" />
+    <result column="stepName" property="stepName" jdbcType="VARCHAR" />
     <result column="reason" property="reason" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
@@ -26,10 +27,10 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_STEP_EXECUTE_RECORD (recordId, stepId, reason, 
+    insert into AUTO_TEST_STEP_EXECUTE_RECORD (recordId, stepId, stepName, reason,
       status, createTime)
-    values (#{recordId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{reason,jdbcType=VARCHAR}, 
-      #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT})
+    values (#{recordId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{stepName,jdbcType=VARCHAR},
+      #{reason,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.StepRecord" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -42,6 +43,9 @@
       </if>
       <if test="stepId != null" >
         stepId,
+      </if>
+      <if test="stepName != null" >
+        stepName,
       </if>
       <if test="reason != null" >
         reason,
@@ -59,6 +63,9 @@
       </if>
       <if test="stepId != null" >
         #{stepId,jdbcType=BIGINT},
+      </if>
+      <if test="stepName != null" >
+        #{stepName,jdbcType=VARCHAR},
       </if>
       <if test="reason != null" >
         #{reason,jdbcType=VARCHAR},
@@ -80,6 +87,9 @@
       <if test="stepId != null" >
         stepId = #{stepId,jdbcType=BIGINT},
       </if>
+      <if test="stepName != null" >
+        stepName = #{stepName,jdbcType=VARCHAR},
+      </if>
       <if test="reason != null" >
         reason = #{reason,jdbcType=VARCHAR},
       </if>
@@ -96,6 +106,7 @@
     update AUTO_TEST_STEP_EXECUTE_RECORD
     set recordId = #{recordId,jdbcType=BIGINT},
       stepId = #{stepId,jdbcType=BIGINT},
+      stepName = #{stepName,jdbcType=VARCHAR},
       reason = #{reason,jdbcType=VARCHAR},
       status = #{status,jdbcType=INTEGER},
       createTime = #{createTime,jdbcType=BIGINT}

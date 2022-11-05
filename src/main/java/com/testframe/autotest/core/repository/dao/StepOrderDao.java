@@ -40,4 +40,11 @@ public class StepOrderDao {
         }
         return stepOrders;
     }
+
+    public StepOrder queryStepOrderByRecordId(Long recordId) {
+        StepOrder stepOrder = stepOrderMapper.getStepOrderByRecordId(recordId);
+        return stepOrder;
+    }
+
+
 }

@@ -5,11 +5,12 @@ import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.query.SceneQry;
 import com.testframe.autotest.meta.vo.SceneListVO;
+import com.testframe.autotest.service.SceneListService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.service.impl.SceneDetailImpl;
-import com.testframe.autotest.service.impl.SceneListInterImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class SceneController {
     private SceneDetailImpl sceneDetail;
 
     @Autowired
-    private SceneListInterImpl sceneListInter;
+    private SceneListService sceneListService;
 
     @Autowired
     private CopyServiceImpl sceneCopyService;
@@ -52,16 +53,21 @@ public class SceneController {
         return HttpResult.error();
     }
 
+    @GetMapping("query")
+    public HttpResult<SceneDetailInfo> queryScene(@RequestParam(required = true) Long sceneId) {
+        return HttpResult.ok();
+    }
+
     @GetMapping("/list")
-    public HttpResult<Object> sceneList(@RequestBody SceneQry sceneQry) {
-        SceneListVO sceneListVO = sceneListInter.queryScenes(sceneQry);
+    public HttpResult<SceneListVO> sceneList(@RequestBody SceneQry sceneQry) {
+        SceneListVO sceneListVO = sceneListService.queryScenes(sceneQry);
         return  HttpResult.ok(sceneListVO);
     }
 
     @GetMapping("/delete")
     public HttpResult<Object> deleteScene(@RequestParam(required = true) Long sceneId) {
         try {
-            sceneListInter.deleteScene(sceneId);
+            sceneListService.deleteScene(sceneId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

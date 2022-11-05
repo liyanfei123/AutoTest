@@ -20,15 +20,18 @@ public class SceneStepOrder {
 
     private Long sceneId;
 
-    private String orderList;
+    private String orderStr;
+
+    // 不处理
+    private List<Long> orderList;
 
     // 调用接口保存时判断type类型进行赋值
     private Integer type;
 
-    public static SceneStepOrder build(Long sceneId, String orderList) {
+    public static SceneStepOrder build(Long sceneId, String orderStr) {
         return SceneStepOrder.builder()
                 .sceneId(sceneId)
-                .orderList(orderList)
+                .orderStr(orderStr)
                 .type(StepOrderEnum.BEFORE.getType()).build();
     }
 

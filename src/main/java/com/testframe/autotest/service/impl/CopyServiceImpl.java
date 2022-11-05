@@ -77,7 +77,7 @@ public class CopyServiceImpl implements CopyService {
             // 保存执行步骤
             SceneStepOrder sceneStepOrder = new SceneStepOrder();
             sceneStepOrder.setSceneId(newSceneId);
-            sceneStepOrder.setOrderList(newStepIds.toString());
+            sceneStepOrder.setOrderStr(newStepIds.toString());
             sceneStepOrder.setType(StepOrderEnum.BEFORE.getType());
             stepOrderRepository.saveSceneStepOrder(sceneStepOrder);
             return newSceneId;
@@ -112,10 +112,10 @@ public class CopyServiceImpl implements CopyService {
                 stepOrderRepository.saveSceneStepOrder(newSceneStepOrder);
             } else {
                 newSceneStepOrder = sceneStepOrders.get(0);
-                List<Long> orderList = SceneStepOrder.orderToList(newSceneStepOrder.getOrderList());
+                List<Long> orderList = SceneStepOrder.orderToList(newSceneStepOrder.getOrderStr());
                 int index = orderList.indexOf(stepId);
                 orderList.add(index+1, newStepId);
-                newSceneStepOrder.setOrderList(orderList.toString());
+                newSceneStepOrder.setOrderStr(orderList.toString());
                 stepOrderRepository.updateSceneStepOrder(newSceneStepOrder);
             }
             return newStepId;

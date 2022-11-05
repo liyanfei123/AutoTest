@@ -39,7 +39,7 @@ public class StepOrderImpl implements StepOrderService {
         } else {
             // 更新
             log.info("[StepOrderImpl:updateStepOrder] update step run order, order = {}", JSON.toJSONString(stepIds));
-            sceneStepOrder.setOrderList(stepIds.toString());
+            sceneStepOrder.setOrderStr(stepIds.toString());
             stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
         }
     }
@@ -47,7 +47,7 @@ public class StepOrderImpl implements StepOrderService {
     @Override
     public void removeStepId(Long sceneId, Long stepId) {
         SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
-        String stepOrder = sceneStepOrder.getOrderList();
+        String stepOrder = sceneStepOrder.getOrderStr();
         if (stepOrder == null || stepOrder.equals("")) {
             throw new AutoTestException("当前场景无可删除步骤");
         }
@@ -55,7 +55,7 @@ public class StepOrderImpl implements StepOrderService {
         newOrder.stream().filter(sId -> !sId.equals(stepId));
         log.info("[StepOrderImpl:removeStepId] update step run order, oldOrder = {}, newOrder = {}",
                 JSON.toJSONString(stepOrder), JSON.toJSONString(newOrder));
-        sceneStepOrder.setOrderList(newOrder.toString());
+        sceneStepOrder.setOrderStr(newOrder.toString());
         stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
     }
 

@@ -5,6 +5,8 @@ public class StepOrder {
 
     private Long sceneId;
 
+    private Long recordId;
+
     private String orderList;
 
     private Integer type;
@@ -27,6 +29,14 @@ public class StepOrder {
 
     public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
     public String getOrderList() {

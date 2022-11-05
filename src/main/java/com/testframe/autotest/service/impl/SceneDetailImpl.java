@@ -1,15 +1,16 @@
 package com.testframe.autotest.service.impl;
 
+import com.testframe.autotest.core.repository.*;
+import com.testframe.autotest.meta.bo.*;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.repository.SceneDetailRepository;
-import com.testframe.autotest.core.repository.SceneStepRepository;
-import com.testframe.autotest.core.repository.StepDetailRepository;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.Step;
+import com.testframe.autotest.meta.dto.SceneDetailInfo;
+import com.testframe.autotest.meta.dto.execute.StepExeRecordDto;
+import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneDetailService;
+import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 
 @Slf4j
@@ -35,19 +36,19 @@ public class SceneDetailImpl implements SceneDetailService {
     private SceneDetailRepository sceneDetailRepository;
 
     @Autowired
-    private StepDetailRepository stepDetailRepository;
+    private SceneExecuteRecordRepository sceneExecuteRecordRepository;
 
     @Autowired
-    private SceneStepRepository sceneStepRepository;
+    private StepExecuteRecordRepository stepExecuteRecordRepository;
 
     @Autowired
-    private SceneStepInterImpl sceneStepInter;
+    private StepOrderRepository stepOrderRepository;
+
+    @Autowired
+    private SceneStepService sceneStepService;
 
     @Autowired
     private StepOrderImpl stepOrder;
-
-
-
 
     // 创建测试场景
     @Override
@@ -87,7 +88,7 @@ public class SceneDetailImpl implements SceneDetailService {
                 steps.add(step);
             }
             // 更新场景下的所有步骤
-            List<Long> stepIds = sceneStepInter.updateSceneStep(sceneId, steps);
+            List<Long> stepIds = sceneStepService.updateSceneStep(sceneId, steps);
             // 更新执行步骤顺序
             stepOrder.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
@@ -95,6 +96,11 @@ public class SceneDetailImpl implements SceneDetailService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public SceneDetailInfo query(Long sceneId) {
+        return null;
     }
 
     private List<Long> orderListStr(String stepIdsStr) {
@@ -106,6 +112,7 @@ public class SceneDetailImpl implements SceneDetailService {
         }
         return stepIds;
     }
+
 
     private Scene build(SceneCreateCmd sceneCreateCmd) {
         Scene sceneCreate = new Scene();

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,16 @@ public class SceneExecuteRecordRepository {
         List<SceneExecuteRecord> sceneExecuteRecords = sceneRecords.stream().map(sceneExecuteRecordConverter::toSceneExecuteRecord)
                 .collect(Collectors.toList());
         return sceneExecuteRecords;
+    }
+
+    public HashMap<Long, SceneExecuteRecord> querySceneExecuteRecordBySceneId(Long sceneId) {
+        PageQry pageQry = new PageQry(1, 20, -1L);
+        List<SceneExecuteRecord> sceneExecuteRecords = querySceneExecuteRecordBySceneId(sceneId, pageQry);
+        HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = new HashMap<>();
+        sceneExecuteRecords.forEach(sceneExecuteRecord -> {
+            sceneExecuteRecordMap.put(sceneExecuteRecord.getSceneId(), sceneExecuteRecord);
+        });
+        return sceneExecuteRecordMap;
     }
 
 

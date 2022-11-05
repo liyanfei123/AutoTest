@@ -19,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SceneStepInterImpl implements SceneStepService {
+public class SceneStepImpl implements SceneStepService {
 
     @Autowired
     private SceneStepRepository sceneStepRepository;

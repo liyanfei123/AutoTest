@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,15 @@ public class StepOrderRepository {
             return Collections.EMPTY_LIST;
         }
         return sceneStepOrders;
+    }
+
+    public HashMap<Long, SceneStepOrder> bacthQueryStepExeOrderByRecordIds(List<Long> recordIds) {
+        HashMap<Long, SceneStepOrder> stepExeOrderMap = new HashMap<>();
+        for (Long recordId : recordIds) {
+            StepOrder stepOrder = stepOrderDao.queryStepOrderByRecordId(recordId);
+            stepExeOrderMap.put(recordId, sceneStepOrderConverter.PoToDo(stepOrder));
+        }
+        return stepExeOrderMap;
     }
 
 

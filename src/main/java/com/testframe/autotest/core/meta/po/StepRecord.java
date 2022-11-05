@@ -7,6 +7,8 @@ public class StepRecord {
 
     private Long stepId;
 
+    private String stepName;
+
     private String reason;
 
     private Integer status;
@@ -35,6 +37,14 @@ public class StepRecord {
 
     public void setStepId(Long stepId) {
         this.stepId = stepId;
+    }
+
+    public String getStepName() {
+        return stepName;
+    }
+
+    public void setStepName(String stepName) {
+        this.stepName = stepName;
     }
 
     public String getReason() {

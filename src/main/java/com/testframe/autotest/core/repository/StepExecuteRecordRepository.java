@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,5 +38,13 @@ public class StepExecuteRecordRepository {
         return stepExecuteRecords;
     }
 
+    public HashMap<Long, List<StepExecuteRecord>> bacchQueryStepExeRecord(List<Long> recordIds) {
+        HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordHashMap = new HashMap<>();
+        for (Long recordId : recordIds) {
+            List<StepExecuteRecord> stepExecuteRecords = queryStepExecuteRecordByRecordId(recordId);
+            stepExecuteRecordHashMap.put(recordId, stepExecuteRecords);
+        }
+        return stepExecuteRecordHashMap;
+    }
 
 }

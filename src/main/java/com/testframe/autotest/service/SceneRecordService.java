@@ -1,5 +1,7 @@
 package com.testframe.autotest.service;
 
+import com.testframe.autotest.meta.vo.SceneRecordListVo;
+
 /**
  * Description:
  *
@@ -8,6 +10,7 @@ package com.testframe.autotest.service;
  */
 public interface SceneRecordService {
 
+    SceneRecordListVo records(Long sceneId);
 
 
 }

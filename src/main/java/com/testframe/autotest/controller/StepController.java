@@ -4,8 +4,8 @@ package com.testframe.autotest.controller;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
-import com.testframe.autotest.service.impl.SceneStepInterImpl;
 import com.testframe.autotest.service.impl.StepDetailImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class StepController {
     private StepDetailImpl stepDetail;
 
     @Autowired
-    private SceneStepInterImpl sceneStepInter;
+    private SceneStepService sceneStepService;
 
     @Autowired
     private CopyServiceImpl stepCopyService;
@@ -52,7 +52,7 @@ public class StepController {
             return HttpResult.error("请输入步骤id");
         }
         try {
-            sceneStepInter.removeSceneStepRel(stepId);
+            sceneStepService.removeSceneStepRel(stepId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

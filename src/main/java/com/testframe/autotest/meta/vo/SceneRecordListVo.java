@@ -1,6 +1,7 @@
 package com.testframe.autotest.meta.vo;
 
 import com.testframe.autotest.meta.dto.SceneInfoDto;
+import com.testframe.autotest.meta.dto.execute.SceneExeRecordDto;
 import lombok.Data;
 
 import java.util.List;
@@ -16,5 +17,5 @@ public class SceneRecordListVo {
 
     private Long sceneId;
 
-    private List<SceneInfoDto> sceneInfoDtos;
+    private List<SceneExeRecordDto> sceneExeRecordDtos;
 }

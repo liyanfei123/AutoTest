@@ -20,7 +20,4 @@ public class StepExeRecordDto {
     // 错误信息
     private Integer errInfo;
 
-    // 执行时间
-    private Long stepExeTime;
-
 }

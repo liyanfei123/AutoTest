@@ -18,4 +18,5 @@ public class SceneInfoDto {
 
     // 等待时间
     private Integer waitTime;
+
 }

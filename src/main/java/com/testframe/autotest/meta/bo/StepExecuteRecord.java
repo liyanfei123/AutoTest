@@ -15,6 +15,8 @@ public class StepExecuteRecord {
 
     private Long stepId;
 
+    private String stepName;
+
     private String reason;
 
     private Integer status;
