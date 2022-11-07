@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class SceneDetailInfo {
 
-    private SceneSimpleInfoDto scene;
+    private SceneInfoDto scene;
 
     private List<StepInfoDto> steps;
 

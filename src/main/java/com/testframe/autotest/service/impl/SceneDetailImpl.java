@@ -11,6 +11,7 @@ import com.testframe.autotest.meta.dto.execute.StepExeRecordDto;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneStepService;
+import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,9 @@ public class SceneDetailImpl implements SceneDetailService {
 
     @Autowired
     private SceneStepService sceneStepService;
+
+    @Autowired
+    private StepDetailService stepDetailService;
 
     @Autowired
     private StepOrderImpl stepOrder;
@@ -100,6 +104,14 @@ public class SceneDetailImpl implements SceneDetailService {
 
     @Override
     public SceneDetailInfo query(Long sceneId) {
+        try {
+            log.info("[SceneDetailImpl:query] query scene {}", sceneId);
+            Scene scene = sceneDetailRepository.querySceneById(sceneId);
+            List<Long> stepIds = sceneStepService.queryStepBySceneId(sceneId);
+
+        } catch (Exception e) {
+            log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e.getStackTrace());
+        }
         return null;
     }
 

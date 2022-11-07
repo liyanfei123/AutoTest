@@ -6,6 +6,8 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.Step;
+import com.testframe.autotest.meta.dto.StepInfoDto;
+import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -84,6 +87,33 @@ public class StepDetailImpl implements StepDetailService {
             return null;
         }
         return stepIds;
+    }
+
+    @Override
+    public HashMap<Long, StepInfoDto> batchQueryStepDetail(List<Long> stepIds) {
+       try {
+           log.info("[StepDetailImpl:batchQueryStepDetail] query step detail ids: {}", JSON.toJSONString(stepIds));
+           List<Step> steps = stepDetailRepository.queryStepByIds(stepIds);
+           HashMap<Long, StepInfoDto> stepInfoDtoMap = new HashMap<>();
+           for (Step step : steps) {
+               StepInfoModel stepInfoModel;
+               StepInfoDto stepInfoDto;
+               try {
+                   stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
+                   stepInfoDto = StepInfoDto.build(stepInfoModel);
+                   stepInfoDto.setStepId(step.getStepId());
+                   stepInfoDto.setStepName(step.getStepName());
+                   stepInfoDto.setStepStatus(step.getStatus());
+                   stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
+               } catch (Exception e) {
+                   log.error("[StepDetailImpl:batchQueryStepDetail] step = {}, reason = ", JSON.toJSONString(step), e);
+               }
+           }
+           return stepInfoDtoMap;
+       } catch (Exception e) {
+           log.error("[StepDetailImpl:batchQueryStepDetail] query steps {} error, reason = {}", JSON.toJSONString(stepIds), e.getStackTrace());
+           throw new AutoTestException("批量查询场景失败");
+       }
     }
 
 

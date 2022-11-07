@@ -94,6 +94,22 @@ public class SceneStepImpl implements SceneStepService {
         // 获取当前场景下的执行步骤顺序，对其进行修改
     }
 
+    @Override
+    public List<Long> queryStepBySceneId(Long sceneId) {
+        try {
+            log.info("[SceneStepImpl:queryStepBySceneId] query steps in scene {}", sceneId);
+            List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
+            List<Long> stepIds = new ArrayList<>(sceneStepRels.size());
+            sceneStepRels.forEach(sceneStepRel -> stepIds.add(sceneStepRel.getStepId()));
+            log.info("[SceneStepImpl:queryStepBySceneId] query steps in scene {}, steps {}", sceneId, JSON.toJSONString(stepIds));
+            return stepIds;
+        } catch (Exception e) {
+            log.error("[SceneStepImpl:queryStepBySceneId] query steps in scene {} error, reason = ", sceneId, e);
+        }
+        return null;
+    }
+
+
     // 移除步骤场景绑定关系
     private void removeSceneStepRel(HashMap<Long, SceneStepRel> sceneStepMap) {
         if (!sceneStepMap.isEmpty()) {

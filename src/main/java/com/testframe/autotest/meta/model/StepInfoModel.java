@@ -26,6 +26,9 @@ public class StepInfoModel {
     // 操作方式
     private Integer operateMode;
 
+    // 验证方式
+    private Integer verifyType;
+
     // 输入参数
     private String value;
 

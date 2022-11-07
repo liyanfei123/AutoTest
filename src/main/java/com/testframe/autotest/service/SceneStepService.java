@@ -10,4 +10,6 @@ public interface SceneStepService {
     public List<Long> updateSceneStep(Long sceneId, List<Step> steps);
 
     public void removeSceneStepRel(Long step);
+
+    public List<Long> queryStepBySceneId(Long sceneId);
 }
