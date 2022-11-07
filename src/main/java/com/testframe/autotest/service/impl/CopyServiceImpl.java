@@ -12,6 +12,7 @@ import com.testframe.autotest.meta.bo.SceneStepOrder;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.service.CopyService;
+import com.testframe.autotest.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,8 @@ public class CopyServiceImpl implements CopyService {
             }
             // 复制场景信息
             scene.setId(null);
+            String suffix = RandomUtil.randomCode(8);
+            scene.setTitle(scene.getTitle() + suffix);
             Long newSceneId = sceneDetailRepository.saveScene(scene);
             // 复制场景步骤
             List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
