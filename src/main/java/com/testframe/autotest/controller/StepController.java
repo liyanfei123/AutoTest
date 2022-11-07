@@ -39,12 +39,6 @@ public class StepController {
         return HttpResult.error("步骤更新失败");
     }
 
-    // 多步骤批量保存
-    @PostMapping("/batchSave")
-    public HttpResult<Boolean> batchSave() {
-        return null;
-    }
-
     // 单步骤删除
     @GetMapping("/deleteStep")
     public HttpResult<Boolean> deleteStep(@RequestParam(required = true) Long stepId) {

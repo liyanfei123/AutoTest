@@ -45,6 +45,19 @@ public class StepOrderImpl implements StepOrderService {
     }
 
     @Override
+    public void updateStepOrder(Long sceneId, Long stepId) {
+        try {
+            SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
+            List<Long> stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+            updateStepOrder(sceneId, stepOrderList);
+        } catch (Exception e) {
+            log.error("[StepOrderImpl:updateStepOrder] add step order stepId {} error, reason = ", stepId, e);
+            throw new AutoTestException("单步骤执行顺序添加失败");
+        }
+    }
+
+
+    @Override
     public void removeStepId(Long sceneId, Long stepId) {
         SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
         String stepOrder = sceneStepOrder.getOrderStr();
@@ -58,6 +71,20 @@ public class StepOrderImpl implements StepOrderService {
         sceneStepOrder.setOrderStr(newOrder.toString());
         stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
     }
+
+    @Override
+    public List<Long> queryNowStepOrder(Long sceneId) {
+        try {
+            SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
+            List<Long> stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+            log.info("[StepOrderImpl:queryNowStepOrder] step order {}", JSON.toJSONString(stepOrderList));
+            return stepOrderList;
+        } catch (Exception e) {
+            log.error("[StepOrderImpl:queryNowStepOrder] in scene {}, reason", sceneId, e);
+            throw new AutoTestException("查询当前场景下的步骤顺序失败");
+        }
+    }
+
 
     // 获取执行前的顺序
     private SceneStepOrder getStepBeforeOrder(Long sceneId) {

@@ -39,9 +39,15 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     public SceneRecordListVo records(Long sceneId) {
         try {
             log.info("[SceneDetailImpl:query] query execute records in sceneId {}", sceneId);
+            SceneRecordListVo sceneRecordListVo = new SceneRecordListVo();
             // 查询当前场景下的执行记录
             HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId);
             Set<Long> recordIdset = sceneExecuteRecordMap.keySet();
+            if (recordIdset.isEmpty()) {
+                sceneRecordListVo.setSceneId(sceneId);
+                sceneRecordListVo.setSceneExeRecordDtos(null);
+                return sceneRecordListVo;
+            }
             List<Long> recordIds = new ArrayList<>(recordIdset);
             // 批量获取场景执行下的多个步骤执行顺序
             CompletableFuture<HashMap<Long, List<StepExecuteRecord>>> stepExecuteRecordsFuture = CompletableFuture
@@ -50,7 +56,6 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             CompletableFuture<HashMap<Long, SceneStepOrder>> stepOrderFuture = CompletableFuture
                     .supplyAsync(() -> batchGetStepOrder(recordIds));
 
-            SceneRecordListVo sceneRecordListVo = new SceneRecordListVo();
             return CompletableFuture.allOf(stepExecuteRecordsFuture, stepOrderFuture).thenApply( e -> {
                 HashMap<Long, List<StepExecuteRecord>> stepExecuteRecords = stepExecuteRecordsFuture.join();
                 HashMap<Long, SceneStepOrder> stepOrders = stepOrderFuture.join();

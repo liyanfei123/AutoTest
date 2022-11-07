@@ -109,11 +109,13 @@ public class CopyServiceImpl implements CopyService {
             ));
             SceneStepOrder newSceneStepOrder;
             if (sceneStepOrders.isEmpty()) {
+                // 新增执行顺序
                 List<Long> stepIds = new ArrayList<>();
                 stepIds.add(newStepId);
                 newSceneStepOrder = SceneStepOrder.build(sceneId, stepIds.toString());
                 stepOrderRepository.saveSceneStepOrder(newSceneStepOrder);
             } else {
+                // 更新执行顺序
                 newSceneStepOrder = sceneStepOrders.get(0);
                 List<Long> orderList = SceneStepOrder.orderToList(newSceneStepOrder.getOrderStr());
                 int index = orderList.indexOf(stepId);

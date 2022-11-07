@@ -1,6 +1,8 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.repository.SceneStepRepository;
+import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
@@ -9,10 +11,12 @@ import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.meta.dto.StepInfoDto;
 import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.service.StepDetailService;
+import com.testframe.autotest.service.StepOrderService;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,11 +30,18 @@ public class StepDetailImpl implements StepDetailService {
     private StepValidator stepValidator;
 
     @Autowired
+    private StepOrderService stepOrderService;
+
+    @Autowired
     private StepDetailRepository stepDetailRepository;
 
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
 
+    @Autowired
+    private SceneStepRepository sceneStepRepository;
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveStepDetail(StepUpdateCmd stepUpdateCmd) {
         log.info("[StepDetailImpl:saveStepDetail] create/update step, stepUpdateCmd={}", JSON.toJSONString(stepUpdateCmd));
@@ -40,14 +51,26 @@ public class StepDetailImpl implements StepDetailService {
             Step step = StepUpdateCmd.toStep(stepUpdateCmd);
             if (stepUpdateCmd.getStepId() == null) {
                 // 新增
-                return stepDetailRepository.saveStep(step);
+                Long stepId = stepDetailRepository.saveStep(step);
+                SceneStepRel sceneStepRel = SceneStepRel.build(stepUpdateCmd.getSceneId(), step);
+                sceneStepRel.setStepId(stepId);
+                sceneStepRepository.saveSceneStep(sceneStepRel);
+                // 新增步骤顺序
+                stepOrderService.updateStepOrder(stepUpdateCmd.getSceneId(), stepId);
+                return stepId;
             } else {
                 // 更新
                 // 判断当前场景是否还存在
                 if (sceneDetailRepository.querySceneById(stepUpdateCmd.getSceneId()) == null) {
                     throw new AutoTestException("当前场景已被删除，无法修改");
                 }
-                return stepDetailRepository.update(step);
+                stepDetailRepository.update(step);
+                SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepUpdateCmd.getStepId());
+                if (sceneStepRel.getStatus() != stepUpdateCmd.getStatus()) {
+                    sceneStepRel.setStatus(stepUpdateCmd.getStatus());
+                    sceneStepRepository.updateSceneStep(sceneStepRel);
+                }
+                return stepUpdateCmd.getStepId();
             }
         } catch (AutoTestException e) {
             log.error("[StepDetailImpl:saveStepDetail] create step, reason = {}", e.getMessage());
@@ -99,11 +122,12 @@ public class StepDetailImpl implements StepDetailService {
                StepInfoModel stepInfoModel;
                StepInfoDto stepInfoDto;
                try {
+                   SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(step.getStepId());
                    stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
                    stepInfoDto = StepInfoDto.build(stepInfoModel);
                    stepInfoDto.setStepId(step.getStepId());
                    stepInfoDto.setStepName(step.getStepName());
-                   stepInfoDto.setStepStatus(step.getStatus());
+                   stepInfoDto.setStepStatus(sceneStepRel.getStatus());
                    stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
                } catch (Exception e) {
                    log.error("[StepDetailImpl:batchQueryStepDetail] step = {}, reason = ", JSON.toJSONString(step), e);

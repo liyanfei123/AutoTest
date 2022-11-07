@@ -8,6 +8,7 @@ import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.query.SceneQry;
 import com.testframe.autotest.meta.vo.SceneListVO;
+import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneListService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.service.impl.SceneDetailImpl;
@@ -25,7 +26,7 @@ public class SceneController {
     private static final Logger logger = LoggerFactory.getLogger(SceneController.class);
 
     @Autowired
-    private SceneDetailImpl sceneDetail;
+    private SceneDetailService sceneDetailService;
 
     @Autowired
     private SceneListService sceneListService;
@@ -37,7 +38,7 @@ public class SceneController {
     @PostMapping("/create")
     public HttpResult<Long> createScene(@RequestBody SceneCreateCmd sceneCreateCmd) {
         sceneCreateCmd.setType(SceneTypeEnum.UI.getType());
-        Long sceneId = sceneDetail.create(sceneCreateCmd);
+        Long sceneId = sceneDetailService.create(sceneCreateCmd);
         if (sceneId == null) {
             return HttpResult.error("场景创建失败");
         }
@@ -47,7 +48,7 @@ public class SceneController {
     @PostMapping("/update")
     public HttpResult<Long> createScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
         sceneUpdateCmd.setType(SceneTypeEnum.UI.getType());
-        if (sceneDetail.update(sceneUpdateCmd)) {
+        if (sceneDetailService.update(sceneUpdateCmd)) {
             return  HttpResult.ok();
         }
         return HttpResult.error();
@@ -55,7 +56,11 @@ public class SceneController {
 
     @GetMapping("query")
     public HttpResult<SceneDetailInfo> queryScene(@RequestParam(required = true) Long sceneId) {
-        return HttpResult.ok();
+        try {
+            return HttpResult.ok(sceneDetailService.query(sceneId));
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
     }
 
     @GetMapping("/list")

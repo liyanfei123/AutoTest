@@ -7,11 +7,14 @@ import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
+import com.testframe.autotest.meta.dto.SceneInfoDto;
+import com.testframe.autotest.meta.dto.StepInfoDto;
 import com.testframe.autotest.meta.dto.execute.StepExeRecordDto;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.service.StepDetailService;
+import com.testframe.autotest.service.StepOrderService;
 import com.testframe.autotest.validator.SceneValidator;
 import com.testframe.autotest.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -37,22 +40,13 @@ public class SceneDetailImpl implements SceneDetailService {
     private SceneDetailRepository sceneDetailRepository;
 
     @Autowired
-    private SceneExecuteRecordRepository sceneExecuteRecordRepository;
-
-    @Autowired
-    private StepExecuteRecordRepository stepExecuteRecordRepository;
-
-    @Autowired
-    private StepOrderRepository stepOrderRepository;
-
-    @Autowired
     private SceneStepService sceneStepService;
 
     @Autowired
     private StepDetailService stepDetailService;
 
     @Autowired
-    private StepOrderImpl stepOrder;
+    private StepOrderService stepOrderService;
 
     // 创建测试场景
     @Override
@@ -94,7 +88,7 @@ public class SceneDetailImpl implements SceneDetailService {
             // 更新场景下的所有步骤
             List<Long> stepIds = sceneStepService.updateSceneStep(sceneId, steps);
             // 更新执行步骤顺序
-            stepOrder.updateStepOrder(sceneId, stepIds);
+            stepOrderService.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:update] update scene error, reason: {}", e.getMessage());
             return false;
@@ -107,8 +101,26 @@ public class SceneDetailImpl implements SceneDetailService {
         try {
             log.info("[SceneDetailImpl:query] query scene {}", sceneId);
             Scene scene = sceneDetailRepository.querySceneById(sceneId);
+            if (scene == null) {
+                throw new AutoTestException("当前场景不存在");
+            }
+            SceneInfoDto sceneInfoDto = SceneInfoDto.build(scene);
+            SceneDetailInfo sceneDetailInfo = new SceneDetailInfo();
+            sceneDetailInfo.setScene(sceneInfoDto);
+            // 查询步骤信息
             List<Long> stepIds = sceneStepService.queryStepBySceneId(sceneId);
-
+            if (stepIds.isEmpty()) {
+                sceneDetailInfo.setSteps(null);
+            } else {
+                HashMap<Long, StepInfoDto> stepInfoDtoMap = stepDetailService.batchQueryStepDetail(stepIds);
+                List<Long> stepOrderList = stepOrderService.queryNowStepOrder(sceneId);
+                List<StepInfoDto> steps = new ArrayList<>(stepOrderList.size());
+                stepOrderList.forEach(stepId -> {
+                    steps.add(stepInfoDtoMap.get(stepId));
+                });
+            }
+            log.info("[SceneDetailImpl:query] scene detail {}", JSON.toJSONString(sceneDetailInfo));
+            return sceneDetailInfo;
         } catch (Exception e) {
             log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e.getStackTrace());
         }
