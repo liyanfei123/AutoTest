@@ -1,4 +1,4 @@
-package com.testframe.autotest.validator;
+package com.testframe.autotest.meta.validator;
 
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;

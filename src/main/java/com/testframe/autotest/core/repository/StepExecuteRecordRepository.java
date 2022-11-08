@@ -38,7 +38,7 @@ public class StepExecuteRecordRepository {
         return stepExecuteRecords;
     }
 
-    public HashMap<Long, List<StepExecuteRecord>> bacchQueryStepExeRecord(List<Long> recordIds) {
+    public HashMap<Long, List<StepExecuteRecord>> batchQueryStepExeRecord(List<Long> recordIds) {
         HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordHashMap = new HashMap<>();
         for (Long recordId : recordIds) {
             List<StepExecuteRecord> stepExecuteRecords = queryStepExecuteRecordByRecordId(recordId);

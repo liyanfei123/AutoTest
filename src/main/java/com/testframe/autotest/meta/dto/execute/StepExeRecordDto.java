@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.dto.execute;
 
+import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import lombok.Data;
 
 /**
@@ -18,6 +19,14 @@ public class StepExeRecordDto {
     private Integer status;
 
     // 错误信息
-    private Integer errInfo;
+    private String errInfo;
+
+    public static StepExeRecordDto build(StepExecuteRecord stepExecuteRecord) {
+        StepExeRecordDto stepExeRecordDto = new StepExeRecordDto();
+        stepExeRecordDto.setStepName(stepExecuteRecord.getStepName());
+        stepExeRecordDto.setStatus(stepExecuteRecord.getStatus());
+        stepExeRecordDto.setErrInfo(stepExecuteRecord.getReason());
+        return stepExeRecordDto;
+    }
 
 }

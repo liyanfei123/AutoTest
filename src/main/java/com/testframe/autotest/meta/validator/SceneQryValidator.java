@@ -1,4 +1,4 @@
-package com.testframe.autotest.validator;
+package com.testframe.autotest.meta.validator;
 
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.SceneTypeEnum;

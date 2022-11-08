@@ -9,21 +9,18 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.dto.SceneInfoDto;
 import com.testframe.autotest.meta.dto.StepInfoDto;
-import com.testframe.autotest.meta.dto.execute.StepExeRecordDto;
-import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.service.StepOrderService;
-import com.testframe.autotest.validator.SceneValidator;
-import com.testframe.autotest.validator.StepValidator;
+import com.testframe.autotest.meta.validator.SceneValidator;
+import com.testframe.autotest.meta.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 
 @Slf4j

@@ -90,6 +90,7 @@ public class SceneController {
     }
 
     // 执行场景
+    // 没有步骤的场景不允许执行
     @GetMapping("/execute")
     public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId) {
         return null;

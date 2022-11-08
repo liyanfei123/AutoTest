@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.dto.execute;
 
+import com.testframe.autotest.meta.bo.SceneExecuteRecord;
 import lombok.Data;
 
 import java.util.List;
@@ -31,4 +32,12 @@ public class SceneExeRecordDto {
     private Long sceneExeTime;
 
     private List<StepExeRecordDto> stepExeRecordDtos;
+
+    public static void build(SceneExeRecordDto sceneExeRecordDto, SceneExecuteRecord sceneExecuteRecord) {
+        sceneExeRecordDto.setSceneName(sceneExecuteRecord.getSceneName());
+        sceneExeRecordDto.setTestUrl(sceneExecuteRecord.getUrl());
+        sceneExeRecordDto.setWaitType(sceneExeRecordDto.getWaitType());
+        sceneExeRecordDto.setWaitTime(sceneExeRecordDto.getWaitTime());
+        sceneExeRecordDto.setSceneExeTime(sceneExecuteRecord.getExecuteTime());
+    }
 }

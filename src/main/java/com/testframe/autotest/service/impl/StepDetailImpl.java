@@ -12,7 +12,7 @@ import com.testframe.autotest.meta.dto.StepInfoDto;
 import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.service.StepOrderService;
-import com.testframe.autotest.validator.StepValidator;
+import com.testframe.autotest.meta.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -7,13 +7,12 @@ import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.service.SceneStepService;
-import com.testframe.autotest.validator.StepValidator;
+import com.testframe.autotest.meta.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
