@@ -11,7 +11,6 @@ import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneListService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
-import com.testframe.autotest.service.impl.SceneDetailImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
