@@ -27,7 +27,6 @@ import java.util.List;
  * @date:2022/10/24 21:07
  * @author: lyf
  */
-@Component
 @Slf4j
 public class FindElement {
 

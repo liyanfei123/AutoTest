@@ -5,6 +5,8 @@ import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.handler.event.SeleniumRunEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@DependsOn("myEventBus")
 public class SceneExecuteServiceImpl implements SceneExecuteService {
 
     @Autowired
+    @Qualifier("myEventBus")
     private EventBus eventBus;
 
     @Override

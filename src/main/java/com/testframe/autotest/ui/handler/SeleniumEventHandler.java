@@ -3,6 +3,7 @@ package com.testframe.autotest.ui.handler;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.greenrobot.eventbus.Subscribe;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,12 +12,12 @@ import org.springframework.stereotype.Component;
  * @date:2022/11/08 21:55
  * @author: lyf
  */
+@DependsOn("myEventBus")
 @Component
 @Slf4j
 public class SeleniumEventHandler extends AbstractEventHandler {
 
     @Subscribe
-    @Override
     public void eventHandler(Object event) {
         try {
             Thread.sleep(2000);

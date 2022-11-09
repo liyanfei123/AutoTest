@@ -1,7 +1,6 @@
 package com.testframe.autotest.core.config;
 
 import lombok.Data;
-import com.ctrip.framework.apollo.spring.annotation.ValueMapping;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.List;
 @Component
 public class Config {
     
-    @ValueMapping("${bizType:[0]}")
+//    @ValueMapping("${bizType:[0]}")
     private List<Integer> bizTypes;
 
 }

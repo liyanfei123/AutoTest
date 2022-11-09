@@ -16,7 +16,6 @@ import java.util.Map;
  * @date:2022/10/24 22:30
  * @author: lyf
  */
-@Component
 @Slf4j
 public class WaitTypeFactory {
 

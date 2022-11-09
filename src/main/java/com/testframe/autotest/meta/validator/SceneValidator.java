@@ -25,6 +25,9 @@ public class SceneValidator {
 
     // 验证当前场景类型是否正确
     private void checkSceneType(SceneCreateCmd createCmd) {
+        if (createCmd.getType() < 1 || createCmd.getType() > 5) {
+            throw new AutoTestException("测试场景类型错误");
+        }
         if (createCmd.getType() == null || SceneTypeEnum.getByType(createCmd.getType()) == null) {
             throw new AutoTestException("场景类型错误");
         }
@@ -39,6 +42,9 @@ public class SceneValidator {
 
     // 检验更新的场景
     public void checkSceneUpdate(SceneUpdateCmd sceneUpdateCmd) {
+        if (sceneUpdateCmd.getWaitType() < 1 || sceneUpdateCmd.getWaitType() > 2) {
+            throw new AutoTestException("等待类型错误");
+        }
         if (sceneDetailRepository.querySceneById(sceneUpdateCmd.getId()) == null) {
             throw new AutoTestException("当前场景不存在");
         }

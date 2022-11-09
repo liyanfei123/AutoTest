@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
  * @date:2022/10/24 21:58
  * @author: lyf
  */
-@Component
 @Slf4j
 public class ImplictWait extends BaseWait implements WaitElementI {
 
