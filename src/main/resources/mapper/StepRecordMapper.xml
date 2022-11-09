@@ -113,7 +113,7 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-  <select id="getStepRecordByRecordId" resultMap="com.testframe.autotest.core.meta.po.StepRecord">
+  <select id="getStepRecordByRecordId" resultType="com.testframe.autotest.core.meta.po.StepRecord">
     select *
     from AUTO_TEST_STEP_EXECUTE_RECORD
     where sceneId = #{sceneId,jdbcType=BIGINT} order by createTime DESC limit #{offset},#{size}

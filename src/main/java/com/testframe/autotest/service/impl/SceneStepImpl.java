@@ -47,26 +47,30 @@ public class SceneStepImpl implements SceneStepService {
                 Long stepId = step.getStepId();
                 if (stepId == null) {
                     // 新增步骤
-                    log.info("[SceneStepInterImpl:updateSceneStep] add step in sceneId {}, step = {}", sceneId, JSON.toJSONString(step));
+                    log.info("[SceneStepInterImpl:updateSceneStep] add step in sceneId {}, step = {}",
+                            sceneId, JSON.toJSONString(step));
                     try {
                         stepId = stepDetailRepository.saveStep(step);
                         sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, step));
                     } catch (Exception e) {
-                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}", sceneId, e.getStackTrace());
+                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
+                                sceneId, e.getStackTrace());
                         throw new AutoTestException("当前场景下新增步骤失败");
                     }
                 } else {
                     try {
                         // 更新步骤
                         sceneStepRel = existedStepMap.get(stepId);
-                        log.info("[SceneStepInterImpl:updateSceneStep] update step in sceneId-stepId {}-{}, sceneStepRel = {}", sceneId, step.getStepId(), JSON.toJSONString(sceneStepRel));
+                        log.info("[SceneStepInterImpl:updateSceneStep] update step in sceneId-stepId {}-{}, sceneStepRel = {}",
+                                sceneId, step.getStepId(), JSON.toJSONString(sceneStepRel));
                         stepDetailRepository.update(step);
                         sceneStepRel.setStatus(step.getStatus());
                         sceneStepRepository.updateSceneStep(sceneStepRel);
                         stepIds.add(stepId);
                         existedStepMap.remove(stepId);
                     } catch (Exception e) {
-                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}", stepId, e.getStackTrace());
+                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
+                                stepId, e.getStackTrace());
                         throw new AutoTestException("当前场景下已有步骤更新失败");
                     }
                 }

@@ -32,11 +32,12 @@ public class StepController {
     // 单场景步骤保存/更新
     @PostMapping("/save")
     public HttpResult<Boolean> stepSave(@RequestBody StepUpdateCmd stepUpdateCmd) {
-        Long flag = stepDetail.saveStepDetail(stepUpdateCmd);
-        if (flag != null) {
+        try {
+            stepDetail.saveStepDetail(stepUpdateCmd);
             return HttpResult.ok();
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
         }
-        return HttpResult.error("步骤更新失败");
     }
 
     // 单步骤删除

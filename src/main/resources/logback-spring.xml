@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true" scan="true" scanPeroid="60 seconds">
-<!--    <property name="log.path" value="/Users/liyanfei/MyCode/AutoTest/AutoTest/logs/autoTest"/>-->
-    <property name="log.path" value="/Users/liyanfei01/Desktop/st/AutoTest/logs/autoTest"/>
+    <property name="log.path" value="/Users/liyanfei/MyCode/AutoTest/logs/autoTest"/>
+    <!--<property name="log.path" value="/Users/liyanfei01/Desktop/st/AutoTest/logs/autoTest"/>-->
     <property name="log.level" value="debug"/>
     <property name="log.maxSize" value="500MB"/>
     <property name="log.pattern"

@@ -36,21 +36,22 @@ public class SceneController {
     // 创建场景
     @PostMapping("/create")
     public HttpResult<Long> createScene(@RequestBody SceneCreateCmd sceneCreateCmd) {
-        sceneCreateCmd.setType(SceneTypeEnum.UI.getType());
-        Long sceneId = sceneDetailService.create(sceneCreateCmd);
-        if (sceneId == null) {
-            return HttpResult.error("场景创建失败");
+        try {
+            Long sceneId = sceneDetailService.create(sceneCreateCmd);
+            return HttpResult.ok(sceneId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
         }
-        return HttpResult.ok(sceneId);
     }
 
     @PostMapping("/update")
     public HttpResult<Long> createScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
-        sceneUpdateCmd.setType(SceneTypeEnum.UI.getType());
-        if (sceneDetailService.update(sceneUpdateCmd)) {
-            return  HttpResult.ok();
+        try {
+            sceneDetailService.update(sceneUpdateCmd);
+            return HttpResult.ok();
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
         }
-        return HttpResult.error();
     }
 
     @GetMapping("query")
@@ -64,8 +65,13 @@ public class SceneController {
 
     @GetMapping("/list")
     public HttpResult<SceneListVO> sceneList(@RequestBody SceneQry sceneQry) {
-        SceneListVO sceneListVO = sceneListService.queryScenes(sceneQry);
-        return  HttpResult.ok(sceneListVO);
+        try {
+            SceneListVO sceneListVO = sceneListService.queryScenes(sceneQry);
+            return  HttpResult.ok(sceneListVO);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+
     }
 
     @GetMapping("/delete")

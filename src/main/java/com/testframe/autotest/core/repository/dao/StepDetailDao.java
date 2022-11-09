@@ -21,7 +21,7 @@ public class StepDetailDao {
         Long currentTime = System.currentTimeMillis();
         stepDetail.setCreateTime(currentTime);
         stepDetail.setUpdateTime(currentTime);
-        if (stepDetailMapper.insert(stepDetail) > 0) {
+        if (stepDetailMapper.insertSelective(stepDetail) > 0) {
             return stepDetail.getId();
         }
         return null;

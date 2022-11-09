@@ -40,7 +40,7 @@ public class SceneDetailDao {
         Long currentTime = System.currentTimeMillis();
         sceneDetail.setCreateTime(currentTime);
         sceneDetail.setUpdateTime(currentTime);
-        if (sceneDetailMapper.insert(sceneDetail) > 0) {
+        if (sceneDetailMapper.insertSelective(sceneDetail) > 0) {
             return sceneDetail.getId();
         };
         return null;

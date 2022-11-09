@@ -18,14 +18,18 @@ public class SceneValidator {
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
 
-    public void validateCreate(SceneCreateCmd sceneCreateCmd) {
-        checkSceneType(sceneCreateCmd);
-        checkSceneTitle(sceneCreateCmd);
+    public void validateCreate(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
+        try {
+            checkSceneType(sceneCreateCmd);
+            checkSceneTitle(sceneCreateCmd);
+        } catch (AutoTestException e) {
+            throw new AutoTestException(e.getMessage());
+        }
     }
 
     // 验证当前场景类型是否正确
-    private void checkSceneType(SceneCreateCmd createCmd) {
-        if (createCmd.getType() < 1 || createCmd.getType() > 5) {
+    private void checkSceneType(SceneCreateCmd createCmd) throws AutoTestException {
+        if (createCmd.getType() < 1 || createCmd.getType() > 2) {
             throw new AutoTestException("测试场景类型错误");
         }
         if (createCmd.getType() == null || SceneTypeEnum.getByType(createCmd.getType()) == null) {

@@ -27,7 +27,7 @@
 
 
   <select id="selectByTitle" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 'false' as QUERYID,
+    select
     <include refid="Base_Column_List" />
     from AUTO_TEST_SCENE_DETAIL
     where sceneName = #{title,jdbcType=VARCHAR}
@@ -39,25 +39,28 @@
   </delete>
 
   <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
-    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_SCENE_DETAIL (sceneName, sceneDesc, type, 
+    insert into AUTO_TEST_SCENE_DETAIL (id, sceneName, sceneDesc, type,
       url, waitType, waitTime, 
       isDelete, createBy, createTime, 
       updateTime)
-    values (#{sceneName,jdbcType=VARCHAR}, #{sceneDesc,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+    values (#{id,jdbcType=BIGINT}, #{sceneName,jdbcType=VARCHAR}, #{sceneDesc,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
       #{url,jdbcType=VARCHAR}, #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, 
       #{isDelete,jdbcType=INTEGER}, #{createBy,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, 
       #{updateTime,jdbcType=BIGINT})
   </insert>
 
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
-    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_SCENE_DETAIL
     <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
       <if test="sceneName != null" >
         sceneName,
       </if>
@@ -90,6 +93,9 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
       <if test="sceneName != null" >
         #{sceneName,jdbcType=VARCHAR},
       </if>
@@ -156,7 +162,7 @@
         updateTime = #{updateTime,jdbcType=BIGINT},
       </if>
     </set>
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SceneDetail" >
     update AUTO_TEST_SCENE_DETAIL
@@ -200,7 +206,7 @@
       limit #{pageQry.offset}, #{pageQry.size}
     ]]></select>
 
-  <select id="countScenes" resultMap="BaseResultMap">
+  <select id="countScenes" resultType="java.lang.Long">
     select count(*)
     from AUTO_TEST_SCENE_DETAIL
     where isDelete = 0

@@ -20,7 +20,7 @@ public class StepExecuteRecordDao {
     public Boolean saveStepExecuteRecord(StepRecord stepRecord) {
         Long currentTime = System.currentTimeMillis();
         stepRecord.setCreateTime(currentTime);
-        return stepRecordMapper.insert(stepRecord) > 0 ? true : false;
+        return stepRecordMapper.insertSelective(stepRecord) > 0 ? true : false;
     }
 
     public StepRecord getStepRecordsById(Long stepId) {

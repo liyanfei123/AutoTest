@@ -57,61 +57,66 @@ public class SceneListImpl implements SceneListService {
 
     @Override
     public SceneListVO queryScenes(SceneQry sceneQry) {
+        try {
 //        status 按状态列表来搜索
 //        List<Integer> status = SceneStatusEnum.getTypes();
-        PageQry pageQry = new PageQry();
-        pageQry.setSize(sceneQry.getSize()+1);
-        pageQry.setOffset(((sceneQry.getPage()-1) * sceneQry.getSize()));
-        pageQry.setLastId(sceneQry.getLastId());
-        if (pageQry.getLastId() == null) {
-            pageQry.setLastId(-1L);
+            PageQry pageQry = new PageQry();
+            pageQry.setSize(sceneQry.getSize() + 1);
+            pageQry.setOffset(((sceneQry.getPage() - 1) * sceneQry.getSize()));
+            pageQry.setLastId(sceneQry.getLastId());
+            if (pageQry.getLastId() == null) {
+                pageQry.setLastId(-1L);
+            }
+
+            SceneListVO sceneListVO = new SceneListVO();
+            PageVO pageVO = new PageVO(sceneQry.getPage(), sceneQry.getSize());
+            sceneListVO.setPageVO(pageVO);
+            Long allCount = sceneDetailRepository.countScene(sceneQry.getSceneId(), sceneQry.getSceneName());
+            sceneListVO.setTotal(allCount);
+            int totalPage = (int) (allCount / sceneQry.getSize()) + ((allCount % sceneQry.getSize()) >= 1 ? 0 : 1);
+            sceneListVO.setTotalPage(totalPage);
+
+            // 获得size+1个场景
+            List<Scene> scenes = sceneDetailRepository.queryScenes(sceneQry.getSceneId(), sceneQry.getSceneName(), pageQry);
+            if (scenes.isEmpty()) {
+                sceneListVO.setScenes(Collections.EMPTY_LIST);
+                sceneListVO.setHasNext(false);
+                sceneListVO.setLastId(-1L);
+                return sceneListVO;
+            }
+
+            List<Long> sceneIds = scenes.stream().map(Scene::getId).collect(Collectors.toList());
+            sceneListVO.setLastId(sceneIds.get(-1));
+            if (sceneIds.size() == pageQry.getSize()) { // 多找了一个出来
+                sceneListVO.setHasNext(true);
+            } else {
+                sceneListVO.setHasNext(false);
+            }
+
+            // 批量获取场景执行记录
+            CompletableFuture<HashMap<Long, SceneExecuteDto>> sceneExeRecordsFuture = CompletableFuture.supplyAsync(() -> batchGetSceneExeRecord(sceneIds));
+            // 批量获取场景步骤数
+            CompletableFuture<HashMap<Long, Integer>> sceneStepNumsFuture = CompletableFuture.supplyAsync(() -> batchGetSceneStepNum(sceneIds));
+
+            List<SceneSimpleInfoDto> sceneSimpleInfoDtos = (List<SceneSimpleInfoDto>) scenes.stream().map(scene -> {
+                SceneSimpleInfoDto sceneSimpleInfoDto = new SceneSimpleInfoDto();
+                sceneSimpleInfoDto.setId(scene.getId());
+                sceneSimpleInfoDto.setSceneName(scene.getTitle());
+                return sceneSimpleInfoDto;
+            });
+
+            return CompletableFuture.allOf(sceneExeRecordsFuture, sceneStepNumsFuture).thenApply(e -> {
+                HashMap<Long, SceneExecuteDto> sceneExeRecords = sceneExeRecordsFuture.join();
+                HashMap<Long, Integer> sceneStepNums = sceneStepNumsFuture.join();
+                // 组装相关Vo
+                sceneListVO.setScenes(sceneSimpleInfoDtos);
+                toSceneListVO(sceneListVO, sceneExeRecords, sceneStepNums);
+                return sceneListVO;
+            }).join();
+        } catch (Exception e) {
+            log.error("[SceneListImpl:queryScenes] query scene list error, reason = {}", e);
+            throw new AutoTestException("场景列表查询错误");
         }
-
-        SceneListVO sceneListVO = new SceneListVO();
-        PageVO pageVO = new PageVO(sceneQry.getPage(), sceneQry.getSize());
-        sceneListVO.setPageVO(pageVO);
-        Long allCount = sceneDetailRepository.countScene(sceneQry.getSceneId(), sceneQry.getSceneName());
-        sceneListVO.setTotal(allCount);
-        int totalPage = (int) (allCount / sceneQry.getSize()) + ((allCount % sceneQry.getSize()) >= 1 ? 0 : 1);
-        sceneListVO.setTotalPage(totalPage);
-
-        // 获得size+1个场景
-        List<Scene> scenes = sceneDetailRepository.queryScenes(sceneQry.getSceneId(), sceneQry.getSceneName(), pageQry);
-        if (scenes.isEmpty()) {
-            sceneListVO.setScenes(Collections.EMPTY_LIST);
-            sceneListVO.setHasNext(false);
-            sceneListVO.setLastId(-1L);
-            return sceneListVO;
-        }
-
-        List<Long> sceneIds = scenes.stream().map(Scene::getId).collect(Collectors.toList());
-        sceneListVO.setLastId(sceneIds.get(-1));
-        if (sceneIds.size() == pageQry.getSize()) { // 多找了一个出来
-            sceneListVO.setHasNext(true);
-        } else {
-            sceneListVO.setHasNext(false);
-        }
-
-        // 批量获取场景执行记录
-        CompletableFuture<HashMap<Long, SceneExecuteDto>> sceneExeRecordsFuture = CompletableFuture.supplyAsync(() -> batchGetSceneExeRecord(sceneIds));
-        // 批量获取场景步骤数
-        CompletableFuture<HashMap<Long, Integer>> sceneStepNumsFuture = CompletableFuture.supplyAsync(() -> batchGetSceneStepNum(sceneIds));
-
-        List<SceneSimpleInfoDto> sceneSimpleInfoDtos = (List<SceneSimpleInfoDto>) scenes.stream().map(scene -> {
-            SceneSimpleInfoDto sceneSimpleInfoDto = new SceneSimpleInfoDto();
-            sceneSimpleInfoDto.setId(scene.getId());
-            sceneSimpleInfoDto.setSceneName(scene.getTitle());
-            return sceneSimpleInfoDto;
-        });
-
-        return CompletableFuture.allOf(sceneExeRecordsFuture, sceneStepNumsFuture).thenApply( e -> {
-            HashMap<Long, SceneExecuteDto> sceneExeRecords = sceneExeRecordsFuture.join();
-            HashMap<Long, Integer> sceneStepNums = sceneStepNumsFuture.join();
-            // 组装相关Vo
-            sceneListVO.setScenes(sceneSimpleInfoDtos);
-            toSceneListVO(sceneListVO, sceneExeRecords, sceneStepNums);
-            return sceneListVO;
-        }).join();
     }
 
     @Override

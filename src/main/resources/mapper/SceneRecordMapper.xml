@@ -150,7 +150,7 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-  <select id="getRecordBySceneId" resultMap="com.testframe.autotest.core.meta.po.SceneRecord">
+  <select id="getRecordBySceneId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
     where sceneId = #{sceneId,jdbcType=BIGINT} order by createTime DESC limit #{pageQry.offset},#{pageQry.size}

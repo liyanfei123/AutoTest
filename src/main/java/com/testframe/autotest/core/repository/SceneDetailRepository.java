@@ -1,5 +1,6 @@
 package com.testframe.autotest.core.repository;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
 import com.testframe.autotest.core.meta.request.PageQry;
@@ -45,6 +46,7 @@ public class SceneDetailRepository {
     @Transactional(rollbackFor = Exception.class)
     public boolean update(Scene sceneUpdate) {
         SceneDetail sceneDetail = sceneDetailConvertor.toPO(sceneUpdate);
+        log.info("[SceneDetailRepository:update] update scene, {}", JSON.toJSONString(sceneDetail));
         if (!sceneDao.updateScene(sceneDetail)) {
             throw new AutoTestException("场景更新失败");
         }

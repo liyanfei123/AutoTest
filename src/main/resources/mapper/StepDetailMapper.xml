@@ -11,7 +11,7 @@
   <sql id="Base_Column_List" >
     id, stepName, stepInfo, createTime, updateTime
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.BIGINT" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
     <include refid="Base_Column_List" />
     from AUTO_TEST_STEP_DETAIL
@@ -22,7 +22,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.StepDetail" >
-    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_STEP_DETAIL (stepName, stepInfo, createTime, 
@@ -31,7 +31,7 @@
       #{updateTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.StepDetail" >
-    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_STEP_DETAIL
@@ -98,7 +98,7 @@
     <foreach collection="stepIds" index="i" item="stepId" close=")" open="(" separator=",">
       #{stepId}
     </foreach>
-    order by id desc 
+    order by id desc
     limit #{offset}, #{size}
    </select>
 

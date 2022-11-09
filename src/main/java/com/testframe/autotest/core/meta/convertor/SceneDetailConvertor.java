@@ -10,13 +10,14 @@ public class SceneDetailConvertor {
 
     public SceneDetail toPO(Scene scene) {
         SceneDetail sceneDetail = new SceneDetail();
+        sceneDetail.setId(scene.getId());
         sceneDetail.setSceneName(scene.getTitle());
         sceneDetail.setSceneDesc(scene.getDesc());
         sceneDetail.setType(scene.getType());
         sceneDetail.setUrl(scene.getUrl());
         sceneDetail.setWaitType(scene.getWaitType());
         sceneDetail.setWaitTime(scene.getWaitTime());
-        sceneDetail.setIsDelete(0);
+        sceneDetail.setIsDelete(scene.getIsDelete());
         sceneDetail.setCreateBy(scene.getCreateBy());
         return sceneDetail;
     }

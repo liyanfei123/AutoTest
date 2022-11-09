@@ -35,7 +35,7 @@
       )
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneStep" >
-    <selectKey resultType="java.lang.BIGINT" keyProperty="id" order="AFTER" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_SCENE_STEP

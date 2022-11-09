@@ -26,7 +26,7 @@ public class SceneStepDao {
         Long currentTime = System.currentTimeMillis();
         sceneStep.setCreateTime(currentTime);
         sceneStep.setUpdateTime(currentTime);
-        return sceneStepMapper.insert(sceneStep) > 0 ? true : false;
+        return sceneStepMapper.insertSelective(sceneStep) > 0 ? true : false;
     }
 
     public Boolean updateSceneStep(SceneStep sceneStep) {

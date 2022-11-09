@@ -60,7 +60,7 @@ public class SceneDetailImpl implements SceneDetailService {
             return sceneCreate.getId();
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:create] create scene error, reason: {}", e.getMessage());
-            return null;
+            throw new AutoTestException(e.getMessage());
         }
     }
 
@@ -88,7 +88,7 @@ public class SceneDetailImpl implements SceneDetailService {
             stepOrderService.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:update] update scene error, reason: {}", e.getMessage());
-            return false;
+            throw new AutoTestException(e.getMessage());
         }
         return true;
     }
@@ -120,8 +120,8 @@ public class SceneDetailImpl implements SceneDetailService {
             return sceneDetailInfo;
         } catch (Exception e) {
             log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e.getStackTrace());
+            throw new AutoTestException(e.getMessage());
         }
-        return null;
     }
 
     private List<Long> orderListStr(String stepIdsStr) {
@@ -139,12 +139,13 @@ public class SceneDetailImpl implements SceneDetailService {
         Scene sceneCreate = new Scene();
         sceneCreate.setTitle(sceneCreateCmd.getTitle());
         sceneCreate.setDesc(sceneCreateCmd.getDesc());
-        sceneCreate.setType(sceneCreate.getType());
+        sceneCreate.setType(sceneCreateCmd.getType());
         return sceneCreate;
     }
 
     private Scene build(SceneUpdateCmd sceneUpdateCmd) {
         Scene sceneUpdate = new Scene();
+        sceneUpdate.setId(sceneUpdateCmd.getId());
         sceneUpdate.setTitle(sceneUpdateCmd.getTitle());
         sceneUpdate.setDesc(sceneUpdateCmd.getDesc());
         sceneUpdate.setType(sceneUpdateCmd.getType());

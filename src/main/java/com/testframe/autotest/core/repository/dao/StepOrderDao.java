@@ -21,7 +21,7 @@ public class StepOrderDao {
         Long currentTime = System.currentTimeMillis();
         stepOrder.setCreateTime(currentTime);
         stepOrder.setUpdateTime(currentTime);
-        return stepOrderMapper.insert(stepOrder) > 0 ? true : false;
+        return stepOrderMapper.insertSelective(stepOrder) > 0 ? true : false;
     }
 
 

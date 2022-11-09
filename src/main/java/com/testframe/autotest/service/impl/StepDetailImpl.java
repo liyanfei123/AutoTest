@@ -74,7 +74,7 @@ public class StepDetailImpl implements StepDetailService {
             }
         } catch (AutoTestException e) {
             log.error("[StepDetailImpl:saveStepDetail] create step, reason = {}", e.getMessage());
-            return null;
+            throw new AutoTestException("步骤更新失败");
         }
     }
 

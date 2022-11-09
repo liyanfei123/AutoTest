@@ -21,7 +21,7 @@ public class SceneExecuteRecordDao {
     public Long saveSceneExecuteRecord(SceneRecord sceneRecord) {
         Long currentTime = System.currentTimeMillis();
         sceneRecord.setCreateTime(currentTime);
-        sceneRecordMapper.insert(sceneRecord);
+        sceneRecordMapper.insertSelective(sceneRecord);
         return sceneRecord.getId();
     }
 
