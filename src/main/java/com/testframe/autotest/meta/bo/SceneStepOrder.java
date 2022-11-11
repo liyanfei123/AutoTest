@@ -20,6 +20,8 @@ public class SceneStepOrder {
 
     private Long sceneId;
 
+    private Long recordId;
+
     private String orderStr;
 
     // 不处理
@@ -36,7 +38,8 @@ public class SceneStepOrder {
     }
 
     public static List<Long> orderToList(String orderStr) {
-        orderStr = orderStr.substring(1, orderStr.length()-1);
+        // "[8, 9, 10, 11, 12, 13, 14, 15, 18]"
+        orderStr = orderStr.substring(1, orderStr.length()-1).replaceAll(" ", "");
         String[] orders = orderStr.split(",");
         List<Long> orderList = new ArrayList<>();
         for (String order : orders) {

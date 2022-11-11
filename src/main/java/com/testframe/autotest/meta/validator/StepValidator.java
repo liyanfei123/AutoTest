@@ -23,9 +23,9 @@ public class StepValidator {
 
     // 验证场景创建参数是否正确
     public void checkStepUpdate(StepUpdateCmd stepUpdateCmd) {
-        if (stepUpdateCmd.getName() == null) {
+        if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName().equals("")) {
             throw new AutoTestException("步骤name不能为空");
-        } else if (stepUpdateCmd.getStepInfo() == null) {
+        } else if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
             throw new AutoTestException("步骤信息不能为空");
         } else if (stepUpdateCmd.getSceneId() == null) {
             throw new AutoTestException("场景id不能为空");

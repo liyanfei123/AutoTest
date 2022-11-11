@@ -10,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description:
@@ -47,11 +49,18 @@ public class StepOrderImpl implements StepOrderService {
     @Override
     public void updateStepOrder(Long sceneId, Long stepId) {
         try {
+            List<Long> stepOrderList;
             SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
-            List<Long> stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+            if (sceneStepOrder == null || sceneStepOrder.getOrderStr() == null) {
+                stepOrderList = new ArrayList<Long>(){{add(stepId);}};
+            } else {
+                stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+                stepOrderList.add(stepId);
+            }
             updateStepOrder(sceneId, stepOrderList);
         } catch (Exception e) {
             log.error("[StepOrderImpl:updateStepOrder] add step order stepId {} error, reason = ", stepId, e);
+            e.printStackTrace();
             throw new AutoTestException("单步骤执行顺序添加失败");
         }
     }
@@ -65,13 +74,14 @@ public class StepOrderImpl implements StepOrderService {
             throw new AutoTestException("当前场景无可删除步骤");
         }
         List<Long> newOrder = SceneStepOrder.orderToList(stepOrder);
-        newOrder.stream().filter(sId -> !sId.equals(stepId));
+        newOrder = newOrder.stream().filter(sId -> !sId.equals(stepId)).collect(Collectors.toList());
         log.info("[StepOrderImpl:removeStepId] update step run order, oldOrder = {}, newOrder = {}",
                 JSON.toJSONString(stepOrder), JSON.toJSONString(newOrder));
         sceneStepOrder.setOrderStr(newOrder.toString());
         stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
     }
 
+    // 查询当前的编排顺序
     @Override
     public List<Long> queryNowStepOrder(Long sceneId) {
         try {
@@ -81,6 +91,7 @@ public class StepOrderImpl implements StepOrderService {
             return stepOrderList;
         } catch (Exception e) {
             log.error("[StepOrderImpl:queryNowStepOrder] in scene {}, reason", sceneId, e);
+            e.printStackTrace();
             throw new AutoTestException("查询当前场景下的步骤顺序失败");
         }
     }
@@ -89,7 +100,8 @@ public class StepOrderImpl implements StepOrderService {
     // 获取执行前的顺序
     private SceneStepOrder getStepBeforeOrder(Long sceneId) {
         List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
-        sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType());
+        sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
+                .collect(Collectors.toList());
         if (sceneStepOrders.size() > 1) {
             throw new AutoTestException("当前场景步骤执行顺序存在脏数据, 请手动处理, sceneId=" + sceneId);
         }
@@ -102,8 +114,8 @@ public class StepOrderImpl implements StepOrderService {
     // 获取步骤执行时的顺序
     private List<SceneStepOrder> getStepRunOrder(Long sceneId) {
         List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
-        sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.ING.getType());
-        return sceneStepOrders;
+        return sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.ING.getType())
+                .collect(Collectors.toList());
     }
 
 }

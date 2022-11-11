@@ -33,8 +33,8 @@ public class StepController {
     @PostMapping("/save")
     public HttpResult<Boolean> stepSave(@RequestBody StepUpdateCmd stepUpdateCmd) {
         try {
-            stepDetail.saveStepDetail(stepUpdateCmd);
-            return HttpResult.ok();
+            Long stepId = stepDetail.saveStepDetail(stepUpdateCmd);
+            return HttpResult.ok(stepId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

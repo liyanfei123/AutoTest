@@ -16,4 +16,15 @@ public class StepDetailConvertor {
         return stepDetail;
     }
 
+    public Step PoToDo(StepDetail stepDetail) {
+        if (stepDetail == null) {
+            return null;
+        }
+        Step step = new Step();
+        step.setStepId(stepDetail.getId());
+        step.setStepName(stepDetail.getStepName());
+        step.setStepInfo(stepDetail.getStepInfo());
+        return step;
+    }
+
 }

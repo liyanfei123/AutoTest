@@ -5,5 +5,4 @@ import com.testframe.autotest.meta.bo.SceneStepOrder;
 
 public abstract class BaseConverter {
     public abstract Object toPo(Object param);
-
 }

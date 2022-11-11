@@ -128,7 +128,8 @@ public class SceneListImpl implements SceneListService {
             }
             // 删除场景关联的步骤顺序
             List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
-            sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType());
+            sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
+                    .collect(Collectors.toList());
             if (!sceneStepOrders.isEmpty()) {
                 SceneStepOrder sceneStepOrder = sceneStepOrders.get(0);
                 sceneStepOrder.setOrderList(null);

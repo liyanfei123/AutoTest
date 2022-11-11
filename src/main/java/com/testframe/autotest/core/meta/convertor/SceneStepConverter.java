@@ -11,14 +11,28 @@ public class SceneStepConverter {
 
     public SceneStep toPO(SceneStepRel sceneStepRel) {
         SceneStep sceneStep = new SceneStep();
-        sceneStep.setSceneId(sceneStep.getSceneId());
-        sceneStep.setStepId(sceneStep.getStepId());
+        sceneStep.setId(sceneStepRel.getId());
+        sceneStep.setSceneId(sceneStepRel.getSceneId());
+        sceneStep.setStepId(sceneStepRel.getStepId());
         sceneStep.setIsDelete(sceneStepRel.getIsDelete());
         if (sceneStep.getIsDelete() == null) {
             sceneStep.setIsDelete(0);
         }
         sceneStep.setStatus(sceneStepRel.getStatus());
         return sceneStep;
+    }
+
+    public SceneStepRel PoToDo(SceneStep sceneStep) {
+        if (sceneStep == null) {
+            return null;
+        }
+        SceneStepRel sceneStepRel = new SceneStepRel();
+        sceneStepRel.setId(sceneStep.getId());
+        sceneStepRel.setSceneId(sceneStep.getSceneId());
+        sceneStepRel.setStepId(sceneStep.getStepId());
+        sceneStepRel.setStatus(sceneStep.getStatus());
+        sceneStepRel.setIsDelete(sceneStep.getIsDelete());
+        return sceneStepRel;
     }
 
 

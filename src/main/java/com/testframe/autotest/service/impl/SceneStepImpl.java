@@ -11,6 +11,7 @@ import com.testframe.autotest.meta.validator.StepValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +82,7 @@ public class SceneStepImpl implements SceneStepService {
         return stepIds;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void removeSceneStepRel(Long stepId) {
         try {

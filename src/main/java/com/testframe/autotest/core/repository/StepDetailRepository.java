@@ -64,7 +64,7 @@ public class StepDetailRepository {
         if (stepDetail == null) {
             return null;
         } else {
-            return build(stepDetail);
+            return stepDetailConvertor.PoToDo(stepDetail);
         }
     }
 
@@ -73,18 +73,8 @@ public class StepDetailRepository {
         if (CollectionUtils.isEmpty(stepDetails)) {
             return Collections.EMPTY_LIST;
         }
-        List<Step> steps = stepDetails.stream().map(this::build).collect(Collectors.toList());
+        List<Step> steps = stepDetails.stream().map(stepDetailConvertor::PoToDo).collect(Collectors.toList());
         return steps;
     }
 
-    private Step build(StepDetail stepDetail) {
-        if (stepDetail == null) {
-            return null;
-        }
-        Step step = new Step();
-        step.setStepId(stepDetail.getId());
-        step.setStepName(stepDetail.getStepName());
-        step.setStepInfo(stepDetail.getStepInfo());
-        return step;
-    }
 }

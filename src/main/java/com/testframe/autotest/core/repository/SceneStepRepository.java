@@ -74,7 +74,7 @@ public class SceneStepRepository {
         }
         List<SceneStepRel> sceneStepRels = new ArrayList<>();
         sceneSteps.forEach(sceneStep -> {
-            SceneStepRel sceneStepRel = build(sceneStep);
+            SceneStepRel sceneStepRel = sceneStepConverter.PoToDo(sceneStep);
             sceneStepRels.add(sceneStepRel);
         });
         return sceneStepRels;
@@ -85,21 +85,10 @@ public class SceneStepRepository {
             return null;
         }
         SceneStep sceneStep = sceneStepDao.queryByStepId(stepId);
-        return build(sceneStep);
+        return sceneStepConverter.PoToDo(sceneStep);
     }
 
 
-    private SceneStepRel build(SceneStep sceneStep) {
-        if (sceneStep == null) {
-            return null;
-        }
-        SceneStepRel sceneStepRel = new SceneStepRel();
-        sceneStepRel.setId(sceneStep.getId());
-        sceneStepRel.setStepId(sceneStep.getStepId());
-        sceneStepRel.setStatus(sceneStepRel.getStatus());
-        sceneStepRel.setIsDelete(sceneStepRel.getIsDelete());
-        return sceneStepRel;
-    }
 
 
 }

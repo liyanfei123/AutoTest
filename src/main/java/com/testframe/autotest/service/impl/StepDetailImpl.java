@@ -2,6 +2,7 @@ package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.repository.SceneStepRepository;
+import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -48,8 +49,13 @@ public class StepDetailImpl implements StepDetailService {
         try {
             // 检验参数的有效性
             stepValidator.checkStepUpdate(stepUpdateCmd);
+            // 判断当前场景是否存在，若不存在直接抛出异常
+            Scene scene = sceneDetailRepository.querySceneById(stepUpdateCmd.getSceneId());
+            if (scene == null) {
+                throw new AutoTestException("当前场景id无效");
+            }
             Step step = StepUpdateCmd.toStep(stepUpdateCmd);
-            if (stepUpdateCmd.getStepId() == null) {
+            if (stepUpdateCmd.getStepId() == null || stepUpdateCmd.getStepId() == 0) {
                 // 新增
                 Long stepId = stepDetailRepository.saveStep(step);
                 SceneStepRel sceneStepRel = SceneStepRel.build(stepUpdateCmd.getSceneId(), step);
@@ -60,6 +66,11 @@ public class StepDetailImpl implements StepDetailService {
                 return stepId;
             } else {
                 // 更新
+                // 判断当前stepId是否正确
+                Step stepEx = stepDetailRepository.queryStepById(stepUpdateCmd.getStepId());
+                if (stepEx == null) {
+                    throw new AutoTestException("当前步骤id无效");
+                }
                 // 判断当前场景是否还存在
                 if (sceneDetailRepository.querySceneById(stepUpdateCmd.getSceneId()) == null) {
                     throw new AutoTestException("当前场景已被删除，无法修改");
@@ -74,7 +85,7 @@ public class StepDetailImpl implements StepDetailService {
             }
         } catch (AutoTestException e) {
             log.error("[StepDetailImpl:saveStepDetail] create step, reason = {}", e.getMessage());
-            throw new AutoTestException("步骤更新失败");
+            throw new AutoTestException(e.getMessage());
         }
     }
 
@@ -104,6 +115,7 @@ public class StepDetailImpl implements StepDetailService {
                     stepIds.add(sceneId);
                     stepDetailRepository.update(step);
                 }
+                // TODO: 2022/11/11 需要添加执行状态的更新 
             }
         } catch (AutoTestException e) {
             log.error("[StepDetailImpl:batchSaveStepDetail] create step, reason = {}", e.getMessage());

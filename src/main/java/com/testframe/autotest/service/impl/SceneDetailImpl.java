@@ -113,7 +113,11 @@ public class SceneDetailImpl implements SceneDetailService {
                 List<Long> stepOrderList = stepOrderService.queryNowStepOrder(sceneId);
                 List<StepInfoDto> steps = new ArrayList<>(stepOrderList.size());
                 stepOrderList.forEach(stepId -> {
-                    steps.add(stepInfoDtoMap.get(stepId));
+                    StepInfoDto stepInfoDto = stepInfoDtoMap.get(stepId);
+                    if (stepInfoDto == null) {
+                        throw new AutoTestException("当前场景下步骤被删除");
+                    }
+                    steps.add(stepInfoDto);
                 });
             }
             log.info("[SceneDetailImpl:query] scene detail {}", JSON.toJSONString(sceneDetailInfo));
