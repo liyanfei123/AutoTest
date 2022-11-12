@@ -51,4 +51,8 @@ public class SceneStepDao {
         return sceneStepMapper.queryStepByStepId(stepId);
     }
 
+    public List<SceneStep> queryByStepIds(List<Long> stepIds) {
+        return sceneStepMapper.queryStepByStepIds(stepIds);
+    }
+
 }

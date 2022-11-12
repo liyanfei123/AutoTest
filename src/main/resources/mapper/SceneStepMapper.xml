@@ -119,7 +119,7 @@
   <select id="queryStepsBySceneId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select *
     from AUTO_TEST_SCENE_STEP
-    where sceenId = #{sceenId,jdbcType=BIGINT} AND
+    where sceneId = #{sceneId,jdbcType=BIGINT} AND
           isDelete = 0
   </select>
 
@@ -128,6 +128,16 @@
     from AUTO_TEST_SCENE_STEP
     where stepId = #{stepId,jdbcType=BIGINT} AND
       isDelete = 0
+  </select>
+
+  <select id="queryStepByStepIds" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select *
+    from AUTO_TEST_SCENE_STEP
+    where stepId in
+    <foreach collection="stepIds" index="i" item="stepId" close=")" open="(" separator=",">
+      #{stepId}
+    </foreach>
+    AND isDelete = 0
   </select>
 
 </mapper>

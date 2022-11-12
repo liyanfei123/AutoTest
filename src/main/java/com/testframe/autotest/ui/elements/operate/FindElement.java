@@ -93,7 +93,7 @@ public class FindElement {
             }
         } catch (NoSuchElementException e) {
             log.error("[FindElement:findElementByType] can not find element by {}, reason = {}, stack = {}",
-                    JSON.toJSONString(locatorInfo), e.getMessage(), e.getStackTrace());
+                    JSON.toJSONString(locatorInfo), e.getMessage(), e);
             throw new NoSuchElementException("控件未出现");
         }
         return element;

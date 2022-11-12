@@ -193,15 +193,15 @@
   <select id="queryScenes" resultMap="BaseResultMap"><![CDATA[
     select *
     from AUTO_TEST_SCENE_DETAIL
-    where id < #{pageQry.lastId} and isDelete = 0
+    where id > #{pageQry.lastId} and isDelete = 0
     order by id
     limit #{pageQry.offset}, #{pageQry.size}
   ]]></select>
 
-  <select id="querySceneLikeTitle" resultMap="BaseResultMap"><![CDATA[
+  <select id="queryScenesLikeTitle" resultMap="BaseResultMap"><![CDATA[
     select *
     from AUTO_TEST_SCENE_DETAIL
-    where id < #{pageQry.lastId} and isDelete = 0 and sceneName like '%' + #{scenenName} '%'
+    where id > #{pageQry.lastId} and isDelete = 0 and sceneName like '%${sceneName}%'
     order by id
       limit #{pageQry.offset}, #{pageQry.size}
     ]]></select>
@@ -211,10 +211,10 @@
     from AUTO_TEST_SCENE_DETAIL
     where isDelete = 0
     <if test="sceneName != null" >
-      and sceneName like '%' + #{scenenName} '%'
+      <![CDATA[and sceneName like '%${sceneName}%']]>
     </if>
     <if test="sceneId != null" >
-      and id= #{scenenId}
+      and id= #{sceneId}
     </if>
     </select>
 

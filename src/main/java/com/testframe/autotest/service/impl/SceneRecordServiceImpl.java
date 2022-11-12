@@ -53,7 +53,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             if (recordIdset.isEmpty()) {
                 // 当前场景从未执行过
                 sceneRecordListVo.setSceneId(sceneId);
-                sceneRecordListVo.setSceneExeRecordDtos(null);
+                sceneRecordListVo.setSceneExeRecordDtos(Collections.EMPTY_LIST);
                 return sceneRecordListVo;
             }
             List<Long> recordIds = new ArrayList<>(recordIdset);
@@ -102,12 +102,12 @@ public class SceneRecordServiceImpl implements SceneRecordService {
                                    HashMap<Long, SceneStepOrder> stepOrders) {
         // 对场景步骤顺序重排
         stepExecuteRecordMap.forEach((recordId, stepExecuteRecords) -> {
-            List<Long> stepOrderList = stepOrders.get(recordId).getOrderList();
+            List<Long> stepOrderList = stepOrders.get(recordId).getOrderList(); // 执行时的顺序
             // 使用匿名比较器排序
             Collections.sort(stepExecuteRecords, new Comparator<StepExecuteRecord>() {
                 @Override
                 public int compare(StepExecuteRecord record1, StepExecuteRecord record2) {
-                    return stepOrderList.indexOf(record1.getStepId()) - stepOrderList.indexOf(record1.getStepId());
+                    return stepOrderList.indexOf(record1.getStepId()) - stepOrderList.indexOf(record2.getStepId());
                 }
             });
         });

@@ -42,7 +42,7 @@
         sceneId,
       </if>
       <if test="recordId != null" >
-        sceneId,
+        recordId,
       </if>
       <if test="orderList != null" >
         orderList,

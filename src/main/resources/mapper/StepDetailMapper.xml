@@ -99,7 +99,6 @@
       #{stepId}
     </foreach>
     order by id desc
-    limit #{offset}, #{size}
    </select>
 
 </mapper>

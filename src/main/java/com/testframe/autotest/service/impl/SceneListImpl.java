@@ -24,11 +24,9 @@ import com.testframe.autotest.service.SceneListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -61,7 +59,7 @@ public class SceneListImpl implements SceneListService {
 //        status 按状态列表来搜索
 //        List<Integer> status = SceneStatusEnum.getTypes();
             PageQry pageQry = new PageQry();
-            pageQry.setSize(sceneQry.getSize() + 1);
+            pageQry.setSize(sceneQry.getSize()+1);
             pageQry.setOffset(((sceneQry.getPage() - 1) * sceneQry.getSize()));
             pageQry.setLastId(sceneQry.getLastId());
             if (pageQry.getLastId() == null) {
@@ -71,12 +69,13 @@ public class SceneListImpl implements SceneListService {
             SceneListVO sceneListVO = new SceneListVO();
             PageVO pageVO = new PageVO(sceneQry.getPage(), sceneQry.getSize());
             sceneListVO.setPageVO(pageVO);
+            // 根据当前搜索条件搜索出的总数
             Long allCount = sceneDetailRepository.countScene(sceneQry.getSceneId(), sceneQry.getSceneName());
             sceneListVO.setTotal(allCount);
-            int totalPage = (int) (allCount / sceneQry.getSize()) + ((allCount % sceneQry.getSize()) >= 1 ? 0 : 1);
+            int totalPage = (int) (allCount / sceneQry.getSize()) + ((allCount % sceneQry.getSize()) >= 1 ? 1 : 0);
             sceneListVO.setTotalPage(totalPage);
 
-            // 获得size+1个场景
+            // 获得size个场景
             List<Scene> scenes = sceneDetailRepository.queryScenes(sceneQry.getSceneId(), sceneQry.getSceneName(), pageQry);
             if (scenes.isEmpty()) {
                 sceneListVO.setScenes(Collections.EMPTY_LIST);
@@ -86,11 +85,13 @@ public class SceneListImpl implements SceneListService {
             }
 
             List<Long> sceneIds = scenes.stream().map(Scene::getId).collect(Collectors.toList());
-            sceneListVO.setLastId(sceneIds.get(-1));
             if (sceneIds.size() == pageQry.getSize()) { // 多找了一个出来
                 sceneListVO.setHasNext(true);
+                sceneListVO.setLastId(sceneIds.get(sceneIds.size()-2));
+
             } else {
                 sceneListVO.setHasNext(false);
+                sceneListVO.setLastId(sceneIds.get(sceneIds.size()-1));
             }
 
             // 批量获取场景执行记录
@@ -98,12 +99,12 @@ public class SceneListImpl implements SceneListService {
             // 批量获取场景步骤数
             CompletableFuture<HashMap<Long, Integer>> sceneStepNumsFuture = CompletableFuture.supplyAsync(() -> batchGetSceneStepNum(sceneIds));
 
-            List<SceneSimpleInfoDto> sceneSimpleInfoDtos = (List<SceneSimpleInfoDto>) scenes.stream().map(scene -> {
+            List<SceneSimpleInfoDto> sceneSimpleInfoDtos = scenes.stream().map(scene -> {
                 SceneSimpleInfoDto sceneSimpleInfoDto = new SceneSimpleInfoDto();
                 sceneSimpleInfoDto.setId(scene.getId());
                 sceneSimpleInfoDto.setSceneName(scene.getTitle());
                 return sceneSimpleInfoDto;
-            });
+            }).collect(Collectors.toList());
 
             return CompletableFuture.allOf(sceneExeRecordsFuture, sceneStepNumsFuture).thenApply(e -> {
                 HashMap<Long, SceneExecuteDto> sceneExeRecords = sceneExeRecordsFuture.join();
@@ -119,6 +120,7 @@ public class SceneListImpl implements SceneListService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean deleteScene(Long sceneId) {
         try {
@@ -149,7 +151,8 @@ public class SceneListImpl implements SceneListService {
             sceneDetailRepository.update(scene);
             return true;
         } catch (Exception e) {
-            log.error("[SceneListInterImpl:deleteScene] delete scene {} error, reason = {}", sceneId, JSON.toJSONString(e.getStackTrace()));
+            log.error("[SceneListInterImpl:deleteScene] delete scene {} error, reason = {}",
+                    sceneId, e);
             throw new AutoTestException(e.getMessage());
         }
     }
@@ -195,13 +198,14 @@ public class SceneListImpl implements SceneListService {
     private void toSceneListVO(SceneListVO sceneListVO, HashMap<Long, SceneExecuteDto> sceneExeRecords, HashMap<Long, Integer> sceneStepNums) {
         List<SceneSimpleInfoDto> scenes = sceneListVO.getScenes();
         if (sceneListVO.getHasNext()) {
-            scenes.remove(-1); // 由于存在下一页，故多了一个
+            scenes.remove(scenes.size()-1); // 由于存在下一页，故多了一个
         }
         for (SceneSimpleInfoDto sceneSimpleInfoDto : scenes) {
             Long sceneId = sceneSimpleInfoDto.getId();
             SceneExecuteDto sceneExecuteDto = sceneExeRecords.get(sceneId);
             sceneSimpleInfoDto.setStepNum(sceneStepNums.get(sceneId));
             if (sceneExecuteDto == null) {
+                // 无执行记录，丛未执行过
                 sceneSimpleInfoDto.setStatus(SceneStatusEnum.NEVER.getType());
                 sceneSimpleInfoDto.setExecuteTime(0L);
             } else {

@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.bo.SceneStepRel;
+import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.bo.Step;
 import com.testframe.autotest.meta.dto.StepInfoDto;
+import com.testframe.autotest.meta.dto.StepUIInfo;
 import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.service.StepDetailService;
 import com.testframe.autotest.service.StepOrderService;
@@ -19,9 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -129,26 +130,60 @@ public class StepDetailImpl implements StepDetailService {
        try {
            log.info("[StepDetailImpl:batchQueryStepDetail] query step detail ids: {}", JSON.toJSONString(stepIds));
            List<Step> steps = stepDetailRepository.queryStepByIds(stepIds);
-           HashMap<Long, StepInfoDto> stepInfoDtoMap = new HashMap<>();
-           for (Step step : steps) {
-               StepInfoModel stepInfoModel;
-               StepInfoDto stepInfoDto;
-               try {
-                   SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(step.getStepId());
-                   stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
-                   stepInfoDto = StepInfoDto.build(stepInfoModel);
-                   stepInfoDto.setStepId(step.getStepId());
-                   stepInfoDto.setStepName(step.getStepName());
-                   stepInfoDto.setStepStatus(sceneStepRel.getStatus());
-                   stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
-               } catch (Exception e) {
-                   log.error("[StepDetailImpl:batchQueryStepDetail] step = {}, reason = ", JSON.toJSONString(step), e);
+           List<SceneStepRel> sceneStepRels = sceneStepRepository.queryByStepIds(stepIds);
+           // 对列表中的内容根据stepIds顺序排序
+           Collections.sort(steps, new Comparator<Step>() {
+               @Override
+               public int compare(Step step1, Step step2) {
+                   return stepIds.indexOf(step1.getStepId())
+                           - stepIds.indexOf(step2.getStepId());
                }
+           });
+           Collections.sort(sceneStepRels, new Comparator<SceneStepRel>() {
+               @Override
+               public int compare(SceneStepRel sceneStepRel1, SceneStepRel sceneStepRel2) {
+                   return stepIds.indexOf(sceneStepRel1.getStepId())
+                           - stepIds.indexOf(sceneStepRel1.getStepId());
+               }
+           });
+           List<Integer> status = sceneStepRels.stream().map(SceneStepRel::getStatus)
+                   .collect(Collectors.toList());
+           HashMap<Long, StepInfoDto> stepInfoDtoMap = new HashMap<>();
+           for (int i = 0; i< stepIds.size(); i++) {
+               Step step = steps.get(i);
+               StepInfoDto stepInfoDto = new StepInfoDto();
+               StepInfoModel stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
+               StepUIInfo stepUIInfo = StepUIInfo.build(stepInfoModel);
+               stepInfoDto.setStepId(step.getStepId());
+               stepInfoDto.setStepName(step.getStepName());
+               stepInfoDto.setStepStatus(status.get(i));
+               stepInfoDto.setStepUIInfo(stepUIInfo);
+               stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
+
            }
+//           for (Step step : steps) {
+//               StepInfoModel stepInfoModel;
+//               StepInfoDto stepInfoDto = new StepInfoDto();
+//               StepUIInfo stepUIInfo;
+//               try {
+//                   SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(step.getStepId());
+//                   stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
+//                   stepUIInfo = StepUIInfo.build(stepInfoModel);
+//                   stepInfoDto.setStepId(step.getStepId());
+//                   stepInfoDto.setStepName(step.getStepName());
+//                   stepInfoDto.setStepStatus(sceneStepRel.getStatus());
+//                   stepInfoDto.setStepUIInfo(stepUIInfo);
+//                   stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
+//               } catch (Exception e) {
+//                   log.error("[StepDetailImpl:batchQueryStepDetail] step = {}, reason = ", JSON.toJSONString(step), e);
+//                   throw new AutoTestException("单步骤查询失败");
+//               }
+//           }
            return stepInfoDtoMap;
        } catch (Exception e) {
-           log.error("[StepDetailImpl:batchQueryStepDetail] query steps {} error, reason = {}", JSON.toJSONString(stepIds), e.getStackTrace());
-           throw new AutoTestException("批量查询场景失败");
+           log.error("[StepDetailImpl:batchQueryStepDetail] query steps {} error, reason = {}",
+                   JSON.toJSONString(stepIds), e);
+           throw new AutoTestException("批量查询步骤失败");
        }
     }
 

@@ -48,14 +48,14 @@ public class StepController {
         }
         try {
             sceneStepService.removeSceneStepRel(stepId);
+            return HttpResult.ok("场景删除成功");
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
-        return HttpResult.ok();
     }
 
     @GetMapping("/copy")
-    public HttpResult<Long> copyStep(@RequestParam(required = true) Long sceneId,
+    public HttpResult<Long> copyStep(@RequestParam(required = false) Long sceneId,
                                      @RequestParam(required = true) Long stepId) {
         try {
             Long newSceneId = stepCopyService.stepCopy(sceneId, stepId);

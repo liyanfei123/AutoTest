@@ -88,7 +88,18 @@ public class SceneStepRepository {
         return sceneStepConverter.PoToDo(sceneStep);
     }
 
-
+    public List<SceneStepRel> queryByStepIds(List<Long> stepIds) {
+        if (stepIds == null) {
+            return null;
+        }
+        List<SceneStep> sceneStep = sceneStepDao.queryByStepIds(stepIds);
+        if (sceneStep.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        List<SceneStepRel> sceneStepRels = sceneStep.stream().map(sceneStepConverter::PoToDo)
+                .collect(Collectors.toList());
+        return sceneStepRels;
+    }
 
 
 }

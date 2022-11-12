@@ -3,7 +3,6 @@ package com.testframe.autotest.controller;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
-import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.query.SceneQry;
@@ -11,6 +10,7 @@ import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneListService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
+import com.testframe.autotest.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class SceneController {
     public HttpResult<Long> createScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
         try {
             sceneDetailService.update(sceneUpdateCmd);
-            return HttpResult.ok();
+            return HttpResult.ok("场景更新成功");
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
@@ -63,7 +63,7 @@ public class SceneController {
         }
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public HttpResult<SceneListVO> sceneList(@RequestBody SceneQry sceneQry) {
         try {
             SceneListVO sceneListVO = sceneListService.queryScenes(sceneQry);
@@ -77,16 +77,22 @@ public class SceneController {
     @GetMapping("/delete")
     public HttpResult<Object> deleteScene(@RequestParam(required = true) Long sceneId) {
         try {
+            if (sceneId == null || StringUtils.isNumeric(sceneId.toString())) {
+                return HttpResult.error("请输入正确的场景id");
+            }
             sceneListService.deleteScene(sceneId);
+            return HttpResult.ok("删除成功");
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
-        return HttpResult.ok();
     }
 
     @GetMapping("/copy")
     public HttpResult<Object> copyScene(@RequestParam(required = true) Long sceneId) {
         try {
+            if (sceneId == null) {
+                return HttpResult.error("请输入场景id");
+            }
             Long newSceneId = sceneCopyService.sceneCopy(sceneId);
             return HttpResult.ok(newSceneId);
         } catch (AutoTestException e) {

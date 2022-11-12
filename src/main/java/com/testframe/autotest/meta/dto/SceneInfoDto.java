@@ -23,12 +23,11 @@ public class SceneInfoDto {
 
     public static SceneInfoDto build(Scene scene) {
         SceneInfoDto sceneInfoDto = new SceneInfoDto();
-        BeanUtils.copyProperties(sceneInfoDto, scene);
-//        sceneInfoDto.setSceneId(scene.getId());
-//        sceneInfoDto.setName(scene.getTitle());
-//        sceneInfoDto.setDesc(scene.getDesc());
-//        sceneInfoDto.setWaitTime(sceneInfoDto.getWaitTime());
-//        sceneInfoDto.setWaitType(sceneInfoDto.getWaitType());
+        sceneInfoDto.setSceneId(scene.getId());
+        sceneInfoDto.setName(scene.getTitle());
+        sceneInfoDto.setDesc(scene.getDesc());
+        sceneInfoDto.setWaitTime(scene.getWaitTime());
+        sceneInfoDto.setWaitType(scene.getWaitType());
         return sceneInfoDto;
     }
 

@@ -24,4 +24,6 @@ public interface SceneStepMapper {
     List<SceneStep> queryStepsBySceneId(@Param("sceneId") Long sceneId);
 
     SceneStep queryStepByStepId(@Param("stepId") Long stepId);
+
+    List<SceneStep> queryStepByStepIds(@Param("stepIds") List<Long> stepIds);
 }

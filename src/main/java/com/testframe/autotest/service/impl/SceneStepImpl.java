@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class SceneStepImpl implements SceneStepService {
                         sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, step));
                     } catch (Exception e) {
                         log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
-                                sceneId, e.getStackTrace());
+                                sceneId, e);
                         throw new AutoTestException("当前场景下新增步骤失败");
                     }
                 } else {
@@ -71,7 +72,7 @@ public class SceneStepImpl implements SceneStepService {
                         existedStepMap.remove(stepId);
                     } catch (Exception e) {
                         log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
-                                stepId, e.getStackTrace());
+                                stepId, e);
                         throw new AutoTestException("当前场景下已有步骤更新失败");
                     }
                 }
@@ -89,11 +90,13 @@ public class SceneStepImpl implements SceneStepService {
             stepValidator.checkStepId(stepId);
             SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepId);
             sceneStepRel.setIsDelete(1);
+            log.info("[SceneStepInterImpl:removeSceneStepRel] update scene-step, sceneStepRel = {}",
+                    JSON.toJSONString(sceneStepRel));
             sceneStepRepository.updateSceneStep(sceneStepRel);
             Long sceneId = sceneStepRel.getSceneId();
             stepOrderImpl.removeStepId(sceneId, stepId);
         } catch (AutoTestException e) {
-            log.error("[SceneStepInterImpl:removeSceneStepRel] remove step {} error, reason = {}", stepId, e.getStackTrace());
+            log.error("[SceneStepInterImpl:removeSceneStepRel] remove step {} error, reason = {}", stepId, e);
             throw new AutoTestException(e.getMessage());
         }
         // 获取当前场景下的执行步骤顺序，对其进行修改
@@ -104,14 +107,17 @@ public class SceneStepImpl implements SceneStepService {
         try {
             log.info("[SceneStepImpl:queryStepBySceneId] query steps in scene {}", sceneId);
             List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
+            if (sceneStepRels.isEmpty()) {
+                return Collections.EMPTY_LIST;
+            }
             List<Long> stepIds = new ArrayList<>(sceneStepRels.size());
             sceneStepRels.forEach(sceneStepRel -> stepIds.add(sceneStepRel.getStepId()));
             log.info("[SceneStepImpl:queryStepBySceneId] query steps in scene {}, steps {}", sceneId, JSON.toJSONString(stepIds));
             return stepIds;
         } catch (Exception e) {
             log.error("[SceneStepImpl:queryStepBySceneId] query steps in scene {} error, reason = ", sceneId, e);
+            throw new AutoTestException("查询场景下步骤失败");
         }
-        return null;
     }
 
 

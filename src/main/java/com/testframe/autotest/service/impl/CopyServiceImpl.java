@@ -89,7 +89,7 @@ public class CopyServiceImpl implements CopyService {
             stepOrderRepository.saveSceneStepOrder(sceneStepOrder);
             return newSceneId;
         } catch (Exception e) {
-            log.error("[SceneCopyServiceImpl:copy] copy scene {} error, reason = {}", sceneId, e.getStackTrace());
+            log.error("[SceneCopyServiceImpl:copy] copy scene {} error, reason = {}", sceneId, e);
             throw new AutoTestException("场景复制失败");
         }
     }
@@ -108,6 +108,9 @@ public class CopyServiceImpl implements CopyService {
             copyStep.setStepId(newStepId);
             // 获取原场景的执行状态
             SceneStepRel orgSceneStepRel = sceneStepRepository.queryByStepId(stepId);
+            if (sceneId == null) {
+                sceneId = orgSceneStepRel.getSceneId();
+            }
             SceneStepRel newSceneStepRel = SceneStepRel.build(sceneId, copyStep);
             newSceneStepRel.setStatus(orgSceneStepRel.getStatus());
             // 绑定关联关系
@@ -140,7 +143,7 @@ public class CopyServiceImpl implements CopyService {
             return newStepId;
         } catch (Exception e) {
             log.error("[CopyServiceImpl:stepCopy] copy step {} error, reason",
-                    stepId, e.getStackTrace());
+                    stepId, e);
             throw new AutoTestException("步骤复制失败");
         }
     }

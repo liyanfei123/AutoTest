@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -46,6 +47,7 @@ public class SceneDetailImpl implements SceneDetailService {
     private StepOrderService stepOrderService;
 
     // 创建测试场景
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Long create(SceneCreateCmd sceneCreateCmd) {
         log.info("[SceneDetailImpl:create] create scene, sceneCreateCmd = {}", JSON.toJSONString(sceneCreateCmd));
@@ -64,6 +66,7 @@ public class SceneDetailImpl implements SceneDetailService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean update(SceneUpdateCmd sceneUpdateCmd) {
         log.info("[SceneDetailImpl:update] update scene, sceneUpdateCmd = {}", JSON.toJSONString(sceneUpdateCmd));
@@ -112,18 +115,20 @@ public class SceneDetailImpl implements SceneDetailService {
                 HashMap<Long, StepInfoDto> stepInfoDtoMap = stepDetailService.batchQueryStepDetail(stepIds);
                 List<Long> stepOrderList = stepOrderService.queryNowStepOrder(sceneId);
                 List<StepInfoDto> steps = new ArrayList<>(stepOrderList.size());
+                // 根据执行步骤编排信息
                 stepOrderList.forEach(stepId -> {
                     StepInfoDto stepInfoDto = stepInfoDtoMap.get(stepId);
                     if (stepInfoDto == null) {
-                        throw new AutoTestException("当前场景下步骤被删除");
+                        throw new AutoTestException("当前场景下步骤被删除，数据有误");
                     }
                     steps.add(stepInfoDto);
                 });
+                sceneDetailInfo.setSteps(steps);
             }
             log.info("[SceneDetailImpl:query] scene detail {}", JSON.toJSONString(sceneDetailInfo));
             return sceneDetailInfo;
         } catch (Exception e) {
-            log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e.getStackTrace());
+            log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e);
             throw new AutoTestException(e.getMessage());
         }
     }

@@ -36,11 +36,11 @@ public class SceneDetailRepository {
     @Transactional(rollbackFor = Exception.class)
     public Long saveScene(Scene sceneCreate) {
         SceneDetail sceneDetail = sceneDetailConvertor.toPO(sceneCreate);
-        sceneDao.saveScene(sceneDetail);
-        if (sceneDetail.getId() <= 0 || sceneDetail.getId() == null) {
-            return null;
+        Long sceneId = sceneDao.saveScene(sceneDetail);
+        if (sceneId <= 0 || sceneId == null) {
+            return 0L;
         }
-        return sceneDetail.getId();
+        return sceneId;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -72,10 +72,10 @@ public class SceneDetailRepository {
      */
     public List<Scene> queryScenes(Long sceneId, String sceneName, PageQry pageQry) {
         List<Scene> scenes = new ArrayList<>();
-        if (sceneId != null) {
+        if (sceneId != null && sceneId != 0L) {
             Scene scene = querySceneById(sceneId);
             scenes.add(scene);
-        } else if (sceneName != null) {
+        } else if (sceneName != null && !sceneName.trim().equals("")) {
             List<SceneDetail> sceneDetailList = sceneDao.querySceneLikeTitle(sceneName, pageQry);
             scenes = sceneDetailList.stream().map(this::buildScene).collect(Collectors.toList());
         } else {
