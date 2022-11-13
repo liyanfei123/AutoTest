@@ -100,7 +100,8 @@ public class StepOrderImpl implements StepOrderService {
     // 获取执行前的顺序
     private SceneStepOrder getStepBeforeOrder(Long sceneId) {
         List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
-        sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
+        sceneStepOrders = sceneStepOrders.stream().filter(
+                sceneStepOrder -> sceneStepOrder.getType() == StepOrderEnum.BEFORE.getType())
                 .collect(Collectors.toList());
         if (sceneStepOrders.size() > 1) {
             throw new AutoTestException("当前场景步骤执行顺序存在脏数据, 请手动处理, sceneId=" + sceneId);

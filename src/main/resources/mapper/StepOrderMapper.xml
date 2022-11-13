@@ -85,7 +85,7 @@
         sceneId = #{sceneId,jdbcType=BIGINT},
       </if>
       <if test="recordId != null" >
-        sceneId = #{recordId,jdbcType=BIGINT},
+        recordId = #{recordId,jdbcType=BIGINT},
       </if>
       <if test="orderList != null" >
         orderList = #{orderList,jdbcType=VARCHAR},
@@ -102,6 +102,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
+
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.StepOrder" >
     update AUTO_TEST_STEP_ORDER
     set sceneId = #{sceneId,jdbcType=BIGINT},
@@ -116,8 +117,8 @@
   <select id="getStepOrderBySceneId" resultType="com.testframe.autotest.core.meta.po.StepOrder" parameterType="java.lang.Long" >
     select *
     from AUTO_TEST_STEP_ORDER
-    where sceneId = #{sceneId,jdbcType=BIGINT} AND
-      type = 1  order by createTime DESC
+    where sceneId = #{sceneId,jdbcType=BIGINT}
+    order by createTime DESC
   </select>
 
   <select id="getStepOrderByRecordId" resultType="com.testframe.autotest.core.meta.po.StepOrder" parameterType="java.lang.Long" >

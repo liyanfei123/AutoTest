@@ -32,7 +32,7 @@ public class SceneStepDao {
     public Boolean updateSceneStep(SceneStep sceneStep) {
         Long currentTime = System.currentTimeMillis();
         sceneStep.setUpdateTime(currentTime);
-        return sceneStepMapper.updateByPrimaryKey(sceneStep) > 0 ? true : false;
+        return sceneStepMapper.updateByPrimaryKeySelective(sceneStep) > 0 ? true : false;
     }
 
     public SceneStep queryById(Long id) {

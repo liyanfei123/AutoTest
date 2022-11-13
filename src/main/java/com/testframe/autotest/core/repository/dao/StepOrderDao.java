@@ -29,7 +29,7 @@ public class StepOrderDao {
     public Boolean updateStepOrder(StepOrder stepOrder) {
         Long currentTime = System.currentTimeMillis();
         stepOrder.setUpdateTime(currentTime);
-        return stepOrderMapper.updateByPrimaryKey(stepOrder) > 0 ? true : false;
+        return stepOrderMapper.updateByPrimaryKeySelective(stepOrder) > 0 ? true : false;
 
     }
 

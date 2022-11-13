@@ -107,7 +107,9 @@ public class SceneDetailImpl implements SceneDetailService {
             SceneInfoDto sceneInfoDto = SceneInfoDto.build(scene);
             SceneDetailInfo sceneDetailInfo = new SceneDetailInfo();
             sceneDetailInfo.setScene(sceneInfoDto);
-            // 查询步骤信息
+            // 查询步骤执行信息
+            // TODO: 2022/11/13 可以先查询步骤执行顺序，再查询步骤详情 
+//            List<Long> stepIds = stepOrderService.queryNowStepOrder(sceneId);
             List<Long> stepIds = sceneStepService.queryStepBySceneId(sceneId);
             if (stepIds.isEmpty()) {
                 sceneDetailInfo.setSteps(null);

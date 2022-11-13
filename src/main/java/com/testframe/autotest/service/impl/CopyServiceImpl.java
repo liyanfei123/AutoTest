@@ -126,7 +126,7 @@ public class CopyServiceImpl implements CopyService {
                 // 新增执行顺序
                 newStepIds = new ArrayList<>();
                 newStepIds.add(newStepId);
-                newSceneStepOrder = SceneStepOrder.build(sceneId, newStepIds.toString());
+//                newSceneStepOrder = SceneStepOrder.build(sceneId, newStepIds.toString());
 //                stepOrderRepository.saveSceneStepOrder(newSceneStepOrder);
             } else {
                 // 更新执行顺序
@@ -136,7 +136,7 @@ public class CopyServiceImpl implements CopyService {
                 // 默认复制在后面
                 orderList.add(index+1, newStepId);
                 newStepIds = orderList;
-                newSceneStepOrder.setOrderStr(orderList.toString());
+//                newSceneStepOrder.setOrderStr(orderList.toString());
 //                stepOrderRepository.updateSceneStepOrder(newSceneStepOrder);
             }
             stepOrderService.updateStepOrder(sceneId, newStepIds);
