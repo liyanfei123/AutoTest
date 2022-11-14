@@ -7,10 +7,7 @@ import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneStepOrder;
-import com.testframe.autotest.meta.bo.SceneStepRel;
-import com.testframe.autotest.meta.bo.Step;
+import com.testframe.autotest.meta.bo.*;
 import com.testframe.autotest.service.CopyService;
 import com.testframe.autotest.service.StepOrderService;
 import com.testframe.autotest.util.RandomUtil;
@@ -19,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,15 +55,35 @@ public class CopyServiceImpl implements CopyService {
             }
             // 复制场景信息
             scene.setId(null);
-            String suffix = RandomUtil.randomCode(8);
-            scene.setTitle(scene.getTitle() + suffix);
+            String sceneSuffix = RandomUtil.randomCode(8);
+            scene.setTitle(scene.getTitle() + sceneSuffix);
             Long newSceneId = sceneDetailRepository.saveScene(scene);
             // 复制场景步骤
             List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
-            List<Long> stepIds = sceneStepRels.stream().map(SceneStepRel::getStepId).collect(Collectors.toList());
+            if (sceneStepRels.isEmpty()) {
+                // 当前场景下没有步骤需要保存
+                return newSceneId;
+            }
+
+//            List<Long> oldStepIds = sceneStepRels.stream().map(SceneStepRel::getStepId).collect(Collectors.toList());
+            List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
+            sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
+                    .collect(Collectors.toList());
+            List<Long> orgStepOrder = sceneStepOrders.get(0).getOrderList();
             // 查询当前场景下的所有步骤并进行复制
-            List<Step> originSteps = stepDetailRepository.queryStepByIds(stepIds);
-            originSteps.forEach(step -> step.setStepId(null));
+            List<Step> originSteps = stepDetailRepository.queryStepByIds(orgStepOrder);
+            // 不改变步骤编排顺序
+            Collections.sort(originSteps, new Comparator<Step>() {
+                @Override
+                public int compare(Step step1, Step step2) {
+                    return orgStepOrder.indexOf(step1.getStepId()) - orgStepOrder.indexOf(step2.getStepId());
+                }
+            });
+            originSteps.forEach(step -> {
+                step.setStepId(null);
+                String stepSuffix = RandomUtil.randomCode(8);
+                step.setStepName(step.getStepName() + stepSuffix);
+            });
             List<Long> newStepIds = stepDetailRepository.batchSaveStep(originSteps);
             // 构建新场景绑定关系,步骤默认为开启状态
             List<SceneStepRel> newSceneStepRels = new ArrayList<>();
@@ -81,12 +96,14 @@ public class CopyServiceImpl implements CopyService {
                 newSceneStepRels.add(sceneStepRel);
             }
             sceneStepRepository.batchSaveSceneStep(newSceneStepRels);
+
             // 保存执行步骤
             SceneStepOrder sceneStepOrder = new SceneStepOrder();
             sceneStepOrder.setSceneId(newSceneId);
-            sceneStepOrder.setOrderStr(newStepIds.toString());
+            sceneStepOrder.setOrderList(newStepIds);
             sceneStepOrder.setType(StepOrderEnum.BEFORE.getType());
             stepOrderRepository.saveSceneStepOrder(sceneStepOrder);
+
             return newSceneId;
         } catch (Exception e) {
             log.error("[SceneCopyServiceImpl:copy] copy scene {} error, reason = {}", sceneId, e);
@@ -102,12 +119,20 @@ public class CopyServiceImpl implements CopyService {
             // TODO: 2022/11/11 其实可以复制StepDetailService中的saveStepDetail 方法，只是会默认把复制的步骤放到最后 使用switch进行区分
             // 复制步骤
             Step copyStep = stepDetailRepository.queryStepById(stepId);
+            if (copyStep == null) {
+                throw new AutoTestException("当前被复制的步骤不存在");
+            }
             copyStep.setStepName(copyStep.getStepName() + "复制");
             copyStep.setStepId(null);
+            String stepSuffix = RandomUtil.randomCode(8);
+            copyStep.setStepName(copyStep.getStepName() + stepSuffix);
             Long newStepId = stepDetailRepository.saveStep(copyStep);
             copyStep.setStepId(newStepId);
             // 获取原场景的执行状态
             SceneStepRel orgSceneStepRel = sceneStepRepository.queryByStepId(stepId);
+            if (orgSceneStepRel == null) {
+                throw new AutoTestException("请复制正确的步骤");
+            }
             if (sceneId == null) {
                 sceneId = orgSceneStepRel.getSceneId();
             }
@@ -131,7 +156,7 @@ public class CopyServiceImpl implements CopyService {
             } else {
                 // 更新执行顺序
                 newSceneStepOrder = sceneStepOrders.get(0);
-                List<Long> orderList = SceneStepOrder.orderToList(newSceneStepOrder.getOrderStr());
+                List<Long> orderList = newSceneStepOrder.getOrderList();
                 int index = orderList.indexOf(stepId);
                 // 默认复制在后面
                 orderList.add(index+1, newStepId);
@@ -144,7 +169,7 @@ public class CopyServiceImpl implements CopyService {
         } catch (Exception e) {
             log.error("[CopyServiceImpl:stepCopy] copy step {} error, reason",
                     stepId, e);
-            throw new AutoTestException("步骤复制失败");
+            throw new AutoTestException(e.getMessage());
         }
     }
 }

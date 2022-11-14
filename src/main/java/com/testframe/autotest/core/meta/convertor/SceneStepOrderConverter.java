@@ -6,6 +6,8 @@ import com.testframe.autotest.core.meta.po.StepOrder;
 import com.testframe.autotest.meta.bo.SceneStepOrder;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 @Component
 public class SceneStepOrderConverter {
 
@@ -13,13 +15,10 @@ public class SceneStepOrderConverter {
         StepOrder stepOrder = new StepOrder();
         stepOrder.setId(sceneStepOrder.getId());
         stepOrder.setSceneId(sceneStepOrder.getSceneId());
-        if (sceneStepOrder.getOrderStr() == null || sceneStepOrder.getOrderStr() == "") {
-            stepOrder.setOrderList(null);
-        } else if (sceneStepOrder.getOrderList() != null &&
-                !sceneStepOrder.getOrderList().isEmpty()) {
+        if (sceneStepOrder.getOrderList() != null && !sceneStepOrder.getOrderList().isEmpty()) {
             stepOrder.setOrderList(sceneStepOrder.getOrderList().toString());
         } else {
-            stepOrder.setOrderList(sceneStepOrder.getOrderStr());
+            stepOrder.setOrderList(Collections.EMPTY_LIST.toString());
         }
         if (sceneStepOrder.getType() == null || !StepOrderEnum.contains(sceneStepOrder.getType())) {
             stepOrder.setType(StepOrderEnum.BEFORE.getType());
@@ -37,7 +36,7 @@ public class SceneStepOrderConverter {
         SceneStepOrder sceneStepOrder = new SceneStepOrder();
         sceneStepOrder.setId(stepOrder.getId());
         sceneStepOrder.setSceneId(stepOrder.getSceneId());
-        sceneStepOrder.setOrderStr(stepOrder.getOrderList());
+        sceneStepOrder.setOrderList(SceneStepOrder.orderToList(stepOrder.getOrderList()));
         sceneStepOrder.setType(stepOrder.getType());
         return sceneStepOrder;
     }

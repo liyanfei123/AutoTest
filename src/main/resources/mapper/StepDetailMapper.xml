@@ -17,6 +17,7 @@
     from AUTO_TEST_STEP_DETAIL
     where id = #{id,jdbcType=BIGINT}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from AUTO_TEST_STEP_DETAIL
     where id = #{id,jdbcType=BIGINT}

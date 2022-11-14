@@ -22,10 +22,12 @@
     from AUTO_TEST_SCENE_EXECUTE_RECORD
     where id = #{id,jdbcType=BIGINT}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_SCENE_EXECUTE_RECORD
-    where id = #{id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT} AND isDelete = 0
   </delete>
+
   <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()

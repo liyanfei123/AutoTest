@@ -41,7 +41,7 @@ public class StepOrderImpl implements StepOrderService {
         } else {
             // 更新
             log.info("[StepOrderImpl:updateStepOrder] update step run order, order = {}", JSON.toJSONString(stepIds));
-            sceneStepOrder.setOrderStr(stepIds.toString());
+            sceneStepOrder.setOrderList(stepIds);
             stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
         }
     }
@@ -51,10 +51,10 @@ public class StepOrderImpl implements StepOrderService {
         try {
             List<Long> stepOrderList;
             SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
-            if (sceneStepOrder == null || sceneStepOrder.getOrderStr() == null) {
+            if (sceneStepOrder == null || sceneStepOrder.getOrderList().isEmpty()) {
                 stepOrderList = new ArrayList<Long>(){{add(stepId);}};
             } else {
-                stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+                stepOrderList = sceneStepOrder.getOrderList();
                 stepOrderList.add(stepId);
             }
             updateStepOrder(sceneId, stepOrderList);
@@ -69,15 +69,14 @@ public class StepOrderImpl implements StepOrderService {
     @Override
     public void removeStepId(Long sceneId, Long stepId) {
         SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
-        String stepOrder = sceneStepOrder.getOrderStr();
-        if (stepOrder == null || stepOrder.equals("")) {
+        List<Long> stepOrder = sceneStepOrder.getOrderList();
+        if (stepOrder == null || stepOrder.isEmpty()) {
             throw new AutoTestException("当前场景无可删除步骤");
         }
-        List<Long> newOrder = SceneStepOrder.orderToList(stepOrder);
-        newOrder = newOrder.stream().filter(sId -> !sId.equals(stepId)).collect(Collectors.toList());
+        List<Long> newOrder = stepOrder.stream().filter(sId -> !sId.equals(stepId)).collect(Collectors.toList());
         log.info("[StepOrderImpl:removeStepId] update step run order, oldOrder = {}, newOrder = {}",
                 JSON.toJSONString(stepOrder), JSON.toJSONString(newOrder));
-        sceneStepOrder.setOrderStr(newOrder.toString());
+        sceneStepOrder.setOrderList(newOrder);
         stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
     }
 
@@ -86,7 +85,7 @@ public class StepOrderImpl implements StepOrderService {
     public List<Long> queryNowStepOrder(Long sceneId) {
         try {
             SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
-            List<Long> stepOrderList = SceneStepOrder.orderToList(sceneStepOrder.getOrderStr());
+            List<Long> stepOrderList = sceneStepOrder.getOrderList();
             log.info("[StepOrderImpl:queryNowStepOrder] step order {}", JSON.toJSONString(stepOrderList));
             return stepOrderList;
         } catch (Exception e) {

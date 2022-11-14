@@ -134,7 +134,7 @@ public class SceneListImpl implements SceneListService {
                     .collect(Collectors.toList());
             if (!sceneStepOrders.isEmpty()) {
                 SceneStepOrder sceneStepOrder = sceneStepOrders.get(0);
-                sceneStepOrder.setOrderList(null);
+                sceneStepOrder.setOrderList(Collections.EMPTY_LIST);
                 stepOrderRepository.updateSceneStepOrder(sceneStepOrder);
             }
             // 删除场景关联的步骤

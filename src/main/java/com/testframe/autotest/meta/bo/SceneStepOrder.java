@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -22,8 +23,6 @@ public class SceneStepOrder {
 
     private Long recordId;
 
-    private String orderStr;
-
     // 不处理
     private List<Long> orderList;
 
@@ -33,13 +32,16 @@ public class SceneStepOrder {
     public static SceneStepOrder build(Long sceneId, String orderStr) {
         return SceneStepOrder.builder()
                 .sceneId(sceneId)
-                .orderStr(orderStr)
+                .orderList(orderToList(orderStr))
                 .type(StepOrderEnum.BEFORE.getType()).build();
     }
 
     public static List<Long> orderToList(String orderStr) {
         // "[8, 9, 10, 11, 12, 13, 14, 15, 18]"
         orderStr = orderStr.substring(1, orderStr.length()-1).replaceAll(" ", "");
+        if (orderStr.equals("")) {
+            return Collections.EMPTY_LIST;
+        }
         String[] orders = orderStr.split(",");
         List<Long> orderList = new ArrayList<>();
         for (String order : orders) {

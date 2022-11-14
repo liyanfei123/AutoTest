@@ -88,8 +88,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     private HashMap<Long, SceneStepOrder> batchGetStepOrder(List<Long> recordIds) {
         HashMap<Long, SceneStepOrder> sceneStepOrderMap = stepOrderRepository.bacthQueryStepExeOrderByRecordIds(recordIds);
         sceneStepOrderMap.forEach((recordId, sceneStepOrder) -> {
-            String orderStr = sceneStepOrder.getOrderStr();
-            List<Long> orderList = SceneStepOrder.orderToList(orderStr);
+            List<Long> orderList = sceneStepOrder.getOrderList();
             sceneStepOrder.setOrderList(orderList);
         });
         log.info("[SceneRecordServiceImpl:batchGetStepOrder] get step order, datas = {}", JSON.toJSONString(sceneStepOrderMap));

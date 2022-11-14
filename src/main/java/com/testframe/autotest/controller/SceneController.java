@@ -77,7 +77,7 @@ public class SceneController {
     @GetMapping("/delete")
     public HttpResult<Object> deleteScene(@RequestParam(required = true) Long sceneId) {
         try {
-            if (sceneId == null || StringUtils.isNumeric(sceneId.toString())) {
+            if (sceneId == null || !StringUtils.isNumeric(sceneId.toString())) {
                 return HttpResult.error("请输入正确的场景id");
             }
             sceneListService.deleteScene(sceneId);
