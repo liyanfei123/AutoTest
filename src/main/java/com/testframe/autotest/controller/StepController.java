@@ -54,6 +54,18 @@ public class StepController {
         }
     }
 
+    // 改变步骤状态
+    @GetMapping("/changeStatus")
+    public HttpResult<Boolean> changeStatus(@RequestParam(required = true) Long stepId,
+                                            @RequestParam(required = true) int status) {
+        try {
+            sceneStepService.changeStepStatus(stepId, status);
+            return HttpResult.ok();
+        } catch (Exception e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
     @GetMapping("/copy")
     public HttpResult<Long> copyStep(@RequestParam(required = false) Long sceneId,
                                      @RequestParam(required = true) Long stepId) {

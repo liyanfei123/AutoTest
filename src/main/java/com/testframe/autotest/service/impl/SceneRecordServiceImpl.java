@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepRunResultEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
+import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.bo.SceneExecuteRecord;
 import com.testframe.autotest.meta.bo.SceneStepOrder;
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
@@ -18,6 +20,7 @@ import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +43,11 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     private StepExecuteRecordRepository stepExecuteRecordRepository;
 
     @Autowired
+    private SceneDetailRepository sceneDetailRepository;
+
+    @Autowired
     private StepOrderRepository stepOrderRepository;
+
 
     @Override
     public SceneRecordListVo records(Long sceneId) {
@@ -75,6 +82,22 @@ public class SceneRecordServiceImpl implements SceneRecordService {
         } catch (Exception e) {
             log.error("[SceneDetailImpl:query] query execute records {} error, reason: ", sceneId, e.getMessage());
             throw new AutoTestException("查询执行记录失败");
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Long saveRecord(Long sceneId) {
+        try {
+            log.info("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {}", sceneId);
+            Scene scene = sceneDetailRepository.querySceneById(sceneId);
+            Long currentTime = System.currentTimeMillis();
+            SceneExecuteRecord sceneExecuteRecord = SceneExecuteRecord.build(scene);
+            sceneExecuteRecord.setExecuteTime(currentTime);
+            return sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecord);
+        } catch (Exception e) {
+            log.error("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {} error ", sceneId, e);
+            throw new AutoTestException("保存场景执行记录失败");
         }
     }
 
@@ -139,4 +162,6 @@ public class SceneRecordServiceImpl implements SceneRecordService {
         }
         return SceneStatusEnum.SUCCESS.getType();
     }
+
+
 }

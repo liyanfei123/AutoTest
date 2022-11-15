@@ -12,5 +12,6 @@ public interface SceneRecordService {
 
     SceneRecordListVo records(Long sceneId);
 
+    Long saveRecord(Long sceneId);
 
 }

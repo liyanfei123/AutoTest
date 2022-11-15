@@ -146,6 +146,7 @@ public class StepDetailImpl implements StepDetailService {
                            - stepIds.indexOf(sceneStepRel1.getStepId());
                }
            });
+           // 步骤状态
            List<Integer> status = sceneStepRels.stream().map(SceneStepRel::getStatus)
                    .collect(Collectors.toList());
            HashMap<Long, StepInfoDto> stepInfoDtoMap = new HashMap<>();
@@ -159,26 +160,7 @@ public class StepDetailImpl implements StepDetailService {
                stepInfoDto.setStepStatus(status.get(i));
                stepInfoDto.setStepUIInfo(stepUIInfo);
                stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
-
            }
-//           for (Step step : steps) {
-//               StepInfoModel stepInfoModel;
-//               StepInfoDto stepInfoDto = new StepInfoDto();
-//               StepUIInfo stepUIInfo;
-//               try {
-//                   SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(step.getStepId());
-//                   stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
-//                   stepUIInfo = StepUIInfo.build(stepInfoModel);
-//                   stepInfoDto.setStepId(step.getStepId());
-//                   stepInfoDto.setStepName(step.getStepName());
-//                   stepInfoDto.setStepStatus(sceneStepRel.getStatus());
-//                   stepInfoDto.setStepUIInfo(stepUIInfo);
-//                   stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
-//               } catch (Exception e) {
-//                   log.error("[StepDetailImpl:batchQueryStepDetail] step = {}, reason = ", JSON.toJSONString(step), e);
-//                   throw new AutoTestException("单步骤查询失败");
-//               }
-//           }
            return stepInfoDtoMap;
        } catch (Exception e) {
            log.error("[StepDetailImpl:batchQueryStepDetail] query steps {} error, reason = {}",

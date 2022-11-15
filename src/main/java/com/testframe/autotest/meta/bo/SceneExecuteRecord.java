@@ -27,9 +27,21 @@ public class SceneExecuteRecord {
 
     private Long executeTime;
 
-//    private String extInfo;
+    private String extInfo;
 
     // 根据步骤执行顺序来存放每个步骤的执行状态
     private List<StepExecuteRecord> stepRecords;
 
+    public static SceneExecuteRecord build(Scene scene) {
+        SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();
+        sceneExecuteRecord.setSceneId(scene.getId());
+        sceneExecuteRecord.setSceneName(scene.getTitle());
+        sceneExecuteRecord.setUrl(scene.getUrl());
+        sceneExecuteRecord.setWaitType(scene.getWaitType());
+        sceneExecuteRecord.setWaitTime(scene.getWaitTime());
+        sceneExecuteRecord.setStatus(null);
+        sceneExecuteRecord.setExecuteTime(null);
+        sceneExecuteRecord.setExtInfo(null);
+        return sceneExecuteRecord;
+    }
 }

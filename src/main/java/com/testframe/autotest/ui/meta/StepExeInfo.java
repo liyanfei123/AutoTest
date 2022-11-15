@@ -6,6 +6,10 @@ import lombok.Data;
 @Data
 public class StepExeInfo {
 
+    private Long stepId;
+
+    private String stepName;
+
     private LocatorInfo locatorInfo;
 
     private OperateData operateData;

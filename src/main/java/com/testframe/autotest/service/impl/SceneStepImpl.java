@@ -88,6 +88,22 @@ public class SceneStepImpl implements SceneStepService {
         return stepIds;
     }
 
+    @Override
+    public Boolean changeStepStatus(Long stepId, int status) {
+        try {
+            log.info("[SceneStepInterImpl:changeStepStatus] step = {}, status = {}", stepId, status);
+            SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepId);
+            if (sceneStepRel.getStatus() != status) {
+                sceneStepRel.setStatus(status);
+                sceneStepRepository.updateSceneStep(sceneStepRel);
+            }
+        } catch (Exception e) {
+            log.info("[SceneStepInterImpl:changeStepStatus] step = {}, status = {} error, reason ", stepId, status, e);
+            throw new AutoTestException("步骤状态更新失败");
+        }
+        return true;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void removeSceneStepRel(Long stepId) {

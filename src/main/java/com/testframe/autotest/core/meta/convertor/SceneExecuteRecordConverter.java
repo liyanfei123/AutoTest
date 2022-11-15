@@ -9,6 +9,7 @@ import io.swagger.models.auth.In;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,13 +27,21 @@ public class SceneExecuteRecordConverter {
         sceneRecord.setUrl(sceneExecuteRecord.getUrl());
         sceneRecord.setWaitType(sceneExecuteRecord.getWaitType());
         sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
-        sceneRecord.setExtInfo(null);
-        List<Long> stepIds = new ArrayList<>();
-        for (StepExecuteRecord stepExecuteRecord : sceneExecuteRecord.getStepRecords()) {
-            stepIds.add(stepExecuteRecord.getStepId());
+        if (sceneExecuteRecord.getExtInfo() != null || !sceneExecuteRecord.getExtInfo().equals("")) {
+            sceneRecord.setExtInfo(sceneExecuteRecord.getExtInfo());
+        } else {
+            sceneRecord.setExtInfo(null);
         }
-        String stepOrders = stepIds.toString();
-        sceneRecord.setOrderList(stepOrders.substring(1, stepOrders.length()-1));
+        if (sceneExecuteRecord.getStepRecords() == null) {
+            sceneRecord.setOrderList(Collections.EMPTY_LIST.toString());
+        } else {
+            List<Long> stepIds = new ArrayList<>();
+            for (StepExecuteRecord stepExecuteRecord : sceneExecuteRecord.getStepRecords()) {
+                stepIds.add(stepExecuteRecord.getStepId());
+            }
+            String stepOrders = stepIds.toString();
+            sceneRecord.setOrderList(stepOrders.substring(1, stepOrders.length() - 1));
+        }
         return sceneRecord;
     }
 

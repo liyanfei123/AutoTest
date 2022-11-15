@@ -9,6 +9,8 @@ public interface SceneStepService {
 
     public List<Long> updateSceneStep(Long sceneId, List<Step> steps);
 
+    public Boolean changeStepStatus(Long stepId, int status);
+
     public void removeSceneStepRel(Long stepId);
 
     public void removeSceneStepRel(List<Long> stepIds);

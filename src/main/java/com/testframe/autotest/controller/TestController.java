@@ -28,7 +28,7 @@ public class TestController {
 
     @GetMapping("/execute")
     public void execute() {
-        sceneExecuteService.execute();
+        sceneExecuteService.execute(123L);
     }
 
 
