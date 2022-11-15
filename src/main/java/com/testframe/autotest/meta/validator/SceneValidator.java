@@ -49,6 +49,9 @@ public class SceneValidator {
         if (sceneUpdateCmd.getWaitType() < 1 || sceneUpdateCmd.getWaitType() > 2) {
             throw new AutoTestException("等待类型错误");
         }
+        if (sceneUpdateCmd.getType() < 1 || sceneUpdateCmd.getType() > 2) {
+            throw new AutoTestException("测试场景类型错误");
+        }
         if (sceneDetailRepository.querySceneById(sceneUpdateCmd.getId()) == null) {
             throw new AutoTestException("当前场景不存在");
         }

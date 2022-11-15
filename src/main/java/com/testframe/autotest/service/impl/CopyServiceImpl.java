@@ -9,6 +9,7 @@ import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.meta.bo.*;
 import com.testframe.autotest.service.CopyService;
+import com.testframe.autotest.service.SceneStepService;
 import com.testframe.autotest.service.StepOrderService;
 import com.testframe.autotest.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,9 @@ public class CopyServiceImpl implements CopyService {
 
     @Autowired
     private SceneStepRepository sceneStepRepository;
+
+    @Autowired
+    private SceneStepService sceneStepService;
 
     @Autowired
     private StepOrderRepository stepOrderRepository;
@@ -65,7 +69,6 @@ public class CopyServiceImpl implements CopyService {
                 return newSceneId;
             }
 
-//            List<Long> oldStepIds = sceneStepRels.stream().map(SceneStepRel::getStepId).collect(Collectors.toList());
             List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
             sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
                     .collect(Collectors.toList());
@@ -86,16 +89,7 @@ public class CopyServiceImpl implements CopyService {
             });
             List<Long> newStepIds = stepDetailRepository.batchSaveStep(originSteps);
             // 构建新场景绑定关系,步骤默认为开启状态
-            List<SceneStepRel> newSceneStepRels = new ArrayList<>();
-            for (Long newStepId : newStepIds) {
-                SceneStepRel sceneStepRel = new SceneStepRel();
-                sceneStepRel.setSceneId(newSceneId);
-                sceneStepRel.setStatus(StepStatusEnum.OPEN.getType());
-                sceneStepRel.setStepId(newStepId);
-                sceneStepRel.setIsDelete(0);
-                newSceneStepRels.add(sceneStepRel);
-            }
-            sceneStepRepository.batchSaveSceneStep(newSceneStepRels);
+            sceneStepService.batchSaveSceneStep(newStepIds, sceneId);
 
             // 保存执行步骤
             SceneStepOrder sceneStepOrder = new SceneStepOrder();
@@ -145,24 +139,19 @@ public class CopyServiceImpl implements CopyService {
             sceneStepOrders = sceneStepOrders.stream().filter(sceneStepOrder -> sceneStepOrder.getType().equals(
                     StepOrderEnum.BEFORE.getType()
             )).collect(Collectors.toList());
-            SceneStepOrder newSceneStepOrder;
             List<Long> newStepIds;
             if (sceneStepOrders.isEmpty()) {
                 // 新增执行顺序
                 newStepIds = new ArrayList<>();
                 newStepIds.add(newStepId);
-//                newSceneStepOrder = SceneStepOrder.build(sceneId, newStepIds.toString());
-//                stepOrderRepository.saveSceneStepOrder(newSceneStepOrder);
             } else {
                 // 更新执行顺序
-                newSceneStepOrder = sceneStepOrders.get(0);
+                SceneStepOrder newSceneStepOrder = sceneStepOrders.get(0);
                 List<Long> orderList = newSceneStepOrder.getOrderList();
                 int index = orderList.indexOf(stepId);
                 // 默认复制在后面
                 orderList.add(index+1, newStepId);
                 newStepIds = orderList;
-//                newSceneStepOrder.setOrderStr(orderList.toString());
-//                stepOrderRepository.updateSceneStepOrder(newSceneStepOrder);
             }
             stepOrderService.updateStepOrder(sceneId, newStepIds);
             return newStepId;

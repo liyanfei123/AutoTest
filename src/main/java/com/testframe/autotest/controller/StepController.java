@@ -47,8 +47,8 @@ public class StepController {
             return HttpResult.error("请输入步骤id");
         }
         try {
-            sceneStepService.removeSceneStepRel(stepId);
-            return HttpResult.ok("场景删除成功");
+            sceneStepService.removeSceneStepRelWithOrder(stepId);
+            return HttpResult.ok("步骤删除成功");
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

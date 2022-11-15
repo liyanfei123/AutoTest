@@ -1,6 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
@@ -46,37 +47,41 @@ public class SceneStepImpl implements SceneStepService {
             sceneStepRels.stream().forEach(e -> existedStepMap.put(e.getStepId(), e));
         }
         for (Step step : steps) {
-                Long stepId = step.getStepId();
-                if (stepId == null) {
-                    // 新增步骤
-                    log.info("[SceneStepInterImpl:updateSceneStep] add step in sceneId {}, step = {}",
-                            sceneId, JSON.toJSONString(step));
-                    try {
-                        stepId = stepDetailRepository.saveStep(step);
-                        sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, step));
-                    } catch (Exception e) {
-                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
-                                sceneId, e);
-                        throw new AutoTestException("当前场景下新增步骤失败");
-                    }
-                } else {
-                    try {
-                        // 更新步骤
-                        sceneStepRel = existedStepMap.get(stepId);
-                        log.info("[SceneStepInterImpl:updateSceneStep] update step in sceneId-stepId {}-{}, sceneStepRel = {}",
-                                sceneId, step.getStepId(), JSON.toJSONString(sceneStepRel));
-                        stepDetailRepository.update(step);
-                        sceneStepRel.setStatus(step.getStatus());
-                        sceneStepRepository.updateSceneStep(sceneStepRel);
-                        stepIds.add(stepId);
-                        existedStepMap.remove(stepId);
-                    } catch (Exception e) {
-                        log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
-                                stepId, e);
-                        throw new AutoTestException("当前场景下已有步骤更新失败");
-                    }
+            Long stepId = step.getStepId();
+            if (stepId == null || stepId == 0) {
+                // 新增步骤
+                log.info("[SceneStepInterImpl:updateSceneStep] add step in sceneId {}, step = {}",
+                        sceneId, JSON.toJSONString(step));
+                try {
+                    stepId = stepDetailRepository.saveStep(step);
+                    step.setStepId(stepId);
+                    sceneStepRepository.saveSceneStep(SceneStepRel.build(sceneId, step));
+                    stepIds.add(stepId);
+                } catch (Exception e) {
+                    log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
+                            sceneId, e);
+                    throw new AutoTestException("当前场景下新增步骤失败");
                 }
-                stepIds.add(stepId);
+            } else {
+                try {
+                    // 更新步骤
+                    sceneStepRel = existedStepMap.get(stepId);
+                    if (sceneStepRel == null) {
+                        throw new AutoTestException("当前步骤id错误");
+                    }
+                    log.info("[SceneStepInterImpl:updateSceneStep] update step in sceneId-stepId {}-{}, sceneStepRel = {}",
+                            sceneId, step.getStepId(), JSON.toJSONString(sceneStepRel));
+                    stepDetailRepository.update(step);
+                    sceneStepRel.setStatus(step.getStatus());
+                    sceneStepRepository.updateSceneStep(sceneStepRel);
+                    stepIds.add(stepId);
+                    existedStepMap.remove(stepId);
+                } catch (Exception e) {
+                    log.error("[SceneStepInterImpl:updateSceneStep] update step error, stepId = {}, reason = {}",
+                            stepId, e);
+                    throw new AutoTestException("当前场景下已有步骤更新失败");
+                }
+            }
         }
         // 把未进行操作的步骤给删除掉
         removeSceneStepRel(existedStepMap);
@@ -103,6 +108,36 @@ public class SceneStepImpl implements SceneStepService {
     }
 
     @Override
+    public void removeSceneStepRel(List<Long> stepIds) {
+        if (stepIds.isEmpty()) {
+            return;
+        }
+        try {
+            for (Long stepId : stepIds) {
+                removeSceneStepRel(stepId);
+            }
+        } catch (Exception e) {
+            throw new AutoTestException(e.getMessage());
+        }
+
+    }
+
+
+    @Override
+    public void removeSceneStepRelWithOrder(Long stepId) {
+        try {
+            SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepId);
+            removeSceneStepRel(stepId);
+            Long sceneId = sceneStepRel.getSceneId();
+            stepOrderImpl.removeStepId(sceneId, stepId);
+        } catch (AutoTestException e) {
+            log.error("[SceneStepInterImpl:removeSceneStepRel] remove step {} error, reason = {}", stepId, e);
+            throw new AutoTestException(e.getMessage());
+        }
+    }
+
+
+    @Override
     public List<Long> queryStepBySceneId(Long sceneId) {
         try {
             log.info("[SceneStepImpl:queryStepBySceneId] query steps in scene {}", sceneId);
@@ -118,6 +153,30 @@ public class SceneStepImpl implements SceneStepService {
             log.error("[SceneStepImpl:queryStepBySceneId] query steps in scene {} error, reason = ", sceneId, e);
             throw new AutoTestException("查询场景下步骤失败");
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void batchSaveSceneStep(List<Long> stepIds, Long sceneId) {
+        try {
+            log.info("[SceneStepImpl:batchSaveSceneStep] bacth save step scene rel, steps {}, scene {}",
+                    JSON.toJSONString(stepIds), sceneId);
+            List<SceneStepRel> newSceneStepRels = new ArrayList<>();
+            for (Long stepId : stepIds) {
+                SceneStepRel sceneStepRel = new SceneStepRel();
+                sceneStepRel.setSceneId(stepId);
+                sceneStepRel.setStatus(StepStatusEnum.OPEN.getType());
+                sceneStepRel.setStepId(stepId);
+                sceneStepRel.setIsDelete(0);
+                newSceneStepRels.add(sceneStepRel);
+            }
+            sceneStepRepository.batchSaveSceneStep(newSceneStepRels);
+        } catch (Exception e) {
+            log.info("[SceneStepImpl:batchSaveSceneStep] bacth save step scene rel, steps {}, scene {}, error, ",
+                    JSON.toJSONString(stepIds), sceneId, e);
+            throw new AutoTestException("批量保存步骤关联关系失败");
+        }
+
     }
 
 

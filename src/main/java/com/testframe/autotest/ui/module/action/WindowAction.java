@@ -24,7 +24,7 @@ public class WindowAction implements ActionI {
             if (!allWindowHandlers.isEmpty()) {
                 Integer index = 0;
                 for (String windowHandle : allWindowHandlers) {
-                    if (index == data.getIndexs().get(0)) {
+                    if (index == data.getIndexes().get(0)) {
                         driver.switchTo().window(windowHandle);
                         break;
                     }

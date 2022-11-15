@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSON;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -58,8 +59,7 @@ public class SceneDetailImpl implements SceneDetailService {
             // todo:获取当前登录的用户信息
             sceneCreate.setCreateBy(1234L);
             log.info("[SceneDetailImpl:create] create scene, scene = {}", JSON.toJSONString(sceneCreate));
-            sceneDetailRepository.saveScene(sceneCreate);
-            return sceneCreate.getId();
+            return sceneDetailRepository.saveScene(sceneCreate);
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:create] create scene error, reason: {}", e.getMessage());
             throw new AutoTestException(e.getMessage());
@@ -81,6 +81,7 @@ public class SceneDetailImpl implements SceneDetailService {
             }
             List<Step> steps = new ArrayList<>();
             for (StepUpdateCmd stepUpdateCmd : sceneUpdateCmd.getStepUpdateCmds()) {
+                stepUpdateCmd.setSceneId(sceneId);
                 stepValidator.checkStepUpdate(stepUpdateCmd);
                 Step step = StepUpdateCmd.toStep(stepUpdateCmd);
                 steps.add(step);

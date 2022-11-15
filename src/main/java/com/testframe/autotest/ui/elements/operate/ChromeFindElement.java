@@ -14,6 +14,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,8 +28,11 @@ import java.util.List;
  * @date:2022/10/24 21:07
  * @author: lyf
  */
+// TODO: 2022/11/15 添加一个浏览器选择工厂，用于选择 
 @Slf4j
-public class FindElement {
+public class ChromeFindElement {
+
+    WebDriver driver = new ChromeDriver();
 
     @Autowired
     private WaitTypeFactory waitTypeFactory;
@@ -41,10 +45,9 @@ public class FindElement {
 
     // 目前只支持显式等待
     public WebElement findElementsByType(LocatorInfo locatorInfo) {
-        WebDriver driver = locatorInfo.getDriver();
-        LocatorTypeEnum locatorType = locatorInfo.getLocatedType();
+        LocatorTypeEnum locatorType = LocatorTypeEnum.getByType(locatorInfo.getLocatedType());
         String express = locatorInfo.getExpression();
-        WaitEnum waitType = locatorInfo.getWaitType();
+        WaitEnum waitType = WaitEnum.getByType(locatorInfo.getWaitType());
         if (waitType == WaitEnum.Explicit_Wait) {
             waitStyle = new ExplicitWait(driver, locatorInfo.getWaitTime());
         } else {

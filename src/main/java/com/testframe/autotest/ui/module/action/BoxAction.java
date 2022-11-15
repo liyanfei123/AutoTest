@@ -65,8 +65,8 @@ public class BoxAction implements ActionI {
                 return;
             }
             Select dropList = new Select(element);
-            if (data.getIndexs() != null) {
-                dropList.selectByIndex(data.getIndexs().get(0));
+            if (data.getIndexes() != null) {
+                dropList.selectByIndex(data.getIndexes().get(0));
                 return;
             }
             if (data.getAttr() != null) {
@@ -108,8 +108,8 @@ public class BoxAction implements ActionI {
             if (!dropList.isMultiple()) {
                 throw new ActionExpection("当前不是多选下拉列表，不支持该操作");
             }
-            if (data.getIndexs() != null) {
-                for (Integer index : data.getIndexs()) {
+            if (data.getIndexes() != null) {
+                for (Integer index : data.getIndexes()) {
                     dropList.selectByIndex(index);
                 }
             }

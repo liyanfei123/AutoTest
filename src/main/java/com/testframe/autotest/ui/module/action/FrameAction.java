@@ -25,8 +25,8 @@ public class FrameAction implements ActionI {
                 driver.switchTo().frame(data.getValue());
                 return;
             }
-            if (data.getIndexs() != null) {
-                driver.switchTo().frame(data.getIndexs().get(0));
+            if (data.getIndexes() != null) {
+                driver.switchTo().frame(data.getIndexes().get(0));
             }
         } catch (Exception e) {
             throw new ActionExpection("切换frame失败");

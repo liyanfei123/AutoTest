@@ -1,5 +1,7 @@
 package com.testframe.autotest.ui.enums;
 
+import com.testframe.autotest.core.enums.SceneTypeEnum;
+
 /**
  * 定位方式
  */
@@ -22,6 +24,15 @@ public enum LocatorTypeEnum {
     LocatorTypeEnum(int type, String desc) {
         this.type = type;
         this.desc = desc;
+    }
+
+    public static LocatorTypeEnum getByType(int type) {
+        for (LocatorTypeEnum locatorTypeEnum : values()) {
+            if (locatorTypeEnum.getType() == type) {
+                return locatorTypeEnum;
+            }
+        }
+        return null;
     }
 
     public int getType() {

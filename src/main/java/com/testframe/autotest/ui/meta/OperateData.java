@@ -21,7 +21,7 @@ public class OperateData {
     private String attr;
 
     // 索引
-    private List<Integer> indexs;
+    private List<Integer> indexes;
 
     // JS脚本文件
     private String jsExt;

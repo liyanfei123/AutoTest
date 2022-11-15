@@ -1,7 +1,5 @@
 package com.testframe.autotest.ui.meta;
 
-import com.testframe.autotest.ui.enums.LocatorTypeEnum;
-import com.testframe.autotest.ui.enums.WaitEnum;
 import lombok.Data;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -15,14 +13,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 @Data
 public class LocatorInfo {
 
-    // 默认谷歌浏览器
-    WebDriver driver = new ChromeDriver();
-
-    LocatorTypeEnum locatedType;
+    Integer locatedType;
 
     String expression;
 
-    WaitEnum waitType;
+    Integer waitType;
 
     Integer waitTime;
 
