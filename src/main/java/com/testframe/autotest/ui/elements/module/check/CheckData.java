@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.check;
+package com.testframe.autotest.ui.elements.module.check;
 
 import lombok.Data;
 

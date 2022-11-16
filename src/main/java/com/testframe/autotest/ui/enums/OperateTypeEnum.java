@@ -1,12 +1,13 @@
 package com.testframe.autotest.ui.enums;
 
 /**
- * 操作方式
+ * 操作类型
  */
 public enum OperateTypeEnum {
 
     OPERATE(1, "元素操作"),
-    WAIT(2, "元素等待");
+    WAIT(2, "元素等待"),
+    CHECK(3, "元素检验");
 
     private int type;
 

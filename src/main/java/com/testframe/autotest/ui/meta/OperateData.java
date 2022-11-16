@@ -1,5 +1,6 @@
 package com.testframe.autotest.ui.meta;
 
+import com.testframe.autotest.meta.dto.StepUIInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -17,10 +18,10 @@ public class OperateData {
     // 对于frame，需要是id
     private String value;
 
-    // 元素属性
+    // 根据元素属性来操作
     private String attr;
 
-    // 索引
+    // 根据索引来选择操作
     private List<Integer> indexes;
 
     // JS脚本文件
@@ -31,4 +32,11 @@ public class OperateData {
 
     // y轴位移
     private Integer offsetY;
+
+    public static OperateData build(StepUIInfo stepUIInfo, Integer operateType) {
+        OperateData operateData = new OperateData();
+        operateData.setValue(stepUIInfo.getValue());
+        operateData.setIndexes(stepUIInfo.getIndexes());
+        return operateData;
+    }
 }

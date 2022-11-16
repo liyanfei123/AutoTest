@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.action;
+package com.testframe.autotest.ui.elements.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
 import com.testframe.autotest.ui.meta.OperateData;
@@ -73,12 +73,12 @@ public class MouseAction implements ActionI {
 
 
     /**
-     * 鼠标右键
+     * 鼠标左键
      * @param driver
      * @param element
      * @param data
      */
-    public static void rightClick(WebDriver driver, WebElement element, OperateData data) {
+    public static void leftClick(WebDriver driver, WebElement element, OperateData data) {
         try {
             if (element == null) {
                 return;

@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.check;
+package com.testframe.autotest.ui.elements.module.check;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

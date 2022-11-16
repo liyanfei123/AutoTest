@@ -1,13 +1,12 @@
 package com.testframe.autotest.ui.elements.operate;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.ui.elements.wait.ExplicitWait;
 import com.testframe.autotest.ui.elements.wait.ImplictWait;
 import com.testframe.autotest.ui.elements.wait.WaitElementI;
 import com.testframe.autotest.ui.elements.wait.WaitTypeFactory;
 import com.testframe.autotest.ui.enums.LocatorTypeEnum;
-import com.testframe.autotest.ui.enums.WaitEnum;
+import com.testframe.autotest.ui.enums.wait.WaitEnum;
 import com.testframe.autotest.ui.meta.LocatorInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -15,9 +14,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;

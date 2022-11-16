@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.action;
+package com.testframe.autotest.ui.elements.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
 import com.testframe.autotest.ui.meta.OperateData;
@@ -12,6 +12,20 @@ import org.openqa.selenium.WebElement;
  * @author: lyf
  */
 public class FrameAction implements ActionI {
+
+    /**
+     * 切换回默认frame
+     * @param driver
+     * @param element
+     * @param data
+     */
+    public static void switchDefaultFrame(WebDriver driver, WebElement element, OperateData data) {
+        try {
+            driver.switchTo().defaultContent();
+        } catch (Exception e) {
+            throw new ActionExpection("切换到默认frame失败");
+        }
+    }
 
     /**
      * 根据id来切换frame
@@ -46,12 +60,5 @@ public class FrameAction implements ActionI {
             throw new ActionExpection("切换frame失败");
         }
     }
-    
-    public static void switchDefaultFrame(WebDriver driver, WebElement element, OperateData data) {
-        try {
-            driver.switchTo().defaultContent();
-        } catch (Exception e) {
-            throw new ActionExpection("切换到默认frame失败");
-        }
-    }
+
 }

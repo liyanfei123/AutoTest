@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.check;
+package com.testframe.autotest.ui.elements.module.check;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -29,6 +29,13 @@ public class PageAssert {
         }
     }
 
+    /**
+     * 源码关键字验证
+     * @param driver
+     * @param element
+     * @param checkData
+     * @return
+     */
     public static Boolean assetPageSource(WebDriver driver, WebElement element, CheckData checkData) {
         String pageSource = driver.getPageSource();
         try {

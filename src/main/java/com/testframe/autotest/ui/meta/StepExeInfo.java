@@ -10,6 +10,8 @@ public class StepExeInfo {
 
     private String stepName;
 
+    private Integer operaType;
+
     private LocatorInfo locatorInfo;
 
     private OperateData operateData;

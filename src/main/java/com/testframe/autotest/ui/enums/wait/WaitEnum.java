@@ -1,6 +1,4 @@
-package com.testframe.autotest.ui.enums;
-
-import io.swagger.models.auth.In;
+package com.testframe.autotest.ui.enums.wait;
 
 public enum WaitEnum {
 

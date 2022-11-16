@@ -1,12 +1,11 @@
 package com.testframe.autotest.ui.elements.wait;
 
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.ui.enums.WaitEnum;
+import com.testframe.autotest.ui.enums.wait.WaitEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Description:

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 // 步骤中关于ui执行信息的参数
 @Data
 @NoArgsConstructor
@@ -15,7 +17,7 @@ public class StepUIInfo {
     private Integer operateType;
 
     // 元素索引
-    private Integer index;
+    private List<Integer> indexes;
 
     // 定位方式
     private Integer locatorType;
@@ -35,7 +37,7 @@ public class StepUIInfo {
     public static StepUIInfo build(StepInfoModel stepInfoModel) {
         StepUIInfo stepUIInfo = new StepUIInfo();
         stepUIInfo.setOperateType(stepInfoModel.getOperateType());
-        stepUIInfo.setIndex(stepInfoModel.getIndex());
+        stepUIInfo.setIndexes(stepInfoModel.getIndexes());
         stepUIInfo.setLocatorType(stepInfoModel.getLocatorType());
         stepUIInfo.setLocator(stepInfoModel.getLocator());
         stepUIInfo.setOperateMode(stepInfoModel.getOperateMode());

@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.action;
+package com.testframe.autotest.ui.elements.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
 import com.testframe.autotest.ui.meta.OperateData;
@@ -21,7 +21,7 @@ public class BoxAction implements ActionI {
      * @param element
      * @param data
      */
-    public static void beSelected(WebDriver driver, WebElement element, OperateData data) {
+    public static void selected(WebDriver driver, WebElement element, OperateData data) {
         try {
             if (element == null || element.isSelected()) {
                 return;
@@ -39,7 +39,7 @@ public class BoxAction implements ActionI {
      * @param element
      * @param data
      */
-    public static void notBeSelected(WebDriver driver, WebElement element, OperateData data) {
+    public static void notSelected(WebDriver driver, WebElement element, OperateData data) {
         try {
             if (element == null || !element.isSelected()) {
                 return;

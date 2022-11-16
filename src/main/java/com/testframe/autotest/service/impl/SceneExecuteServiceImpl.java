@@ -3,8 +3,11 @@ package com.testframe.autotest.service.impl;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
+import com.testframe.autotest.meta.dto.SceneInfoDto;
 import com.testframe.autotest.meta.dto.StepInfoDto;
 import com.testframe.autotest.service.SceneRecordService;
+import com.testframe.autotest.ui.meta.LocatorInfo;
+import com.testframe.autotest.ui.meta.OperateData;
 import com.testframe.autotest.ui.meta.StepExeInfo;
 import org.greenrobot.eventbus.EventBus;
 import com.testframe.autotest.service.SceneExecuteService;
@@ -69,12 +72,16 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
         }
     }
 
-    private void build(SeleniumRunEvent seleniumRunEvent, List<StepInfoDto> steps) {
+    private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto, List<StepInfoDto> steps) {
         // 转换为StepExeInfo
         List<StepExeInfo> stepExeInfos = new ArrayList<>(steps.size());
         for (StepInfoDto stepInfoDto : steps) {
             StepExeInfo stepExeInfo = new StepExeInfo();
-
+            stepExeInfo.setStepId(stepInfoDto.getStepId());
+            stepExeInfo.setStepName(stepInfoDto.getStepName());
+            LocatorInfo locatorInfo = LocatorInfo.build(stepInfoDto.getStepUIInfo(), sceneInfoDto);
+            stepExeInfo.setLocatorInfo(locatorInfo);
+            OperateData operateData;
         }
 
     }

@@ -2,6 +2,8 @@ package com.testframe.autotest.meta.model;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Description:
  *
@@ -15,7 +17,7 @@ public class StepInfoModel {
     private Integer operateType;
 
     // 元素索引
-    private Integer index;
+    private List<Integer> indexes;
 
     // 定位方式
     private Integer locatorType;

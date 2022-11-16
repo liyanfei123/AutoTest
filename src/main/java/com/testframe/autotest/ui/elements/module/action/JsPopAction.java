@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.module.action;
+package com.testframe.autotest.ui.elements.module.action;
 
 import com.testframe.autotest.core.exception.ActionExpection;
 import com.testframe.autotest.ui.meta.OperateData;
@@ -13,7 +13,6 @@ import org.openqa.selenium.WebElement;
  * @author: lyf
  */
 public class JsPopAction implements ActionI {
-
 
     public static void handleAlert(WebDriver driver, WebElement element, OperateData data) {
         try {

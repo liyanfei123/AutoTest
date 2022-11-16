@@ -1,16 +1,19 @@
-package com.testframe.autotest.ui.enums;
+package com.testframe.autotest.ui.enums.check;
 
 public enum VerifyTypeEnum {
 
-    KEYWORD(1, "源码关键字检验");
+    KEYWORD(1, "源码关键字检验", "assetPageSource");
 
     private int type;
 
     private String name;
 
-    VerifyTypeEnum(int type, String name) {
+    private String func;
+
+    VerifyTypeEnum(int type, String name, String func) {
         this.type = type;
         this.name = name;
+        this.func = func;
     }
 
     public int getType() {
@@ -19,6 +22,10 @@ public enum VerifyTypeEnum {
 
     public String getName() {
         return name;
+    }
+
+    public String getFunc() {
+        return func;
     }
 
     public static VerifyTypeEnum getByType(int type) {
