@@ -2,6 +2,7 @@ package com.testframe.autotest.ui.enums.wait;
 
 public enum WaitEnum {
 
+    NO_WAIT(0, "noWait", "无需等待"),
     Implict_Wait(1, "implictWait", "隐式等待"),
     Explicit_Wait(2,"explicitWait", "显式等待"),
     Presence_Element_Located(3,"presenceOfElementLocated", "页面元素在页面中存在"),

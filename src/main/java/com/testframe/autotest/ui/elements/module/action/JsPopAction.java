@@ -14,6 +14,12 @@ import org.openqa.selenium.WebElement;
  */
 public class JsPopAction implements ActionI {
 
+    /**
+     * 确认Alert弹窗
+     * @param driver
+     * @param element
+     * @param data
+     */
     public static void handleAlert(WebDriver driver, WebElement element, OperateData data) {
         try {
             Alert alert = driver.switchTo().alert();
@@ -23,6 +29,12 @@ public class JsPopAction implements ActionI {
         }
     }
 
+    /**
+     * 操作confirm弹窗
+     * @param driver
+     * @param element
+     * @param data 判定当前是确认还是取消
+     */
     public static void handleConfirm(WebDriver driver, WebElement element, OperateData data) {
         try {
             Alert alert = driver.switchTo().alert();
@@ -36,6 +48,13 @@ public class JsPopAction implements ActionI {
         }
     }
 
+    /**
+     * 操作prompt弹窗
+     * 如果需要输入内容则输入内容，不需要输入内容则直接关闭
+     * @param driver
+     * @param element
+     * @param data
+     */
     public static void handlePrompt(WebDriver driver, WebElement element, OperateData data) {
         try {
             Alert alert = driver.switchTo().alert();

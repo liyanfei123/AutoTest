@@ -1,76 +1,50 @@
 package com.testframe.autotest.ui.enums.operate;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 元素操作类型
+ */
 public enum OperateEnum {
 
-    // type第一位不可修改
-    // 键盘操作
-    KEYBOARD_CTRL(1, "ctrl按键", "ctrl"),
-    KEYBOARD_SHIFT(1, "shift按键", "shift"),
-    KEYBOARD_ALT(1, "alt按键", "alt"),
-    KEYBOARD_ENTER(1, "enter按键", "enter"),
-    KEYBOARD_CTRLCV(1, "ctrlCV按键", "ctrlCV"),
-    KEYBOARD_INPUT(1, "input按键", "input"),
-    // 鼠标操作
-    MOUSE_SINGLE_CLICK(1, "单击", "click"),
-    MOUSE_DOUBLE_CLICK(2, "双击", "doubleClick"),
-    MOUSE_LEFT_CLICK(3, "左键", "leftClick"),
-
-    // frame操作
-    FRAME_DEFAULTFRAME(1, "切换回默认frame", "switchDefaultFrame"),
-    FRAME_FRAME_BYID(1, "根据id切换frame", "switchFrameById"),
-    FRAME_FRAME_BYELEMENT(1, "根据元素切换frame", "switchFrameByElement"),
-
-    // 单选框/复选框操作
-    BOX_SELECTED(1, "选中单选框", "selected"),
-
-
-    // 窗口操作
-    WINOW_SWITCH(1, "切换窗口", "switchWindow");
-
-
-    // 鼠标操作
+    KEYBOARD_OPERATE(1, "keyboardOperate", "键盘操作", OperateModeEnum.keyBoard()),
+    MOUSE_OPERATE(2,"mouseOperate", "鼠标操作", OperateModeEnum.mouse()),
+    FRAME_OPERATE(3,"frameOperate", "frame操作", OperateModeEnum.frame()),
+    BOX_OPERATE(4,"boxOperate", "单选框/复选框操作", OperateModeEnum.box()),
+    POP_OPERATE(5,"popOperate", "POP弹窗操作", OperateModeEnum.pop()),
+    SCRIPT_OPERATE(6, "scriptOperate", "脚本操作", OperateModeEnum.script()),
+    WINDOW_OPERATE(7,"windowOperate", "窗口操作", OperateModeEnum.window());
 
     private int type;
 
+    private String name;
+
     private String desc;
 
-    private String func;
+    // 元素操作子类
+    private List<OperateModeEnum> operateModeEnums;
 
-    OperateEnum(int type, String desc, String func) {
+    OperateEnum(int type, String name, String desc, List<OperateModeEnum> operateModeEnums) {
         this.type = type;
+        this.name = name;
         this.desc = desc;
-        this.func = func;
+        this.operateModeEnums = operateModeEnums;
     }
 
     public int getType() {
         return type;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getDesc() {
         return desc;
     }
 
-    public String getFunc() {
-        return func;
+    public List<OperateModeEnum> getOperateModeEnum() {
+        return operateModeEnums;
     }
 
-    public static List<OperateEnum> allTypes() {
-        List<OperateEnum> enums = new ArrayList<>();
-        for (OperateEnum operateEnum : values()) {
-            enums.add(operateEnum);
-        }
-        return enums;
-    }
-
-    public static OperateEnum getByType(int type) {
-        for (OperateEnum mouseOperateEnum : values()) {
-            if (mouseOperateEnum.getType() == type) {
-                return mouseOperateEnum;
-            }
-        }
-        return null;
-    }
 }

@@ -1,10 +1,7 @@
 package com.testframe.autotest.ui.elements.operate;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.ui.elements.wait.ExplicitWait;
-import com.testframe.autotest.ui.elements.wait.ImplictWait;
-import com.testframe.autotest.ui.elements.wait.WaitElementI;
-import com.testframe.autotest.ui.elements.wait.WaitTypeFactory;
+import com.testframe.autotest.ui.elements.wait.*;
 import com.testframe.autotest.ui.enums.LocatorTypeEnum;
 import com.testframe.autotest.ui.enums.wait.WaitEnum;
 import com.testframe.autotest.ui.meta.LocatorInfo;
@@ -47,9 +44,11 @@ public class ChromeFindElement {
         WaitEnum waitType = WaitEnum.getByType(locatorInfo.getWaitType());
         if (waitType == WaitEnum.Explicit_Wait) {
             waitStyle = new ExplicitWait(driver, locatorInfo.getWaitTime());
-        } else {
+        } else if (waitType == WaitEnum.Implict_Wait) {
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(locatorInfo.getWaitTime()));
             waitStyle = new ImplictWait(driver, locatorInfo.getWaitTime());
+        } else {
+            waitStyle = new NoWait(driver, null);
         }
         try {
             switch (locatorType) {

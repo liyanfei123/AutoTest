@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
  * @date:2022/10/27 21:12
  * @author: lyf
  */
-public class JsAction implements ActionI {
+public class ScriptAction implements ActionI {
 
     public static void executeJs(WebDriver driver, WebElement element, OperateData data) {
         JavascriptExecutor js = (JavascriptExecutor) driver;

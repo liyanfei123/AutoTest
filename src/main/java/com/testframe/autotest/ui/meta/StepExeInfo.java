@@ -1,5 +1,6 @@
 package com.testframe.autotest.ui.meta;
 
+import com.testframe.autotest.ui.elements.module.check.CheckData;
 import lombok.Data;
 
 // 步骤执行时的相关信息
@@ -15,5 +16,8 @@ public class StepExeInfo {
     private LocatorInfo locatorInfo;
 
     private OperateData operateData;
+
+    // 用于验证的字段
+    private CheckData checkData;
 
 }

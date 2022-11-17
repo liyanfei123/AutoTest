@@ -81,6 +81,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             stepExeInfo.setStepName(stepInfoDto.getStepName());
             LocatorInfo locatorInfo = LocatorInfo.build(stepInfoDto.getStepUIInfo(), sceneInfoDto);
             stepExeInfo.setLocatorInfo(locatorInfo);
+            // 根据操作类型来进行不同的包装
+            // 检验类型需要给checkData赋值
             OperateData operateData;
         }
 
