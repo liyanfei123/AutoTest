@@ -5,10 +5,14 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.dto.SceneInfoDto;
 import com.testframe.autotest.meta.dto.StepInfoDto;
+import com.testframe.autotest.meta.dto.StepUIInfo;
 import com.testframe.autotest.service.SceneRecordService;
+import com.testframe.autotest.ui.elements.module.check.CheckData;
+import com.testframe.autotest.ui.enums.OperateTypeEnum;
 import com.testframe.autotest.ui.meta.LocatorInfo;
 import com.testframe.autotest.ui.meta.OperateData;
 import com.testframe.autotest.ui.meta.StepExeInfo;
+import com.testframe.autotest.ui.meta.WaitInfo;
 import org.greenrobot.eventbus.EventBus;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.handler.event.SeleniumRunEvent;
@@ -43,10 +47,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     @Autowired
     private SceneRecordService sceneRecordService;
 
-    public void execute() {
-        log.info("开始发送消息");
-        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
-    }
+//    public void execute() {
+//        log.info("开始发送消息");
+//        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
+//    }
 
     @Override
     public void execute(Long sceneId) {
@@ -66,25 +70,43 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
             seleniumRunEvent.setSceneId(sceneId);
             seleniumRunEvent.setRecordId(recordId);
-
+            buildEvent(seleniumRunEvent, sceneDetailInfo.getScene(), steps);
+            eventBus.post(seleniumRunEvent);
         } catch (Exception e) {
-            throw new AutoTestException("场景执行失败");
+            log.error("[SceneExecuteServiceImpl:execute] execute scene {} error, reason = {}", sceneId, e);
+            throw new AutoTestException(e.getMessage());
         }
     }
 
     private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto, List<StepInfoDto> steps) {
         // 转换为StepExeInfo
+        WaitInfo waitInfo = new WaitInfo(sceneInfoDto.getWaitType(), sceneInfoDto.getWaitTime());
+        seleniumRunEvent.setWaitInfo(waitInfo);
         List<StepExeInfo> stepExeInfos = new ArrayList<>(steps.size());
         for (StepInfoDto stepInfoDto : steps) {
+            StepUIInfo stepUIInfo = stepInfoDto.getStepUIInfo();
             StepExeInfo stepExeInfo = new StepExeInfo();
             stepExeInfo.setStepId(stepInfoDto.getStepId());
             stepExeInfo.setStepName(stepInfoDto.getStepName());
-            LocatorInfo locatorInfo = LocatorInfo.build(stepInfoDto.getStepUIInfo(), sceneInfoDto);
-            stepExeInfo.setLocatorInfo(locatorInfo);
             // 根据操作类型来进行不同的包装
-            // 检验类型需要给checkData赋值
-            OperateData operateData;
+            if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.CHECK.getType()) {
+                CheckData checkData = CheckData.build(stepUIInfo);
+                stepExeInfo.setCheckData(checkData);
+                stepExeInfo.setLocatorInfo(null);
+                stepExeInfo.setOperateData(null);
+            } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.WAIT.getType()) {
+                LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
+                stepExeInfo.setLocatorInfo(locatorInfo);
+                stepExeInfo.setCheckData(null);
+            } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.OPERATE.getType()) {
+                LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
+                stepExeInfo.setLocatorInfo(locatorInfo);
+                OperateData operateData = OperateData.build(stepUIInfo);
+                stepExeInfo.setOperateData(operateData);
+                stepExeInfo.setCheckData(null);
+            }
+            stepExeInfos.add(stepExeInfo);
         }
-
+        seleniumRunEvent.setStepExeInfos(stepExeInfos);
     }
 }

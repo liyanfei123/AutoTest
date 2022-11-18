@@ -21,7 +21,6 @@ public class OperateData {
     // 根据元素属性来操作
     private String attr;
 
-    // 根据索引来选择操作
     private List<Integer> indexes;
 
     // JS脚本文件
@@ -33,7 +32,7 @@ public class OperateData {
     // y轴位移
     private Integer offsetY;
 
-    public static OperateData build(StepUIInfo stepUIInfo, Integer operateType) {
+    public static OperateData build(StepUIInfo stepUIInfo) {
         OperateData operateData = new OperateData();
         operateData.setValue(stepUIInfo.getValue());
         operateData.setIndexes(stepUIInfo.getIndexes());

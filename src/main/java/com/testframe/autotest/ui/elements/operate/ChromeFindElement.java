@@ -5,6 +5,7 @@ import com.testframe.autotest.ui.elements.wait.*;
 import com.testframe.autotest.ui.enums.LocatorTypeEnum;
 import com.testframe.autotest.ui.enums.wait.WaitEnum;
 import com.testframe.autotest.ui.meta.LocatorInfo;
+import com.testframe.autotest.ui.meta.WaitInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -37,19 +38,22 @@ public class ChromeFindElement {
 
     private List<WebElement> elements;
 
-    // 目前只支持显式等待
-    public WebElement findElementsByType(LocatorInfo locatorInfo) {
-        LocatorTypeEnum locatorType = LocatorTypeEnum.getByType(locatorInfo.getLocatedType());
-        String express = locatorInfo.getExpression();
-        WaitEnum waitType = WaitEnum.getByType(locatorInfo.getWaitType());
+    protected void init(WaitInfo waitInfo) {
+        WaitEnum waitType = WaitEnum.getByType(waitInfo.getWaitType());
         if (waitType == WaitEnum.Explicit_Wait) {
-            waitStyle = new ExplicitWait(driver, locatorInfo.getWaitTime());
+            waitStyle = new ExplicitWait(driver, waitInfo.getWaitTime());
         } else if (waitType == WaitEnum.Implict_Wait) {
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(locatorInfo.getWaitTime()));
-            waitStyle = new ImplictWait(driver, locatorInfo.getWaitTime());
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(waitInfo.getWaitTime()));
+            waitStyle = new ImplictWait(driver, waitInfo.getWaitTime());
         } else {
             waitStyle = new NoWait(driver, null);
         }
+    }
+
+    // 目前只支持显式等待
+    public WebElement findElementByType(LocatorInfo locatorInfo) {
+        LocatorTypeEnum locatorType = LocatorTypeEnum.getByType(locatorInfo.getLocatedType());
+        String express = locatorInfo.getExpression();
         try {
             switch (locatorType) {
                 case ById:
@@ -88,14 +92,21 @@ public class ChromeFindElement {
                     // todo:增加jquery验证
                     break;
                 default:
-                    throw new NoSuchElementException("Unexpected type: " + waitType);
+                    throw new NoSuchElementException("Unexpected type: " + locatorType);
+            }
+            if (elements.isEmpty()) {
+                throw new NoSuchElementException(String.format("%s 控件未出现",express));
             }
         } catch (NoSuchElementException e) {
-            log.error("[FindElement:findElementByType] can not find element by {}, reason = {}, stack = {}",
+            log.error("[FindElement:findElementsByType] can not find element by {}, reason = {}, stack = {}",
                     JSON.toJSONString(locatorInfo), e.getMessage(), e);
             throw new NoSuchElementException("控件未出现");
         }
-        return element;
+        List<Integer> indexes = locatorInfo.getIndexes();
+        if (indexes.isEmpty() || indexes == null) {
+            return elements.get(0);
+        }
+        return elements.get(indexes.get(0) - 1);
     }
 
 

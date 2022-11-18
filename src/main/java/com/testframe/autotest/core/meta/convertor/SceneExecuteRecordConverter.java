@@ -27,11 +27,7 @@ public class SceneExecuteRecordConverter {
         sceneRecord.setUrl(sceneExecuteRecord.getUrl());
         sceneRecord.setWaitType(sceneExecuteRecord.getWaitType());
         sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
-        if (sceneExecuteRecord.getExtInfo() != null || !sceneExecuteRecord.getExtInfo().equals("")) {
-            sceneRecord.setExtInfo(sceneExecuteRecord.getExtInfo());
-        } else {
-            sceneRecord.setExtInfo(null);
-        }
+        sceneRecord.setExtInfo(sceneExecuteRecord.getExtInfo());
         if (sceneExecuteRecord.getStepRecords() == null) {
             sceneRecord.setOrderList(Collections.EMPTY_LIST.toString());
         } else {

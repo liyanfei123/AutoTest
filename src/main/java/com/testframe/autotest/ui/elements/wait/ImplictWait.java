@@ -32,6 +32,9 @@ public class ImplictWait extends BaseWait implements WaitElementI {
         return;
     }
 
-
+    @Override
+    public void wait(By by, Integer time) {
+        return;
+    }
 
 }

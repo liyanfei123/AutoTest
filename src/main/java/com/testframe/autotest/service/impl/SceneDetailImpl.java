@@ -162,8 +162,8 @@ public class SceneDetailImpl implements SceneDetailService {
         sceneUpdate.setDesc(sceneUpdateCmd.getDesc());
         sceneUpdate.setType(sceneUpdateCmd.getType());
         sceneUpdate.setUrl(sceneUpdateCmd.getUrl());
-        sceneUpdate.setWaitType(sceneUpdate.getWaitType());
-        sceneUpdate.setWaitTime(sceneUpdate.getWaitTime());
+        sceneUpdate.setWaitType(sceneUpdateCmd.getWaitType());
+        sceneUpdate.setWaitTime(sceneUpdateCmd.getWaitTime());
         return sceneUpdate;
     }
 }

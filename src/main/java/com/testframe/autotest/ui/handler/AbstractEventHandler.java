@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
  * @author: lyf
  */
 @Slf4j
-public abstract class AbstractEventHandler<R> {
+public abstract class AbstractEventHandler<T> {
 
     @Autowired
     @Qualifier("myEventBus")
@@ -30,6 +30,6 @@ public abstract class AbstractEventHandler<R> {
         eventBus.register(registerClass);
     }
 
-    public abstract void eventHandler(Object event);
+    public abstract void eventHandler(T event);
 
 }

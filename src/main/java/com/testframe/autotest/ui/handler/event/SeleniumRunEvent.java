@@ -2,6 +2,7 @@ package com.testframe.autotest.ui.handler.event;
 
 import com.testframe.autotest.ui.meta.LocatorInfo;
 import com.testframe.autotest.ui.meta.StepExeInfo;
+import com.testframe.autotest.ui.meta.WaitInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +30,9 @@ public class SeleniumRunEvent {
 
     // 执行时间
     private Long exeTime;
+
+    // 全局等待方式
+    private WaitInfo waitInfo;
 
     private List<StepExeInfo> stepExeInfos;
 

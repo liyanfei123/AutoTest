@@ -2,7 +2,7 @@
 <configuration debug="true" scan="true" scanPeroid="60 seconds">
     <property name="log.path" value="/Users/liyanfei/MyCode/AutoTest/logs/autoTest"/>
 <!--    <property name="log.path" value="/Users/liyanfei01/Desktop/st/AutoTest/logs/autoTest"/>-->
-    <property name="log.level" value="debug"/>
+    <property name="log.level" value="info"/>
     <property name="log.maxSize" value="500MB"/>
     <property name="log.pattern"
               value="{time=%d{yyyy-MM-dd HH:mm:ss.SSS}, level=%p} [%logger{1}] [%c{0}] [%file : %line] - %msg%n"></property>

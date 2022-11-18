@@ -29,7 +29,7 @@ public class StepUIInfo {
     private Integer operateMode;
 
     // 验证类型
-    private Integer verifyType;
+    private Integer verifyMode;
 
     // 输入参数
     private String value;
@@ -42,7 +42,7 @@ public class StepUIInfo {
         stepUIInfo.setLocator(stepInfoModel.getLocator());
         stepUIInfo.setOperateMode(stepInfoModel.getOperateMode());
         stepUIInfo.setValue(stepInfoModel.getValue());
-        stepUIInfo.setVerifyType(stepInfoModel.getVerifyType());
+        stepUIInfo.setOperateMode(stepInfoModel.getVerifyMode());
         return stepUIInfo;
     }
 

@@ -39,4 +39,9 @@ public class ExplicitPresenceWait extends BaseWait implements WaitElementI {
             throw new AutoTestException("元素控件未出现");
         }
     }
+
+    @Override
+    public void wait(By by, Integer time) {
+        return;
+    }
 }

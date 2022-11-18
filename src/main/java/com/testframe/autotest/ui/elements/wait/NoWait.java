@@ -34,4 +34,9 @@ public class NoWait extends BaseWait implements WaitElementI {
     public void wait(By by) {
         return;
     }
+
+    @Override
+    public void wait(By by, Integer time) {
+        return;
+    }
 }

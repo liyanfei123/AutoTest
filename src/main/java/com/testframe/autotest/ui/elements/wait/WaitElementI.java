@@ -13,5 +13,7 @@ public interface WaitElementI {
 
    void wait(By by);
 
+   void wait(By by, Integer time);
+
 
 }

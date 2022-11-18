@@ -8,6 +8,7 @@ import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.query.SceneQry;
 import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.service.SceneDetailService;
+import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.service.SceneListService;
 import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.util.StringUtils;
@@ -32,6 +33,9 @@ public class SceneController {
 
     @Autowired
     private CopyServiceImpl sceneCopyService;
+
+    @Autowired
+    private SceneExecuteService sceneExecuteService;
 
     // 创建场景
     @PostMapping("/create")
@@ -104,7 +108,12 @@ public class SceneController {
     // 没有步骤的场景不允许执行
     @GetMapping("/execute")
     public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId) {
-        return null;
+        try {
+            sceneExecuteService.execute(sceneId);
+            return HttpResult.ok(sceneId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
     }
 
 }
