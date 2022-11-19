@@ -1,6 +1,9 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionExpection;
+import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
+import com.testframe.autotest.ui.elements.module.action.base.ActionI;
+import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,7 +17,12 @@ import java.awt.event.KeyEvent;
  * @date:2022/10/26 21:26
  * @author: lyf
  */
-public class KeyBoardAction implements ActionI {
+public class KeyBoardAction extends BaseAction implements ActionI {
+
+    @Override
+    public String actionTypeIdentity() {
+        return OperateEnum.KEYBOARD_OPERATE.getName();
+    }
 
     private static Robot robot;
 
@@ -68,7 +76,7 @@ public class KeyBoardAction implements ActionI {
             element.sendKeys(data.getValue());
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("输入失败");
+            throw new ActionException("输入失败");
         }
     }
 

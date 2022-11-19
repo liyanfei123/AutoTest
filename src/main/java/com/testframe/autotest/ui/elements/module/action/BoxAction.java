@@ -1,10 +1,14 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionExpection;
+import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
+import com.testframe.autotest.ui.elements.module.action.base.ActionI;
+import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -12,8 +16,13 @@ import org.openqa.selenium.support.ui.Select;
  * @date:2022/10/26 22:05
  * @author: lyf
  */
-public class BoxAction implements ActionI {
+@Component
+public class BoxAction extends BaseAction implements ActionI {
 
+    @Override
+    public String actionTypeIdentity() {
+        return OperateEnum.BOX_OPERATE.getName();
+    }
 
     /**
      * 选中单选框
@@ -29,7 +38,7 @@ public class BoxAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("单选框选中失败");
+            throw new ActionException("单选框选中失败");
         }
     }
 
@@ -47,7 +56,7 @@ public class BoxAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("取消单选框选中失败");
+            throw new ActionException("取消单选框选中失败");
         }
     }
 
@@ -80,10 +89,10 @@ public class BoxAction implements ActionI {
             selected = false;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("单选列表选择失败");
+            throw new ActionException("单选列表选择失败");
         } finally {
             if (selected == false) {
-                throw new ActionExpection("无法选择当前指定的元素，请提供合适的选择方式");
+                throw new ActionException("无法选择当前指定的元素，请提供合适的选择方式");
             }
         }
     }
@@ -106,7 +115,7 @@ public class BoxAction implements ActionI {
             Select dropList = new Select(element);
             dropList.deselectAll(); // 取消所有选中态
             if (!dropList.isMultiple()) {
-                throw new ActionExpection("当前不是多选下拉列表，不支持该操作");
+                throw new ActionException("当前不是多选下拉列表，不支持该操作");
             }
             if (data.getIndexes() != null) {
                 for (Integer index : data.getIndexes()) {
@@ -115,7 +124,7 @@ public class BoxAction implements ActionI {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("多选列表选择失败");
+            throw new ActionException("多选列表选择失败");
         }
     }
 

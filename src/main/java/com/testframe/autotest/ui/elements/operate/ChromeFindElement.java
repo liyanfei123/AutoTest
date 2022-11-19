@@ -1,9 +1,12 @@
 package com.testframe.autotest.ui.elements.operate;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.ui.elements.wait.*;
+import com.testframe.autotest.core.exception.SeleniumRunException;
+import com.testframe.autotest.ui.elements.ByFactory;
+import com.testframe.autotest.ui.elements.module.wait.*;
+import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
 import com.testframe.autotest.ui.enums.LocatorTypeEnum;
-import com.testframe.autotest.ui.enums.wait.WaitEnum;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import com.testframe.autotest.ui.meta.LocatorInfo;
 import com.testframe.autotest.ui.meta.WaitInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +16,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -29,31 +30,64 @@ public class ChromeFindElement {
 
     WebDriver driver = new ChromeDriver();
 
-    @Autowired
-    private WaitTypeFactory waitTypeFactory;
+    public ChromeFindElement() {
+    }
 
-    private WaitElementI waitStyle;
+    public ChromeFindElement(WebDriver webDriver) {
+        this.driver = webDriver;
+    }
+
+    public void setDriver(WebDriver webDriver) {
+        this.driver = webDriver;
+    }
+
+    @Autowired
+    private WaitFactory waitFactory;
+
+    private WaitI waitStyle;
 
     private WebElement element;
 
     private List<WebElement> elements;
 
-    protected void init(WaitInfo waitInfo) {
-        WaitEnum waitType = WaitEnum.getByType(waitInfo.getWaitType());
-        if (waitType == WaitEnum.Explicit_Wait) {
-            waitStyle = new ExplicitWait(driver, waitInfo.getWaitTime());
-        } else if (waitType == WaitEnum.Implict_Wait) {
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(waitInfo.getWaitTime()));
-            waitStyle = new ImplictWait(driver, waitInfo.getWaitTime());
-        } else {
-            waitStyle = new NoWait(driver, null);
+    public void init(WaitInfo waitInfo) {
+        // 全局的等待方式
+        waitStyle = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity());
+        if (waitInfo.getWaitTime() != null) {
+            waitStyle.setTime(waitInfo.getWaitTime());
         }
     }
 
-    // 目前只支持显式等待
     public WebElement findElementByType(LocatorInfo locatorInfo) {
+        String express = locatorInfo.getExpression();
+        if (express == null || express.equals("")) {
+            return null;
+        }
+        try {
+            By by = ByFactory.createBy(locatorInfo.getLocatedType(), express);
+            waitStyle.wait(By.linkText(express));
+            elements = driver.findElements(by);
+            if (elements.isEmpty()) {
+                throw new SeleniumRunException(String.format("无当前控件, %s",express));
+            }
+        } catch (NoSuchElementException e) {
+            log.error("[FindElement:findElementsByType] can not find element by {}, reason = {}, stack = {}",
+                    JSON.toJSONString(locatorInfo), e.getMessage(), e);
+            throw new SeleniumRunException(String.format("查找控件 %s 出现异常", express));
+        }
+        List<Integer> indexes = locatorInfo.getIndexes();
+        if (indexes.isEmpty() || indexes == null) {
+            return elements.get(0);
+        }
+        return elements.get(indexes.get(0) - 1);
+    }
+
+    public WebElement oldFindElementByType(LocatorInfo locatorInfo) {
         LocatorTypeEnum locatorType = LocatorTypeEnum.getByType(locatorInfo.getLocatedType());
         String express = locatorInfo.getExpression();
+        if (express == null || express.equals("")) {
+            return null;
+        }
         try {
             switch (locatorType) {
                 case ById:
@@ -95,12 +129,12 @@ public class ChromeFindElement {
                     throw new NoSuchElementException("Unexpected type: " + locatorType);
             }
             if (elements.isEmpty()) {
-                throw new NoSuchElementException(String.format("%s 控件未出现",express));
+                throw new SeleniumRunException(String.format("无当前控件, %s",express));
             }
         } catch (NoSuchElementException e) {
             log.error("[FindElement:findElementsByType] can not find element by {}, reason = {}, stack = {}",
                     JSON.toJSONString(locatorInfo), e.getMessage(), e);
-            throw new NoSuchElementException("控件未出现");
+            throw new SeleniumRunException(String.format("查找控件 %s 出现异常", express));
         }
         List<Integer> indexes = locatorInfo.getIndexes();
         if (indexes.isEmpty() || indexes == null) {
@@ -108,8 +142,4 @@ public class ChromeFindElement {
         }
         return elements.get(indexes.get(0) - 1);
     }
-
-
-
-
 }

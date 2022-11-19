@@ -1,8 +1,6 @@
 package com.testframe.autotest.ui.handler.event;
 
-import com.testframe.autotest.ui.meta.LocatorInfo;
-import com.testframe.autotest.ui.meta.StepExeInfo;
-import com.testframe.autotest.ui.meta.WaitInfo;
+import com.testframe.autotest.ui.meta.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,14 +20,10 @@ import java.util.List;
 @Builder
 public class SeleniumRunEvent {
 
-    private Long sceneId;
+    private SceneRunInfo sceneRunInfo;
 
-    // 场景执行记录id
-    // 当执行完成后，需要将该执行记录置为已完成
-    private Long recordId;
-
-    // 执行时间
-    private Long exeTime;
+    // 场景执行记录信息
+    private SceneRunRecordInfo sceneRunRecordInfo;
 
     // 全局等待方式
     private WaitInfo waitInfo;

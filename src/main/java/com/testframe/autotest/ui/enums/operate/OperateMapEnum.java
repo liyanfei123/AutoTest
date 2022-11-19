@@ -7,6 +7,7 @@ import java.util.Objects;
 /**
  * 元素操作方式
  */
+@Deprecated
 public enum OperateMapEnum {
 
     MOUSE_OPERATE(OperateEnum.MOUSE_OPERATE, OperateModeEnum.allTypes());

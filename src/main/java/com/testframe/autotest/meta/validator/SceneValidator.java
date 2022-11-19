@@ -5,7 +5,7 @@ import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
-import com.testframe.autotest.ui.enums.wait.WaitEnum;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,7 +47,7 @@ public class SceneValidator {
 
     // 检验更新的场景
     public void checkSceneUpdate(SceneUpdateCmd sceneUpdateCmd) {
-        if (!WaitEnum.allTypes().contains(sceneUpdateCmd.getWaitType())) {
+        if (!WaitModeEnum.allTypes().contains(sceneUpdateCmd.getWaitType())) {
             throw new AutoTestException("等待类型错误");
         }
         if (sceneUpdateCmd.getType() < 1 || sceneUpdateCmd.getType() > 2) {

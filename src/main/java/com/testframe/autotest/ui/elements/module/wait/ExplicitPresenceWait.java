@@ -1,11 +1,13 @@
-package com.testframe.autotest.ui.elements.wait;
+package com.testframe.autotest.ui.elements.module.wait;
 
-import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.ui.enums.wait.WaitEnum;
+import com.testframe.autotest.core.exception.SeleniumRunException;
+import com.testframe.autotest.ui.elements.module.wait.base.BaseWait;
+import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -15,19 +17,12 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  * @author: lyf
  */
 @Slf4j
-public class ExplicitWait extends BaseWait implements WaitElementI{
-
-    public ExplicitWait(WebDriver driver) {
-        super(driver);
-    }
-
-    public ExplicitWait(WebDriver driver, Integer time) {
-        super(driver, time);
-    }
+@Component
+public class ExplicitPresenceWait extends BaseWait implements WaitI {
 
     @Override
     public String waitIdentity() {
-        return WaitEnum.Presence_Element_Located.getWaitIdentity();
+        return WaitModeEnum.Presence_Element_Located.getWaitIdentity();
     }
 
     @Override
@@ -36,7 +31,7 @@ public class ExplicitWait extends BaseWait implements WaitElementI{
             this.driverWait.until(ExpectedConditions.presenceOfElementLocated(by));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new AutoTestException("元素控件未出现");
+            throw new SeleniumRunException("元素控件未出现");
         }
     }
 

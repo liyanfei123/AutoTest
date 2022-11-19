@@ -1,71 +1,68 @@
 package com.testframe.autotest.ui.enums.wait;
 
-import io.swagger.models.auth.In;
+import com.testframe.autotest.ui.enums.check.AssertEnum;
+import com.testframe.autotest.ui.enums.check.AssertModeEnum;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * 等待类型的大类
+ */
 public enum WaitEnum {
 
-    NO_WAIT(0, "noWait", "无需等待"),
-    SLEEP_WAIT(1, "睡眠", "直接等待几秒"),
-    Implict_Wait(2, "implictWait", "隐式等待"),
-    Explicit_Wait(3,"explicitWait", "显式等待"),
-    Presence_Element_Located(4,"presenceOfElementLocated", "页面元素在页面中存在"),
-    Element_Be_Clicked(5,"elementToBeSelected", "页面元素处于被选中态");
+    IMPLICT_WAIT(1, "implictWait","隐式等待", WaitModeEnum.implict()),
+    EXPLICIT_WAIT(2, "explictWait","显式等待", WaitModeEnum.explicit()),
+    OTHER_WAIT(5, "otherWait","其他等待", WaitModeEnum.other());
 
     private int type;
-    // 等待方式
-    private String waitIdentity;
+
+    private String name;
 
     private String desc;
 
+    // 元素操作子类
+    private List<WaitModeEnum> waitModeEnums;
 
-    WaitEnum(int type, String waitType, String desc) {
+    WaitEnum(int type, String name, String desc, List<WaitModeEnum> waitModeEnums) {
         this.type = type;
-        this.waitIdentity = waitType;
+        this.name = name;
         this.desc = desc;
-    }
-
-    public static WaitEnum getByType(int type) {
-        for (WaitEnum waitEnum: values()) {
-            if (waitEnum.getType() == type) {
-                return waitEnum;
-            }
-        }
-        return null;
-    }
-
-    public static List<Integer> allTypes() {
-        List<Integer> types = new ArrayList<>();
-        for (WaitEnum waitEnum: values()) {
-            types.add(waitEnum.getType());
-        }
-        return types;
+        this.waitModeEnums = waitModeEnums;
     }
 
     public int getType() {
         return type;
     }
 
-    public String getWaitIdentity() {
-        return waitIdentity;
+    public String getName() {
+        return name;
     }
 
     public String getDesc() {
         return desc;
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-    public void setWaitIdentity(String waitIdentity) {
-        this.waitIdentity = waitIdentity;
+    public List<WaitModeEnum> getWaitModeEnums() {
+        return waitModeEnums;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public static WaitEnum getByWaitMode(Integer mode) {
+        WaitModeEnum waitModeEnum = WaitModeEnum.getByType(mode); // 最小等待类
+        for (WaitEnum waitEnum : values()) {
+            if (waitEnum.getWaitModeEnums().contains(waitModeEnum)) {
+                return waitEnum;
+            }
+        }
+        return null;
     }
+
+    public static List<WaitEnum> getTypes() {
+        List<WaitEnum> allTypes = new ArrayList<>();
+        for (WaitEnum waitEnum : values()) {
+            allTypes.add(waitEnum);
+        }
+        return allTypes;
+    }
+
 }

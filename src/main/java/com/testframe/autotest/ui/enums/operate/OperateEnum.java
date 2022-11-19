@@ -1,5 +1,8 @@
 package com.testframe.autotest.ui.enums.operate;
 
+import com.testframe.autotest.core.enums.SceneStatusEnum;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,6 +48,24 @@ public enum OperateEnum {
 
     public List<OperateModeEnum> getOperateModeEnum() {
         return operateModeEnums;
+    }
+
+    public static OperateEnum getByOperateMode(Integer mode) {
+        OperateModeEnum operateModeEnum = OperateModeEnum.getByType(mode); // 最小操作类
+        for (OperateEnum operateEnum : values()) {
+            if (operateEnum.getOperateModeEnum().contains(operateModeEnum)) {
+                return operateEnum;
+            }
+        }
+        return null;
+    }
+
+    public static List<OperateEnum> getTypes() {
+        List<OperateEnum> allTypes = new ArrayList<>();
+        for (OperateEnum operateEnum : values()) {
+            allTypes.add(operateEnum);
+        }
+        return allTypes;
     }
 
 }

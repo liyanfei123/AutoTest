@@ -1,10 +1,14 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionExpection;
+import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
+import com.testframe.autotest.ui.elements.module.action.base.ActionI;
+import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -12,7 +16,13 @@ import org.openqa.selenium.WebElement;
  * @date:2022/10/27 22:35
  * @author: lyf
  */
-public class JsPopAction implements ActionI {
+@Component
+public class PopAction extends BaseAction implements ActionI {
+
+    @Override
+    public String actionTypeIdentity() {
+        return OperateEnum.POP_OPERATE.getName();
+    }
 
     /**
      * 确认Alert弹窗
@@ -25,7 +35,7 @@ public class JsPopAction implements ActionI {
             Alert alert = driver.switchTo().alert();
             alert.accept();
         } catch (Exception e) {
-            throw new ActionExpection("Alert弹窗操作失败");
+            throw new ActionException("Alert弹窗操作失败");
         }
     }
 
@@ -44,7 +54,7 @@ public class JsPopAction implements ActionI {
                 alert.dismiss();
             }
         } catch (Exception e) {
-            throw new ActionExpection("confirm弹窗操作失败");
+            throw new ActionException("confirm弹窗操作失败");
         }
     }
 
@@ -65,7 +75,7 @@ public class JsPopAction implements ActionI {
                 alert.dismiss();
             }
         } catch (Exception e) {
-            throw new ActionExpection("Prompt弹窗操作失败");
+            throw new ActionException("Prompt弹窗操作失败");
         }
     }
 

@@ -1,4 +1,4 @@
-package com.testframe.autotest.ui.elements.module.check;
+package com.testframe.autotest.ui.meta;
 
 import com.testframe.autotest.meta.dto.StepUIInfo;
 import lombok.Data;
@@ -10,14 +10,18 @@ import lombok.Data;
  * @author: lyf
  */
 @Data
-public class CheckData {
+public class AssertData {
+
+    // 验证方式
+    private Integer assertMode;
 
     // 预期的文本
     private String expectString;
 
-    public static CheckData build(StepUIInfo stepUIInfo) {
-        CheckData checkData = new CheckData();
+    public static AssertData build(StepUIInfo stepUIInfo) {
+        AssertData checkData = new AssertData();
         checkData.setExpectString(stepUIInfo.getValue());
+        checkData.setAssertMode(stepUIInfo.getAssertMode());
         return checkData;
     }
 

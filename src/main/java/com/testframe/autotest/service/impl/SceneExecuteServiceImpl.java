@@ -7,12 +7,9 @@ import com.testframe.autotest.meta.dto.SceneInfoDto;
 import com.testframe.autotest.meta.dto.StepInfoDto;
 import com.testframe.autotest.meta.dto.StepUIInfo;
 import com.testframe.autotest.service.SceneRecordService;
-import com.testframe.autotest.ui.elements.module.check.CheckData;
+import com.testframe.autotest.ui.meta.AssertData;
 import com.testframe.autotest.ui.enums.OperateTypeEnum;
-import com.testframe.autotest.ui.meta.LocatorInfo;
-import com.testframe.autotest.ui.meta.OperateData;
-import com.testframe.autotest.ui.meta.StepExeInfo;
-import com.testframe.autotest.ui.meta.WaitInfo;
+import com.testframe.autotest.ui.meta.*;
 import org.greenrobot.eventbus.EventBus;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.handler.event.SeleniumRunEvent;
@@ -68,9 +65,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             }
             Long recordId = sceneRecordService.saveRecord(sceneId);
             SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
-            seleniumRunEvent.setSceneId(sceneId);
-            seleniumRunEvent.setRecordId(recordId);
-            buildEvent(seleniumRunEvent, sceneDetailInfo.getScene(), steps);
+            buildEvent(seleniumRunEvent, sceneDetailInfo.getScene(), steps, recordId);
             eventBus.post(seleniumRunEvent);
         } catch (Exception e) {
             log.error("[SceneExecuteServiceImpl:execute] execute scene {} error, reason = {}", sceneId, e);
@@ -78,10 +73,17 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
         }
     }
 
-    private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto, List<StepInfoDto> steps) {
-        // 转换为StepExeInfo
+    private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto,
+                            List<StepInfoDto> steps, Long recordId) {
+
+        SceneRunInfo sceneRunInfo = SceneRunInfo.build(sceneInfoDto);
+        seleniumRunEvent.setSceneRunInfo(sceneRunInfo);
+        SceneRunRecordInfo sceneRunRecordInfo = new SceneRunRecordInfo();
+        sceneRunRecordInfo.setRecordId(recordId);
+        seleniumRunEvent.setSceneRunRecordInfo(sceneRunRecordInfo);
         WaitInfo waitInfo = new WaitInfo(sceneInfoDto.getWaitType(), sceneInfoDto.getWaitTime());
         seleniumRunEvent.setWaitInfo(waitInfo);
+        // 转换为StepExeInfo
         List<StepExeInfo> stepExeInfos = new ArrayList<>(steps.size());
         for (StepInfoDto stepInfoDto : steps) {
             StepUIInfo stepUIInfo = stepInfoDto.getStepUIInfo();
@@ -89,21 +91,25 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             stepExeInfo.setStepId(stepInfoDto.getStepId());
             stepExeInfo.setStepName(stepInfoDto.getStepName());
             // 根据操作类型来进行不同的包装
-            if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.CHECK.getType()) {
-                CheckData checkData = CheckData.build(stepUIInfo);
+            if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.ASSERT.getType()) {
+                AssertData checkData = AssertData.build(stepUIInfo);
                 stepExeInfo.setCheckData(checkData);
-                stepExeInfo.setLocatorInfo(null);
+                LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
+                stepExeInfo.setLocatorInfo(locatorInfo);
                 stepExeInfo.setOperateData(null);
+                stepExeInfo.setWaitInfo(null);
             } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.WAIT.getType()) {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);
                 stepExeInfo.setCheckData(null);
+
             } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.OPERATE.getType()) {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);
                 OperateData operateData = OperateData.build(stepUIInfo);
                 stepExeInfo.setOperateData(operateData);
                 stepExeInfo.setCheckData(null);
+                stepExeInfo.setWaitInfo(null);
             }
             stepExeInfos.add(stepExeInfo);
         }

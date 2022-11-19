@@ -1,5 +1,6 @@
-package com.testframe.autotest.ui.elements.wait;
+package com.testframe.autotest.ui.elements.module.wait.base;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -17,6 +18,8 @@ public class BaseWait {
 
     public Integer time;
 
+    public WebDriver driver;
+
     public BaseWait() {}
 
     public BaseWait(WebDriver driver) {
@@ -27,5 +30,15 @@ public class BaseWait {
         this.driverWait = new WebDriverWait(driver, Duration.ofSeconds(time));
     }
 
+    public void setDriver(WebDriver driver) {
+        this.driver = driver;
+    }
 
+    public void setWebDriver(WebDriver webDriver) {
+        this.driver = webDriver;
+    }
+
+    public void setTime(Integer time) {
+        this.time = time;
+    }
 }

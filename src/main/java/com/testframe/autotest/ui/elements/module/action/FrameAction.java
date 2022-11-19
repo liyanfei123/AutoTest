@@ -1,9 +1,13 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionExpection;
+import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
+import com.testframe.autotest.ui.elements.module.action.base.ActionI;
+import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -11,7 +15,13 @@ import org.openqa.selenium.WebElement;
  * @date:2022/10/27 22:41
  * @author: lyf
  */
-public class FrameAction implements ActionI {
+@Component
+public class FrameAction extends BaseAction implements ActionI {
+
+    @Override
+    public String actionTypeIdentity() {
+        return OperateEnum.FRAME_OPERATE.getName();
+    }
 
     /**
      * 切换回默认frame
@@ -23,7 +33,7 @@ public class FrameAction implements ActionI {
         try {
             driver.switchTo().defaultContent();
         } catch (Exception e) {
-            throw new ActionExpection("切换到默认frame失败");
+            throw new ActionException("切换到默认frame失败");
         }
     }
 
@@ -43,7 +53,7 @@ public class FrameAction implements ActionI {
                 driver.switchTo().frame(data.getIndexes().get(0));
             }
         } catch (Exception e) {
-            throw new ActionExpection("切换frame失败");
+            throw new ActionException("切换frame失败");
         }
     }
 
@@ -57,7 +67,7 @@ public class FrameAction implements ActionI {
         try {
                 driver.switchTo().frame(element);
         } catch (Exception e) {
-            throw new ActionExpection("切换frame失败");
+            throw new ActionException("切换frame失败");
         }
     }
 

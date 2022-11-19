@@ -11,12 +11,12 @@ import lombok.Data;
 @Data
 public class WaitInfo {
 
-    Integer waitType;
+    Integer waitMode;
 
     Integer waitTime;
 
-    public WaitInfo(Integer waitType, Integer waitTime) {
-        this.waitType = waitType;
+    public WaitInfo(Integer waitMode, Integer waitTime) {
+        this.waitMode = waitMode;
         this.waitTime = waitTime;
     }
 

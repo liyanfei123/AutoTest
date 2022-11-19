@@ -1,11 +1,13 @@
-package com.testframe.autotest.ui.elements.wait;
+package com.testframe.autotest.ui.elements.module.wait;
 
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.ui.enums.wait.WaitEnum;
+import com.testframe.autotest.ui.elements.module.wait.base.BaseWait;
+import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -15,19 +17,12 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  * @author: lyf
  */
 @Slf4j
-public class ExplicitPresenceWait extends BaseWait implements WaitElementI {
-
-    public ExplicitPresenceWait(WebDriver driver) {
-        super(driver);
-    }
-
-    public ExplicitPresenceWait(WebDriver driver, Integer time) {
-        super(driver, time);
-    }
+@Component
+public class ExplicitWait extends BaseWait implements WaitI {
 
     @Override
     public String waitIdentity() {
-        return WaitEnum.Presence_Element_Located.getWaitIdentity();
+        return WaitModeEnum.Presence_Element_Located.getWaitIdentity();
     }
 
     @Override

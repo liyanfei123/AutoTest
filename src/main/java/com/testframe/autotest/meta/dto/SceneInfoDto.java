@@ -15,6 +15,8 @@ public class SceneInfoDto {
     // 场景描述
     private String desc;
 
+    private String url;
+
     // 等待方式
     private Integer waitType;
 
@@ -26,6 +28,7 @@ public class SceneInfoDto {
         sceneInfoDto.setSceneId(scene.getId());
         sceneInfoDto.setName(scene.getTitle());
         sceneInfoDto.setDesc(scene.getDesc());
+        sceneInfoDto.setUrl(scene.getUrl());
         sceneInfoDto.setWaitTime(scene.getWaitTime());
         sceneInfoDto.setWaitType(scene.getWaitType());
         return sceneInfoDto;

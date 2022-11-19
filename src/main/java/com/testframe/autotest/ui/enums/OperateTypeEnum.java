@@ -7,7 +7,7 @@ public enum OperateTypeEnum {
 
     OPERATE(1, "元素操作"),
     WAIT(2, "元素等待"),
-    CHECK(3, "元素检验");
+    ASSERT(3, "元素检验");
 
     private int type;
 

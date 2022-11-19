@@ -74,6 +74,7 @@ public class SceneDetailImpl implements SceneDetailService {
         try {
             // 更新场景概要
             sceneValidator.checkSceneUpdate(sceneUpdateCmd);
+            stepValidator.checkStepUpdates(sceneUpdateCmd.getStepUpdateCmds());
             Scene sceneUpdate = build(sceneUpdateCmd);
             sceneDetailRepository.update(sceneUpdate);
             if (sceneUpdateCmd.getStepUpdateCmds().isEmpty()) {
@@ -82,7 +83,6 @@ public class SceneDetailImpl implements SceneDetailService {
             List<Step> steps = new ArrayList<>();
             for (StepUpdateCmd stepUpdateCmd : sceneUpdateCmd.getStepUpdateCmds()) {
                 stepUpdateCmd.setSceneId(sceneId);
-                stepValidator.checkStepUpdate(stepUpdateCmd);
                 Step step = StepUpdateCmd.toStep(stepUpdateCmd);
                 steps.add(step);
             }

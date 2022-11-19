@@ -1,14 +1,21 @@
 package com.testframe.autotest.meta.validator;
 
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
+import com.testframe.autotest.meta.model.StepInfoModel;
+import com.testframe.autotest.ui.enums.check.AssertModeEnum;
+import com.testframe.autotest.ui.enums.operate.OperateModeEnum;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 // 场景步骤检验
 @Component
@@ -20,6 +27,12 @@ public class StepValidator {
 
     @Autowired
     private StepDetailRepository stepDetailRepository;
+
+    public void checkStepUpdates(List<StepUpdateCmd> stepUpdateCmds) {
+        for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
+            checkStepUpdate(stepUpdateCmd);
+        }
+    }
 
     // 验证场景创建参数是否正确
     public void checkStepUpdate(StepUpdateCmd stepUpdateCmd) {
@@ -33,6 +46,22 @@ public class StepValidator {
         // 检验执行状态参数是否正确
         if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
             throw new AutoTestException("步骤状态错误");
+        }
+        StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
+        // 验证元素操作类型
+        if (stepInfoModel.getOperateMode() != null &&
+                OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        // 验证元素等待类型
+        if (stepInfoModel.getWaitMode() != null &&
+                WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        // 验证元素检验类型
+        if (stepInfoModel.getAssertMode() != null &&
+                AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
+            throw new AutoTestException("当前元素检验类型不被支持");
         }
     }
 

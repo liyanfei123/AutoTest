@@ -8,12 +8,12 @@ public enum OperateModeEnum {
 
     // type第一位不可修改
     // 键盘操作
-    KEYBOARD_CTRL(10, "ctrl按键", "ctrl"),
-    KEYBOARD_SHIFT(12, "shift按键", "shift"),
-    KEYBOARD_ALT(13, "alt按键", "alt"),
-    KEYBOARD_ENTER(14, "enter按键", "enter"),
-    KEYBOARD_CTRLCV(15, "ctrlCV按键", "ctrlCV"),
-    KEYBOARD_INPUT(16, "input按键", "input"),
+    KEYBOARD_CTRL(10, "按ctrl键", "ctrl"),
+    KEYBOARD_SHIFT(12, "按shift键", "shift"),
+    KEYBOARD_ALT(13, "按alt键", "alt"),
+    KEYBOARD_ENTER(14, "按enter键", "enter"),
+    KEYBOARD_CTRLCV(15, "按ctrlCV键", "ctrlCV"),
+    KEYBOARD_INPUT(16, "input输入", "input"),
     // 鼠标操作
     MOUSE_SINGLE_CLICK(20, "单击", "click"),
     MOUSE_DOUBLE_CLICK(21, "双击", "doubleClick"),
@@ -37,13 +37,13 @@ public enum OperateModeEnum {
 
     private int type;
 
-    private String desc;
+    private String name;
 
     private String func;
 
-    OperateModeEnum(int type, String desc, String func) {
+    OperateModeEnum(int type, String name, String func) {
         this.type = type;
-        this.desc = desc;
+        this.name = name;
         this.func = func;
     }
 
@@ -51,8 +51,8 @@ public enum OperateModeEnum {
         return type;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getName() {
+        return name;
     }
 
     public String getFunc() {

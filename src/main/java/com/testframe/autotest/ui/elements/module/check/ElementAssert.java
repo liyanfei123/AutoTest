@@ -1,7 +1,12 @@
 package com.testframe.autotest.ui.elements.module.check;
 
+import com.testframe.autotest.ui.elements.module.check.base.AssertI;
+import com.testframe.autotest.ui.elements.module.check.base.BaseAssert;
+import com.testframe.autotest.ui.enums.check.AssertEnum;
+import com.testframe.autotest.ui.meta.AssertData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 /**
@@ -10,7 +15,13 @@ import org.testng.Assert;
  * @date:2022/10/27 21:26
  * @author: lyf
  */
-public class ElementAssert implements AssertI {
+@Component
+public class ElementAssert extends BaseAssert implements AssertI {
+
+    @Override
+    public String assertTypeIdentity() {
+        return AssertEnum.ELEMENT_ASSERT.getName();
+    }
 
     /**
      * 检验元素文本是否复合预期
@@ -18,7 +29,7 @@ public class ElementAssert implements AssertI {
      * @param element
      * @param checkData
      */
-    public static Boolean checkElementText(WebDriver driver, WebElement element, CheckData checkData) {
+    public static Boolean checkElementText(WebDriver driver, WebElement element, AssertData checkData) {
         try {
             Assert.assertEquals(element.getText(), checkData.getExpectString());
             return true;
@@ -31,12 +42,12 @@ public class ElementAssert implements AssertI {
      * 检查元素属性
      * @param driver
      * @param element
-     * @param checkData
+     * @param assertData
      * @return
      */
-    public static Boolean checkElementAttr(WebDriver driver, WebElement element, CheckData checkData) {
+    public static Boolean checkElementAttr(WebDriver driver, WebElement element, AssertData assertData) {
         try {
-            Assert.assertEquals(element.getAttribute("attr"), checkData.getExpectString());
+            Assert.assertEquals(element.getAttribute("attr"), assertData.getExpectString());
             return true;
         } catch (AssertionError e) {
             return false;

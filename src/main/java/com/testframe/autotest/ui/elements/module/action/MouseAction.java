@@ -1,10 +1,14 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionExpection;
+import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
+import com.testframe.autotest.ui.elements.module.action.base.ActionI;
+import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -12,7 +16,13 @@ import org.openqa.selenium.interactions.Actions;
  * @date:2022/10/26 21:43
  * @author: lyf
  */
-public class MouseAction implements ActionI {
+@Component
+public class MouseAction extends BaseAction implements ActionI {
+
+    @Override
+    public String actionTypeIdentity() {
+        return OperateEnum.MOUSE_OPERATE.getName();
+    }
 
     /**
      * 单击元素
@@ -28,7 +38,7 @@ public class MouseAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("元素单击失败");
+            throw new ActionException("元素单击失败");
         }
     }
 
@@ -48,7 +58,7 @@ public class MouseAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("元素双击失败");
+            throw new ActionException("元素双击失败");
         }
     }
 
@@ -67,7 +77,7 @@ public class MouseAction implements ActionI {
             actions.dragAndDropBy(element, data.getOffsetX(), data.getOffsetY()).build().perform();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("元素拖拽失败");
+            throw new ActionException("元素拖拽失败");
         }
     }
 
@@ -87,7 +97,7 @@ public class MouseAction implements ActionI {
             actions.contextClick(element).perform();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("元素右键失败");
+            throw new ActionException("元素右键失败");
         }
     }
 
@@ -108,7 +118,7 @@ public class MouseAction implements ActionI {
             Thread.sleep(1000);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionExpection("在元素上方悬浮失败");
+            throw new ActionException("在元素上方悬浮失败");
         }
     }
 
