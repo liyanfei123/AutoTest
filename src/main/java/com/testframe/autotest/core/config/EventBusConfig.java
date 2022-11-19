@@ -9,7 +9,7 @@ public class EventBusConfig {
 
     @Bean("myEventBus")
     public EventBus myEventBus() {
-        return new EventBus();
+        return EventBus.getDefault();
     }
 
 }

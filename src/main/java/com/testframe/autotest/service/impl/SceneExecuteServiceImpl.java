@@ -63,10 +63,12 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             if (steps.isEmpty()) {
                 throw new AutoTestException("当前场景下无开启的步骤");
             }
-            Long recordId = sceneRecordService.saveRecord(sceneId);
+            List<Long> stepOrderList = steps.stream().map(StepInfoDto::getStepId).collect(Collectors.toList());
+            Long recordId = sceneRecordService.saveRecord(sceneId, stepOrderList);
             SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
             buildEvent(seleniumRunEvent, sceneDetailInfo.getScene(), steps, recordId);
             eventBus.post(seleniumRunEvent);
+            return;
         } catch (Exception e) {
             log.error("[SceneExecuteServiceImpl:execute] execute scene {} error, reason = {}", sceneId, e);
             throw new AutoTestException(e.getMessage());

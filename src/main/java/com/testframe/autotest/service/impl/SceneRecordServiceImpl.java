@@ -87,13 +87,14 @@ public class SceneRecordServiceImpl implements SceneRecordService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveRecord(Long sceneId) {
+    public Long saveRecord(Long sceneId, List<Long> orderList) {
         try {
             log.info("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {}", sceneId);
             Scene scene = sceneDetailRepository.querySceneById(sceneId);
             Long currentTime = System.currentTimeMillis();
             SceneExecuteRecord sceneExecuteRecord = SceneExecuteRecord.build(scene);
             sceneExecuteRecord.setExecuteTime(currentTime);
+            sceneExecuteRecord.setStepOrderList(orderList);
             return sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecord);
         } catch (Exception e) {
             log.error("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {} error ", sceneId, e);

@@ -30,7 +30,7 @@ public class SceneExecuteRecord {
     private String extInfo;
 
     // 根据步骤执行顺序来存放每个步骤的执行状态
-    private List<StepExecuteRecord> stepRecords;
+    private List<Long> stepOrderList;
 
     public static SceneExecuteRecord build(Scene scene) {
         SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();

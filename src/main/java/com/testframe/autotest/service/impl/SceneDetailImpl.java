@@ -91,7 +91,7 @@ public class SceneDetailImpl implements SceneDetailService {
             // 更新执行步骤顺序
             stepOrderService.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
-            log.error("[SceneDetailImpl:update] update scene error, reason: {}", e.getMessage());
+            log.error("[SceneDetailImpl:update] update scene error, reason: {}", e);
             throw new AutoTestException(e.getMessage());
         }
         return true;

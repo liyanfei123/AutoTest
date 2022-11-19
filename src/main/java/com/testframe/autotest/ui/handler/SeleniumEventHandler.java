@@ -24,15 +24,19 @@ import com.testframe.autotest.ui.meta.OperateData;
 import com.testframe.autotest.ui.meta.StepExeInfo;
 import com.testframe.autotest.ui.meta.WaitInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 
 /**
@@ -44,9 +48,20 @@ import java.lang.reflect.Method;
 @DependsOn("myEventBus")
 @Component
 @Slf4j
-public class SeleniumEventHandler extends AbstractEventHandler<SeleniumRunEvent> {
+public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
     private ChromeFindElement chromeFindElement;
+
+//    @Autowired
+//    @Qualifier("myEventBus")
+//    private EventBus eventBus;
+//
+//    @PostConstruct
+//    private void init() {
+//        SeleniumEventHandler seleniumEventHandler = new SeleniumEventHandler();
+//        log.info("开始注册当前监听器");
+//        eventBus.register(seleniumEventHandler);
+//    }
 
 //    @Subscribe
 //    public void eventHandler(Object event) {
@@ -68,12 +83,12 @@ public class SeleniumEventHandler extends AbstractEventHandler<SeleniumRunEvent>
     @Autowired
     private WaitFactory waitFactory;
 
-    @Subscribe
-    @Override
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void eventHandler(SeleniumRunEvent seleniumRunEvent) {
          try {
              log.info("[SeleniumEventHandler:handler] get event info, {}", JSON.toJSONString(seleniumRunEvent));
              // TODO: 2022/11/19 可让用户自行选择浏览器
+             System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
              WebDriver driver = new ChromeDriver();
              chromeFindElement = new ChromeFindElement(driver);
              // 默认打开当前场景中的url
@@ -82,6 +97,7 @@ public class SeleniumEventHandler extends AbstractEventHandler<SeleniumRunEvent>
              for (StepExeInfo stepExeInfo : seleniumRunEvent.getStepExeInfos()) {
                  execute(driver, stepExeInfo);
              }
+             driver.quit();
          } catch (Exception e) {
              e.printStackTrace();
          }
