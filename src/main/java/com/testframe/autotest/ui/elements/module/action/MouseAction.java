@@ -1,6 +1,6 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
@@ -38,7 +38,7 @@ public class MouseAction extends BaseAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("元素单击失败");
+            throw new SeleniumRunException("元素单击失败");
         }
     }
 
@@ -58,7 +58,7 @@ public class MouseAction extends BaseAction implements ActionI {
             element.click();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("元素双击失败");
+            throw new SeleniumRunException("元素双击失败");
         }
     }
 
@@ -77,7 +77,7 @@ public class MouseAction extends BaseAction implements ActionI {
             actions.dragAndDropBy(element, data.getOffsetX(), data.getOffsetY()).build().perform();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("元素拖拽失败");
+            throw new SeleniumRunException("元素拖拽失败");
         }
     }
 
@@ -97,7 +97,7 @@ public class MouseAction extends BaseAction implements ActionI {
             actions.contextClick(element).perform();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("元素右键失败");
+            throw new SeleniumRunException("元素右键失败");
         }
     }
 
@@ -118,7 +118,7 @@ public class MouseAction extends BaseAction implements ActionI {
             Thread.sleep(1000);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("在元素上方悬浮失败");
+            throw new SeleniumRunException("在元素上方悬浮失败");
         }
     }
 

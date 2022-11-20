@@ -1,6 +1,6 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
@@ -33,8 +33,9 @@ public class FrameAction extends BaseAction implements ActionI {
         try {
             driver.switchTo().defaultContent();
         } catch (Exception e) {
-            throw new ActionException("切换到默认frame失败");
-        }
+            e.printStackTrace();
+            throw new SeleniumRunException(String.format("切换到默认frame失败, e=%s", e.getMessage()));
+         }
     }
 
     /**
@@ -53,7 +54,7 @@ public class FrameAction extends BaseAction implements ActionI {
                 driver.switchTo().frame(data.getIndexes().get(0));
             }
         } catch (Exception e) {
-            throw new ActionException("切换frame失败");
+            throw new SeleniumRunException("切换frame失败");
         }
     }
 
@@ -67,7 +68,7 @@ public class FrameAction extends BaseAction implements ActionI {
         try {
                 driver.switchTo().frame(element);
         } catch (Exception e) {
-            throw new ActionException("切换frame失败");
+            throw new SeleniumRunException("切换frame失败");
         }
     }
 

@@ -27,10 +27,25 @@ public class SceneExecuteRecordRepository {
     @Autowired
     private SceneExecuteRecordConverter sceneExecuteRecordConverter;
 
+    public SceneExecuteRecord getSceneExeRecordById(Long recordId) {
+        SceneRecord sceneRecord = sceneExecuteRecordDao.getSceneRecordById(recordId);
+        if (sceneRecord == null) {
+            return null;
+        }
+        return sceneExecuteRecordConverter.toSceneExecuteRecord(sceneRecord);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public Long saveSceneExecuteRecord(SceneExecuteRecord sceneExecuteRecord) {
         SceneRecord sceneRecord = sceneExecuteRecordConverter.toPo(sceneExecuteRecord);
         return sceneExecuteRecordDao.saveSceneExecuteRecord(sceneRecord);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateSceneExecuteRecord(Long recordId, SceneExecuteRecord sceneExecuteRecord) {
+        SceneRecord sceneRecord = sceneExecuteRecordConverter.toPo(sceneExecuteRecord);
+        sceneRecord.setId(recordId);
+        return sceneExecuteRecordDao.updateSceneExecuteRecord(sceneRecord);
     }
 
     public List<SceneExecuteRecord> querySceneExecuteRecordBySceneId(Long sceneId, PageQry pageQry) {

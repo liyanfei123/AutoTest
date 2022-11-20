@@ -97,9 +97,32 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             sceneExecuteRecord.setStepOrderList(orderList);
             return sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecord);
         } catch (Exception e) {
-            log.error("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {} error ", sceneId, e);
+            log.error("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {} error {}", sceneId, e);
             throw new AutoTestException("保存场景执行记录失败");
         }
+    }
+
+
+    /**
+     *
+     * @param recordId 执行记录id
+     * @param status 执行状态
+     * @param extInfo 执行错误信息
+     * @return
+     */
+    @Override
+    public Boolean updateRecord(Long recordId, Integer status, String extInfo) {
+        try {
+            SceneExecuteRecord sceneExecuteRecord = sceneExecuteRecordRepository.getSceneExeRecordById(recordId);
+            sceneExecuteRecord.setStatus(status);
+            sceneExecuteRecord.setExtInfo(extInfo);
+            return sceneExecuteRecordRepository.updateSceneExecuteRecord(recordId, sceneExecuteRecord);
+        } catch (Exception e) {
+            log.error("[SceneRecordServiceImpl:updateRecord] update scene execute record, recordId {} error {}", recordId, e);
+            throw new AutoTestException("更新场景执行记录失败");
+        }
+
+
     }
 
     private HashMap<Long, List<StepExecuteRecord>> batchGetStepExeInfo(List<Long> recordIds) {

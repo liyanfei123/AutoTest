@@ -1,6 +1,6 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
@@ -43,7 +43,7 @@ public class WindowAction extends BaseAction implements ActionI {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("切换窗口失败");
+            throw new SeleniumRunException("切换窗口失败");
         }
     }
 }

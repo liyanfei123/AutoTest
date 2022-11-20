@@ -6,10 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import static com.testframe.autotest.util.StringUtils.orderToList;
 
 @Data
 @AllArgsConstructor
@@ -36,18 +35,5 @@ public class SceneStepOrder {
                 .type(StepOrderEnum.BEFORE.getType()).build();
     }
 
-    public static List<Long> orderToList(String orderStr) {
-        // "[8, 9, 10, 11, 12, 13, 14, 15, 18]"
-        orderStr = orderStr.substring(1, orderStr.length()-1).replaceAll(" ", "");
-        if (orderStr.equals("")) {
-            return Collections.EMPTY_LIST;
-        }
-        String[] orders = orderStr.split(",");
-        List<Long> orderList = new ArrayList<>();
-        for (String order : orders) {
-            orderList.add(Long.parseLong(order));
-        }
-        return orderList;
-    }
 
 }

@@ -25,6 +25,10 @@ public class SceneExecuteRecordDao {
         return sceneRecord.getId();
     }
 
+    public Boolean updateSceneExecuteRecord(SceneRecord sceneRecord) {
+        return sceneRecordMapper.updateByPrimaryKeySelective(sceneRecord) > 0 ? true : false;
+    }
+
     public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, PageQry pageQry) {
         List<SceneRecord> sceneRecords = sceneRecordMapper.getRecordBySceneId(sceneId, pageQry);
         if (CollectionUtils.isEmpty(sceneRecords)) {
@@ -32,4 +36,10 @@ public class SceneExecuteRecordDao {
         }
         return sceneRecords;
     }
+
+    public SceneRecord getSceneRecordById(Long recordId) {
+        SceneRecord sceneRecord = sceneRecordMapper.selectByPrimaryKey(recordId);
+        return sceneRecord;
+    }
+
 }

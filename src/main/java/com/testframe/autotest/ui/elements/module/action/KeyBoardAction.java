@@ -1,6 +1,6 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
@@ -76,7 +76,7 @@ public class KeyBoardAction extends BaseAction implements ActionI {
             element.sendKeys(data.getValue());
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ActionException("输入失败");
+            throw new SeleniumRunException("输入失败");
         }
     }
 

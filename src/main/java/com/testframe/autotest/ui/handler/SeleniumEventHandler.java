@@ -1,8 +1,10 @@
 package com.testframe.autotest.ui.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.exception.SeleniumRunException;
+import com.testframe.autotest.service.SceneRecordService;
 import com.testframe.autotest.ui.elements.ByFactory;
 import com.testframe.autotest.ui.elements.module.action.ActionFactory;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
@@ -24,6 +26,7 @@ import com.testframe.autotest.ui.meta.OperateData;
 import com.testframe.autotest.ui.meta.StepExeInfo;
 import com.testframe.autotest.ui.meta.WaitInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -51,6 +54,8 @@ import java.lang.reflect.Method;
 public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
     private ChromeFindElement chromeFindElement;
+
+    private WebDriver driver;
 
 //    @Autowired
 //    @Qualifier("myEventBus")
@@ -83,23 +88,43 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     @Autowired
     private WaitFactory waitFactory;
 
+    @Autowired
+    private SceneRecordService sceneRecordService;
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void eventHandler(SeleniumRunEvent seleniumRunEvent) {
          try {
              log.info("[SeleniumEventHandler:handler] get event info, {}", JSON.toJSONString(seleniumRunEvent));
              // TODO: 2022/11/19 可让用户自行选择浏览器
              System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
-             WebDriver driver = new ChromeDriver();
+             driver = new ChromeDriver();
              chromeFindElement = new ChromeFindElement(driver);
              // 默认打开当前场景中的url
              driver.get(seleniumRunEvent.getSceneRunInfo().getUrl());
              chromeFindElement.init(seleniumRunEvent.getWaitInfo()); // 配置全局等待方式
              for (StepExeInfo stepExeInfo : seleniumRunEvent.getStepExeInfos()) {
-                 execute(driver, stepExeInfo);
+                 try {
+                     execute(driver, stepExeInfo);
+                     // 无异常进行保存
+                 } catch (SeleniumRunException e) {
+                     // 有异常进行步骤操作记录保存，并保存错误消息
+                 }
              }
              driver.quit();
-         } catch (Exception e) {
+         } catch (SeleniumRunException e) {
+             // 额外的保存操作
+             sceneRecordService.updateRecord(seleniumRunEvent.getSceneRunRecordInfo().getRecordId(),
+                     SceneStatusEnum.FAIL.getType(), e.getMessage());
+         }
+         catch (Exception e) {
+             // 步骤未成功开启的失败原因
              e.printStackTrace();
+             sceneRecordService.updateRecord(seleniumRunEvent.getSceneRunRecordInfo().getRecordId(),
+                     SceneStatusEnum.FAIL.getType(), "场景启动失败，原因：" + e.getMessage());
+         } finally {
+             if (driver != null) {
+                 driver.quit();
+             }
          }
     }
 
@@ -110,25 +135,31 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         OperateData operateData = stepExeInfo.getOperateData();
         AssertData checkData = stepExeInfo.getCheckData();
         WaitInfo waitInfo = stepExeInfo.getWaitInfo();
-        // 查找元素
-        if (locatorInfo != null &&
-                OperateTypeEnum.getOperateByType(operateType) != OperateTypeEnum.WAIT) {
+        try {
+            // 查找元素
+            if (locatorInfo != null &&
+                    OperateTypeEnum.getOperateByType(operateType) != OperateTypeEnum.WAIT) {
                 // 等待类型的不用先找
                 element = findElements(stepExeInfo);
-        }
-        switch (OperateTypeEnum.getOperateByType(operateType)) {
-            case OPERATE:
-                runOperate(driver, element, operateData);
-                break;
-            case WAIT:
-                runWait(driver, element, waitInfo, locatorInfo);
-                break;
-            case ASSERT:
-                runCheck(driver, element, checkData);
-                break;
-            default:
-                log.info("[SeleniumEventHandler:handler] uncorrect operate type, {}", operateType);
-                throw new SeleniumRunException("暂不支持该操作类型");
+            }
+            switch (OperateTypeEnum.getOperateByType(operateType)) {
+                case OPERATE:
+                    runOperate(driver, element, operateData);
+                    break;
+                case WAIT:
+                    runWait(driver, element, waitInfo, locatorInfo);
+                    break;
+                case ASSERT:
+                    runCheck(driver, element, checkData);
+                    break;
+                default:
+                    log.info("[SeleniumEventHandler:handler] uncorrect operate type, {}", operateType);
+                    throw new SeleniumRunException(String.format("暂不支持 operateType=%s 操作类型", operateType));
+            }
+        } catch (SeleniumRunException e) {
+            throw new SeleniumRunException(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -148,47 +179,43 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             if (nowOperateAction == null) {
                 log.error("[SeleniumEventHandler:handler] uncorrect operate mode {}",
                         operateData.getOperateMode());
-                throw new SeleniumRunException("当前不支持该元素操作类型");
+                throw new SeleniumRunException(String.format("当前不支持 operateMode=%s 元素操作类型", operateData.getOperateMode()));
             }
             // 需要操作的函数名
             String needOperateFunc = OperateModeEnum.getByType(operateData.getOperateMode()).getFunc();
             Method method = findMethod(nowOperateAction.getMethods(), needOperateFunc);
             method.invoke(nowOperateAction, driver, element, operateData);
             Method[] methods = nowOperateAction.getMethods();
-        } catch (SeleniumRunException e) {
-            throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
             log.error("[SeleniumEventHandler:runCheck] run operate error, reason ", e);
-            throw new AutoTestException(e.getMessage());
+            throw new SeleniumRunException(e.getMessage());
         }
     }
 
     /**
      * 运行元素检验操作
      */
-    private void runCheck(WebDriver driver, WebElement element, AssertData checkData) {
+    private void runCheck(WebDriver driver, WebElement element, AssertData assertData) {
         try {
             // 获取当前的验证类型
             AssertI nowAssert = assertFactory.getAssert(
-                    AssertEnum.getByAssertMode(checkData.getAssertMode()).getName()
+                    AssertEnum.getByAssertMode(assertData.getAssertMode()).getName()
             );
             if (nowAssert == null) {
-                log.error("[SeleniumEventHandler:handler] uncorrect check mode {}", checkData.getAssertMode());
-                throw new SeleniumRunException("当前不支持该元素验证类型");
+                log.error("[SeleniumEventHandler:handler] uncorrect check mode {}", assertData.getAssertMode());
+                throw new SeleniumRunException(String.format("当前不支持 assertMode=%s 元素验证类型", assertData.getAssertMode()));
             }
             // 检验操作的函数名
-            String needAssertFunc = AssertModeEnum.getByType(checkData.getAssertMode()).getFunc();
+            String needAssertFunc = AssertModeEnum.getByType(assertData.getAssertMode()).getFunc();
 //        if (element == null) {
 //            // 执行不需要元素的等待验证，比如源码验证等
 //        }
             Method[] methods = nowAssert.getMethods();
             Method method = findMethod(nowAssert.getMethods(), needAssertFunc);
-            method.invoke(nowAssert, driver, element, checkData);
-        } catch (SeleniumRunException e) {
-            throw new AutoTestException(e.getMessage());
+            method.invoke(nowAssert, driver, element, assertData);
         } catch (Exception e) {
             log.error("[SeleniumEventHandler:runCheck] run check error, reason ", e);
-            throw new AutoTestException(e.getMessage());
+            throw new SeleniumRunException(e.getMessage());
         }
     }
 
@@ -203,12 +230,10 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             );
             if (nowWait == null) {
                 log.error("[SeleniumEventHandler:handler] uncorrect wait mode {}", waitInfo.getWaitMode());
-                throw new SeleniumRunException("当前不支持该等待类型");
+                throw new SeleniumRunException(String.format("当前不支持 waitMode=%s 等待类型", waitInfo.getWaitMode()));
             }
             By by = ByFactory.createBy(locatorInfo.getLocatedType(), locatorInfo.getExpression());
             nowWait.wait(by, waitInfo.getWaitTime());
-        } catch (SeleniumRunException e) {
-            throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
             log.error("[SeleniumEventHandler:runWait] run wait error, reason ", e);
             throw new AutoTestException(e.getMessage());
@@ -225,10 +250,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             return webElement;
         } catch (SeleniumRunException e) {
             log.info("[SeleniumEventHandler:findElements] find element fail, reason = {}",  e.getMessage());
-            return null;
-        } catch (Exception e) {
-            log.error("[SeleniumEventHandler:findElements] find element has exception, e = {}", e);
-            throw new AutoTestException(e.getMessage());
+            throw new SeleniumRunException(e.getMessage());
         }
     }
 
@@ -253,7 +275,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             }
         }
         log.error("[SeleniumEventHandler:findMethod] can not find func {}", funcName);
-        throw new SeleniumRunException("方法名错误");
+        throw new SeleniumRunException(String.format("方法名 %s 错误/不存在", funcName));
     }
 
 }

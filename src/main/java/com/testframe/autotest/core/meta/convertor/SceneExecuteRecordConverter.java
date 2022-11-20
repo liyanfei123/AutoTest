@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.testframe.autotest.util.StringUtils.orderToList;
+
 /**
  * Description:
  *
@@ -41,6 +43,7 @@ public class SceneExecuteRecordConverter {
         sceneExecuteRecord.setWaitTime(sceneRecord.getWaitTime());
         sceneExecuteRecord.setStatus(sceneRecord.getStatus());
         sceneExecuteRecord.setExecuteTime(sceneRecord.getCreateTime());
+        sceneExecuteRecord.setStepOrderList(orderToList(sceneRecord.getOrderList()));
         return sceneExecuteRecord;
     }
 

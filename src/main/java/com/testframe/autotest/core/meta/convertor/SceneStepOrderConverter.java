@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
+import static com.testframe.autotest.util.StringUtils.orderToList;
+
 @Component
 public class SceneStepOrderConverter {
 
@@ -36,7 +38,7 @@ public class SceneStepOrderConverter {
         SceneStepOrder sceneStepOrder = new SceneStepOrder();
         sceneStepOrder.setId(stepOrder.getId());
         sceneStepOrder.setSceneId(stepOrder.getSceneId());
-        sceneStepOrder.setOrderList(SceneStepOrder.orderToList(stepOrder.getOrderList()));
+        sceneStepOrder.setOrderList(orderToList(stepOrder.getOrderList()));
         sceneStepOrder.setType(stepOrder.getType());
         return sceneStepOrder;
     }

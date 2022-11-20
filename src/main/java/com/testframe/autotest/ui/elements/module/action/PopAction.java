@@ -1,6 +1,6 @@
 package com.testframe.autotest.ui.elements.module.action;
 
-import com.testframe.autotest.core.exception.ActionException;
+import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
@@ -35,7 +35,7 @@ public class PopAction extends BaseAction implements ActionI {
             Alert alert = driver.switchTo().alert();
             alert.accept();
         } catch (Exception e) {
-            throw new ActionException("Alert弹窗操作失败");
+            throw new SeleniumRunException("Alert弹窗操作失败");
         }
     }
 
@@ -54,7 +54,7 @@ public class PopAction extends BaseAction implements ActionI {
                 alert.dismiss();
             }
         } catch (Exception e) {
-            throw new ActionException("confirm弹窗操作失败");
+            throw new SeleniumRunException("confirm弹窗操作失败");
         }
     }
 
@@ -75,7 +75,7 @@ public class PopAction extends BaseAction implements ActionI {
                 alert.dismiss();
             }
         } catch (Exception e) {
-            throw new ActionException("Prompt弹窗操作失败");
+            throw new SeleniumRunException("Prompt弹窗操作失败");
         }
     }
 
