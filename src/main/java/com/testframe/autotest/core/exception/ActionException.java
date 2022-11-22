@@ -6,11 +6,11 @@ package com.testframe.autotest.core.exception;
  * @date:2022/10/26 21:54
  * @author: lyf
  */
-public class SeleniumRunException extends RuntimeException {
+public class ActionException extends RuntimeException {
 
-    public SeleniumRunException() {}
+    public ActionException() {}
 
-    public SeleniumRunException(String msg) {
+    public ActionException(String msg) {
         super(msg);
     }
 

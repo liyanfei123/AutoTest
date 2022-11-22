@@ -17,10 +17,11 @@ public class StepExecuteRecordDao {
     @Autowired
     private StepRecordMapper stepRecordMapper;
 
-    public Boolean saveStepExecuteRecord(StepRecord stepRecord) {
+    public Long saveStepExecuteRecord(StepRecord stepRecord) {
         Long currentTime = System.currentTimeMillis();
         stepRecord.setCreateTime(currentTime);
-        return stepRecordMapper.insertSelective(stepRecord) > 0 ? true : false;
+        stepRecordMapper.insertSelective(stepRecord);
+        return stepRecord.getId();
     }
 
     public StepRecord getStepRecordsById(Long stepId) {

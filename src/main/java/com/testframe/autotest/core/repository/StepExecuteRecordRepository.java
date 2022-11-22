@@ -26,7 +26,7 @@ public class StepExecuteRecordRepository {
     private StepExecuteRecordConverter stepExecuteRecordConverter;
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean saveStepExecuteRecord(StepExecuteRecord stepExecuteRecord) {
+    public Long saveStepExecuteRecord(StepExecuteRecord stepExecuteRecord) {
         StepRecord stepRecord = stepExecuteRecordConverter.toPo(stepExecuteRecord);
         return stepExecuteRecordDao.saveStepExecuteRecord(stepRecord);
     }
