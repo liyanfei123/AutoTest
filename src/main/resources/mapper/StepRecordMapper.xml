@@ -79,6 +79,54 @@
       </if>
     </trim>
   </insert>
+
+  <insert id="batchInsertSelective" parameterType="java.util.List">
+    insert into AUTO_TEST_STEP_EXECUTE_RECORD
+    <foreach collection="stepRecords" index="i" item="stepRecord" close=")" open="(" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides="," >
+        <if test="stepRecord.recordId != null" >
+          recordId,
+        </if>
+        <if test="stepRecord.stepId != null" >
+          stepId,
+        </if>
+        <if test="stepRecord.stepName != null" >
+          stepName,
+        </if>
+        <if test="stepRecord.reason != null" >
+          reason,
+        </if>
+        <if test="stepRecord.status != null" >
+          status,
+        </if>
+        <if test="stepRecord.createTime != null" >
+          createTime,
+        </if>
+      </trim>
+      <trim prefix="values (" suffix=")" suffixOverrides="," >
+
+        <if test="stepRecord.recordId != null" >
+          #{stepRecord.recordId,jdbcType=BIGINT},
+        </if>
+        <if test="stepRecord.stepId != null" >
+          #{stepRecord.stepId,jdbcType=BIGINT},
+        </if>
+        <if test="stepName != null" >
+          #{stepRecord.stepName,jdbcType=VARCHAR},
+        </if>
+        <if test="reason != null" >
+          #{stepRecord.reason,jdbcType=VARCHAR},
+        </if>
+        <if test="status != null" >
+          #{stepRecord.status,jdbcType=INTEGER},
+        </if>
+        <if test="createTime != null" >
+          #{stepRecord.createTime,jdbcType=BIGINT},
+        </if>
+      </trim>
+    </foreach>
+  </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.StepRecord" >
     update AUTO_TEST_STEP_EXECUTE_RECORD
     <set >

@@ -77,7 +77,6 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 
     private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto,
                             List<StepInfoDto> steps, Long recordId) {
-
         SceneRunInfo sceneRunInfo = SceneRunInfo.build(sceneInfoDto);
         seleniumRunEvent.setSceneRunInfo(sceneRunInfo);
         SceneRunRecordInfo sceneRunRecordInfo = new SceneRunRecordInfo();
@@ -92,6 +91,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             StepExeInfo stepExeInfo = new StepExeInfo();
             stepExeInfo.setStepId(stepInfoDto.getStepId());
             stepExeInfo.setStepName(stepInfoDto.getStepName());
+            stepExeInfo.setOperaType(stepInfoDto.getStepUIInfo().getOperateType());
             // 根据操作类型来进行不同的包装
             if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.ASSERT.getType()) {
                 AssertData checkData = AssertData.build(stepUIInfo);
@@ -104,7 +104,9 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);
                 stepExeInfo.setCheckData(null);
-
+                // TODO: 2022/11/22 等待时间 
+                WaitInfo stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), 5);
+                stepExeInfo.setWaitInfo(stepWaitInfo);
             } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.OPERATE.getType()) {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);

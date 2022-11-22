@@ -2,9 +2,13 @@ package com.testframe.autotest.ui.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
+import com.testframe.autotest.core.enums.StepRunResultEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.exception.SeleniumRunException;
+import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
+import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import com.testframe.autotest.service.SceneRecordService;
+import com.testframe.autotest.service.StepRecordService;
 import com.testframe.autotest.ui.elements.ByFactory;
 import com.testframe.autotest.ui.elements.module.action.ActionFactory;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
@@ -41,6 +45,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Description:
@@ -53,6 +61,7 @@ import java.lang.reflect.Method;
 @Slf4j
 public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
+    @Autowired
     private ChromeFindElement chromeFindElement;
 
     private WebDriver driver;
@@ -91,28 +100,58 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     @Autowired
     private SceneRecordService sceneRecordService;
 
+    @Autowired
+    private StepRecordService stepRecordService;
+
+    @Autowired
+    private StepExecuteRecordRepository stepExecuteRecordRepository;
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void eventHandler(SeleniumRunEvent seleniumRunEvent) {
          try {
              log.info("[SeleniumEventHandler:handler] get event info, {}", JSON.toJSONString(seleniumRunEvent));
+             Long recordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId();
              // TODO: 2022/11/19 可让用户自行选择浏览器
              System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
              driver = new ChromeDriver();
-             chromeFindElement = new ChromeFindElement(driver);
+             chromeFindElement.setDriver(driver);
              // 默认打开当前场景中的url
              driver.get(seleniumRunEvent.getSceneRunInfo().getUrl());
              chromeFindElement.init(seleniumRunEvent.getWaitInfo()); // 配置全局等待方式
-             for (StepExeInfo stepExeInfo : seleniumRunEvent.getStepExeInfos()) {
+             Map<Long, StepExecuteRecord> stepExecuteRecordMap = new HashMap<>(); // 步骤执行信息保存
+             List<StepExeInfo> stepExeInfoList = seleniumRunEvent.getStepExeInfos();
+             // 步骤默认是意外中断
+             stepExeInfoList.forEach(stepExeInfo -> {
+                 StepExecuteRecord stepExecuteRecord = new StepExecuteRecord(recordId, stepExeInfo.getStepId(),
+                                 stepExeInfo.getStepName(), null, StepRunResultEnum.CLOSE.getType());
+                 stepExecuteRecordMap.put(stepExeInfo.getStepId(), stepExecuteRecord);
+                     });
+             for (StepExeInfo stepExeInfo : stepExeInfoList) {
+                 // 可先记录状态，待执行结束后再去保存
                  try {
                      execute(driver, stepExeInfo);
-                     // 无异常进行保存
+                     // 执行状态置为成功
+                     stepExecuteRecordMap.get(stepExeInfo.getStepId()).setStatus(StepRunResultEnum.SUCCESS.getType());
+                     log.info("[SeleniumEventHandler:eventHandler] run step success, stepInfo = {}",
+                             JSON.toJSONString(stepExeInfo));
                  } catch (SeleniumRunException e) {
                      // 有异常进行步骤操作记录保存，并保存错误消息
+                     stepExecuteRecordMap.get(stepExeInfo.getStepId()).setStatus(StepRunResultEnum.FAIL.getType());
+                     stepExecuteRecordMap.get(stepExeInfo.getStepId()).setReason(e.getMessage());
+                     log.info("[SeleniumEventHandler:eventHandler] run step fail, stepInfo = {}, reason = {}",
+                             JSON.toJSONString(stepExeInfo), e);
+                     break;
                  }
              }
-             driver.quit();
+             List<StepExecuteRecord> stepExecuteRecords = new ArrayList<StepExecuteRecord>(stepExecuteRecordMap.values());
+             Boolean flag = stepExecuteRecordRepository.batchSaveStepExecuteRecord(stepExecuteRecords);
+             if (flag == false) {
+                 log.error("[SeleniumEventHandler:eventHandler] add step run records error, stepExecuteRecords = {}",
+                         JSON.toJSONString(stepExecuteRecords));
+                 throw new AutoTestException("步骤结果保存异常");
+             }
          } catch (SeleniumRunException e) {
-             // 额外的保存操作
+             // 直接启动失败，不需要对步骤保存
              sceneRecordService.updateRecord(seleniumRunEvent.getSceneRunRecordInfo().getRecordId(),
                      SceneStatusEnum.FAIL.getType(), e.getMessage());
          }

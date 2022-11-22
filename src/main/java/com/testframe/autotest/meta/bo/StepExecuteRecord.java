@@ -1,6 +1,8 @@
 package com.testframe.autotest.meta.bo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Description:
@@ -9,6 +11,8 @@ import lombok.Data;
  * @author: lyf
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StepExecuteRecord {
 
     private Long recordId;

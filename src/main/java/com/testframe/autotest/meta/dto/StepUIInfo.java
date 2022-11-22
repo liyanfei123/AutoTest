@@ -31,6 +31,9 @@ public class StepUIInfo {
     // 验证类型
     private Integer assertMode;
 
+    // 等待类型
+    private Integer waitMode;
+
     // 输入参数
     private String value;
 
@@ -43,6 +46,7 @@ public class StepUIInfo {
         stepUIInfo.setOperateMode(stepInfoModel.getOperateMode());
         stepUIInfo.setValue(stepInfoModel.getValue());
         stepUIInfo.setAssertMode(stepInfoModel.getAssertMode());
+        stepUIInfo.setWaitMode(stepInfoModel.getWaitMode());
         return stepUIInfo;
     }
 

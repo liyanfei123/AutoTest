@@ -16,6 +16,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
@@ -26,12 +28,12 @@ import java.util.List;
  */
 // TODO: 2022/11/15 添加一个浏览器选择工厂，用于选择 
 @Slf4j
+@Component
 public class ChromeFindElement {
 
-    WebDriver driver = new ChromeDriver();
+    WebDriver driver;
 
-    public ChromeFindElement() {
-    }
+    public ChromeFindElement() {}
 
     public ChromeFindElement(WebDriver webDriver) {
         this.driver = webDriver;
@@ -46,15 +48,18 @@ public class ChromeFindElement {
 
     private WaitI waitStyle;
 
-    private WebElement element;
-
     private List<WebElement> elements;
 
     public void init(WaitInfo waitInfo) {
-        // 全局的等待方式
-        waitStyle = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity());
-        if (waitInfo.getWaitTime() != null) {
-            waitStyle.setTime(waitInfo.getWaitTime());
+        try {
+            // 全局的等待方式
+            waitStyle = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity());
+            if (waitInfo.getWaitTime() != null) {
+                waitStyle.setTime(waitInfo.getWaitTime());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SeleniumRunException("寻找元素初始化失败");
         }
     }
 
