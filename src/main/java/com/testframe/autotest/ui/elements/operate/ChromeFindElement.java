@@ -14,7 +14,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,16 +45,17 @@ public class ChromeFindElement {
     @Autowired
     private WaitFactory waitFactory;
 
-    private WaitI waitStyle;
+    private WaitI globalWait;
 
     private List<WebElement> elements;
 
     public void init(WaitInfo waitInfo) {
         try {
             // 全局的等待方式
-            waitStyle = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity());
+            globalWait = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity(),
+                    this.driver, waitInfo.getWaitTime());
             if (waitInfo.getWaitTime() != null) {
-                waitStyle.setTime(waitInfo.getWaitTime());
+                globalWait.setTime(waitInfo.getWaitTime());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +70,7 @@ public class ChromeFindElement {
         }
         try {
             By by = ByFactory.createBy(locatorInfo.getLocatedType(), express);
-            waitStyle.wait(By.linkText(express));
+            globalWait.wait(by);
             elements = driver.findElements(by);
             if (elements.isEmpty()) {
                 throw new SeleniumRunException(String.format("无当前控件, %s",express));
@@ -96,35 +96,35 @@ public class ChromeFindElement {
         try {
             switch (locatorType) {
                 case ById:
-                    waitStyle.wait(By.id(express));
+                    globalWait.wait(By.id(express));
                     elements = driver.findElements(By.id(express));
                     break;
                 case ByName:
-                    waitStyle.wait(By.name(express));
+                    globalWait.wait(By.name(express));
                     elements = driver.findElements(By.name(express));
                     break;
                 case ByClassName:
-                    waitStyle.wait(By.className(express));
+                    globalWait.wait(By.className(express));
                     elements = driver.findElements(By.className(express));
                     break;
                 case ByTagName:
-                    waitStyle.wait(By.tagName(express));
+                    globalWait.wait(By.tagName(express));
                     elements = driver.findElements(By.tagName(express));
                     break;
                 case ByLinkText:
-                    waitStyle.wait(By.linkText(express));
+                    globalWait.wait(By.linkText(express));
                     elements = driver.findElements(By.linkText(express));
                     break;
                 case ByPartialLinkText:
-                    waitStyle.wait(By.partialLinkText(express));
+                    globalWait.wait(By.partialLinkText(express));
                     elements = driver.findElements(By.partialLinkText(express));
                     break;
                 case ByCssSelector:
-                    waitStyle.wait(By.cssSelector(express));
+                    globalWait.wait(By.cssSelector(express));
                     elements = driver.findElements(By.cssSelector(express));
                     break;
                 case ByXpath:
-                    waitStyle.wait(By.xpath(express));
+                    globalWait.wait(By.xpath(express));
                     elements = driver.findElements(By.xpath(express));
                     break;
                 case ByJQuery:

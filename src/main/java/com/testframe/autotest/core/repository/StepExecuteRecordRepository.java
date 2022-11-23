@@ -33,9 +33,13 @@ public class StepExecuteRecordRepository {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean batchSaveStepExecuteRecord(List<StepExecuteRecord> stepExecuteRecords) {
-        List<StepRecord> stepRecords = stepExecuteRecords.stream().map(stepExecuteRecordConverter::toPo)
-                .collect(Collectors.toList());
-        return stepExecuteRecordDao.batchSaveStepExecuteRecord(stepRecords);
+//        List<StepRecord> stepRecords = stepExecuteRecords.stream().map(stepExecuteRecordConverter::toPo)
+//                .collect(Collectors.toList());
+//        return stepExecuteRecordDao.batchSaveStepExecuteRecord(stepRecords);
+        for (StepExecuteRecord stepExecuteRecord : stepExecuteRecords) {
+            saveStepExecuteRecord(stepExecuteRecord);
+        }
+        return true;
     }
 
     public List<StepExecuteRecord> queryStepExecuteRecordByRecordId(Long recordId) {

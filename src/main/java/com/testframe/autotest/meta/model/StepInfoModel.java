@@ -17,7 +17,7 @@ public class StepInfoModel {
     private Integer operateType;
 
     // 元素索引
-    private List<Integer> indexes;
+    private String indexes;
 
     // 定位方式
     private Integer locatorType;

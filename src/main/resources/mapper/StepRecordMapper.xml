@@ -81,8 +81,8 @@
   </insert>
 
   <insert id="batchInsertSelective" parameterType="java.util.List">
-    insert into AUTO_TEST_STEP_EXECUTE_RECORD
     <foreach collection="stepRecords" index="i" item="stepRecord" close=")" open="(" separator=",">
+      insert into AUTO_TEST_STEP_EXECUTE_RECORD
       <trim prefix="(" suffix=")" suffixOverrides="," >
         <if test="stepRecord.recordId != null" >
           recordId,
@@ -111,16 +111,16 @@
         <if test="stepRecord.stepId != null" >
           #{stepRecord.stepId,jdbcType=BIGINT},
         </if>
-        <if test="stepName != null" >
+        <if test="stepRecord.stepName != null" >
           #{stepRecord.stepName,jdbcType=VARCHAR},
         </if>
-        <if test="reason != null" >
+        <if test="stepRecord.reason != null" >
           #{stepRecord.reason,jdbcType=VARCHAR},
         </if>
-        <if test="status != null" >
+        <if test="stepRecord.status != null" >
           #{stepRecord.status,jdbcType=INTEGER},
         </if>
-        <if test="createTime != null" >
+        <if test="stepRecord.createTime != null" >
           #{stepRecord.createTime,jdbcType=BIGINT},
         </if>
       </trim>

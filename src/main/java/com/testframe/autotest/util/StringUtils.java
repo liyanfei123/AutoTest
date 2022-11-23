@@ -29,4 +29,17 @@ public class StringUtils {
         }
         return orderList;
     }
+
+    public static List<Integer> strToList(String str) {
+        if (str.equals("")) {
+            return Collections.EMPTY_LIST;
+        }
+        String[] chs = str.split(",");
+        List<Integer> list = new ArrayList<>();
+        for (String ch : chs) {
+            list.add(Integer.parseInt(ch));
+        }
+        return list;
+    }
+
 }

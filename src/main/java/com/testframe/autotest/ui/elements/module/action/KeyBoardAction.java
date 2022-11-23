@@ -7,6 +7,7 @@ import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -17,6 +18,7 @@ import java.awt.event.KeyEvent;
  * @date:2022/10/26 21:26
  * @author: lyf
  */
+@Component
 public class KeyBoardAction extends BaseAction implements ActionI {
 
     @Override

@@ -3,6 +3,7 @@ package com.testframe.autotest.ui.elements.module.wait;
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +45,7 @@ public class WaitFactory {
 //            }
 //        }
         waitTypes.forEach(e -> {
+            e.setIdentity(e.waitIdentity());
             waitFactory.put(e.waitIdentity(), e);
         });
         log.info("register all wait form, {}", JSON.toJSONString(waitFactory));
@@ -51,6 +53,12 @@ public class WaitFactory {
 
     public WaitI getWait(String waitIdentity) {
         return waitFactory.get(waitIdentity);
+    }
+
+    public WaitI getWait(String waitIdentity, WebDriver driver, Integer time) {
+        WaitI wait = waitFactory.get(waitIdentity);
+        wait.setWebDriverWait(driver, time);
+        return wait;
     }
 
     public WaitI getWait(Integer type) {

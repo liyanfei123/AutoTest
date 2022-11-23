@@ -19,6 +19,7 @@ import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
 import com.testframe.autotest.ui.enums.check.AssertEnum;
 import com.testframe.autotest.ui.enums.check.AssertModeEnum;
 import com.testframe.autotest.ui.enums.wait.WaitEnum;
+import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import com.testframe.autotest.ui.meta.AssertData;
 import com.testframe.autotest.ui.elements.operate.ChromeFindElement;
 import com.testframe.autotest.ui.enums.OperateTypeEnum;
@@ -112,12 +113,14 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
              log.info("[SeleniumEventHandler:handler] get event info, {}", JSON.toJSONString(seleniumRunEvent));
              Long recordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId();
              // TODO: 2022/11/19 可让用户自行选择浏览器
+
              System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
              driver = new ChromeDriver();
              chromeFindElement.setDriver(driver);
              // 默认打开当前场景中的url
              driver.get(seleniumRunEvent.getSceneRunInfo().getUrl());
              chromeFindElement.init(seleniumRunEvent.getWaitInfo()); // 配置全局等待方式
+
              Map<Long, StepExecuteRecord> stepExecuteRecordMap = new HashMap<>(); // 步骤执行信息保存
              List<StepExeInfo> stepExeInfoList = seleniumRunEvent.getStepExeInfos();
              // 步骤默认是意外中断
@@ -159,7 +162,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
              // 步骤未成功开启的失败原因
              e.printStackTrace();
              sceneRecordService.updateRecord(seleniumRunEvent.getSceneRunRecordInfo().getRecordId(),
-                     SceneStatusEnum.FAIL.getType(), "场景启动失败，原因：" + e.getMessage());
+                     SceneStatusEnum.FAIL.getType(), "场景检验失败，原因：" + e.getMessage());
          } finally {
              if (driver != null) {
                  driver.quit();
@@ -212,6 +215,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                 throw new SeleniumRunException("没有可被执行的元素，请填写正确的定位方式");
             }
             // 获取当前的操作类型
+            String name = OperateEnum.getByOperateMode(operateData.getOperateMode()).getName();
             ActionI nowOperateAction = actionFactory.getAction(
                     OperateEnum.getByOperateMode(operateData.getOperateMode()).getName()
             );
@@ -264,9 +268,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     private void runWait(WebDriver driver, WebElement element, WaitInfo waitInfo, LocatorInfo locatorInfo) {
         try {
             // 获取当前的等待类型
-            WaitI nowWait = waitFactory.getWait(
-                    WaitEnum.getByWaitMode(waitInfo.getWaitMode()).getName()
-            );
+            WaitI nowWait = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity());
             if (nowWait == null) {
                 log.error("[SeleniumEventHandler:handler] uncorrect wait mode {}", waitInfo.getWaitMode());
                 throw new SeleniumRunException(String.format("当前不支持 waitMode=%s 等待类型", waitInfo.getWaitMode()));

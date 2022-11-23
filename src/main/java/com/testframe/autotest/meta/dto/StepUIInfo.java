@@ -1,11 +1,14 @@
 package com.testframe.autotest.meta.dto;
 
 import com.testframe.autotest.meta.model.StepInfoModel;
+import com.testframe.autotest.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import static com.testframe.autotest.util.StringUtils.strToList;
 
 // 步骤中关于ui执行信息的参数
 @Data
@@ -40,7 +43,7 @@ public class StepUIInfo {
     public static StepUIInfo build(StepInfoModel stepInfoModel) {
         StepUIInfo stepUIInfo = new StepUIInfo();
         stepUIInfo.setOperateType(stepInfoModel.getOperateType());
-        stepUIInfo.setIndexes(stepInfoModel.getIndexes());
+        stepUIInfo.setIndexes(strToList(stepInfoModel.getIndexes()));
         stepUIInfo.setLocatorType(stepInfoModel.getLocatorType());
         stepUIInfo.setLocator(stepInfoModel.getLocator());
         stepUIInfo.setOperateMode(stepInfoModel.getOperateMode());
