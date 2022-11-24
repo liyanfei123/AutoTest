@@ -1,5 +1,6 @@
 package com.testframe.autotest.service.impl;
 
+import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.SceneDetailInfo;
@@ -64,7 +65,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                 throw new AutoTestException("当前场景下无开启的步骤");
             }
             List<Long> stepOrderList = steps.stream().map(StepInfoDto::getStepId).collect(Collectors.toList());
-            Long recordId = sceneRecordService.saveRecord(sceneId, stepOrderList);
+            Long recordId = sceneRecordService.saveRecord(sceneId, stepOrderList, SceneStatusEnum.ING.getType());
             SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
             buildEvent(seleniumRunEvent, sceneDetailInfo.getScene(), steps, recordId);
             eventBus.post(seleniumRunEvent);
