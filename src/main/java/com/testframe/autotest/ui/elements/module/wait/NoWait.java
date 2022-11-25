@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 /**
  * Description:
  * 无需任何等待
@@ -29,6 +31,11 @@ public class NoWait extends BaseWait implements WaitI {
 
     @Override
     public void wait(By by, Integer time) {
+        return;
+    }
+
+    @Override
+    public void setTime(Integer time) {
         return;
     }
 }

@@ -31,7 +31,7 @@ public class SceneRecordController {
             SceneRecordListVo sceneRecordListVo = sceneRecordService.records(sceneId);
             return HttpResult.ok(sceneRecordListVo);
         } catch (Exception e) {
-            return HttpResult.ok(e.getMessage());
+            return HttpResult.error(e.getMessage());
         }
     }
 }

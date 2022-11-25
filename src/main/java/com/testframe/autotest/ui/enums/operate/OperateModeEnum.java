@@ -27,13 +27,13 @@ public enum OperateModeEnum {
     BOX_NOT_SELECTED(41, "取消选中单选框", "notSelected"),
     BOX_SELECT_SINGLE_DROP(42, "单选选中下拉列表中的元素", "selectMultiDropList"),
     // JS弹窗操作
-    POP_ALERT(50, "选中单选框", "selected"),
+    POP_ALERT(50, "确认Alert弹窗", "handleAlert"),
     POP_CONFIRM(51, "操作confirm弹窗", "handleConfirm"),
     POP_PROMPT(52, "操作prompt弹窗", "handlePrompt"),
     // 脚本操作
-    EXECUTE_JS(60, "确认Alert弹窗", "handleAlert"),
+    EXECUTE_JS(60, "执行自定义js脚本", "executeDefineJs"),
     // 窗口操作
-    WINOW_SWITCH(70, "切换窗口", "switchWindow");
+    WINDOW_SWITCH(70, "切换窗口", "switchWindow");
 
     private int type;
 
@@ -85,7 +85,7 @@ public enum OperateModeEnum {
     }
 
     public static List<OperateModeEnum> window() {
-        return Arrays.asList(WINOW_SWITCH);
+        return Arrays.asList(WINDOW_SWITCH);
     }
 
 

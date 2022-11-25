@@ -13,6 +13,7 @@ public enum WaitModeEnum {
     Implict_Wait(10, "ImplictWait", "隐式等待", "隐式等待"),
 
     // 显式等待
+    Explicit_Wait(200, "ExplicitWait", "隐式等待", "隐式等待"),
     Presence_Element_Located(20,"ExplicitPresenceWait", "元素存在等待", "页面元素在页面中存在"),
     Element_Be_Clicked(21,"elementToBeSelected", "元素选中等待", "页面元素处于被选中态"),
 

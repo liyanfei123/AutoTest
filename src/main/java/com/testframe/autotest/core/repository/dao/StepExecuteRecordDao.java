@@ -27,7 +27,7 @@ public class StepExecuteRecordDao {
     public boolean batchSaveStepExecuteRecord(List<StepRecord> stepRecords) {
         Long currentTime = System.currentTimeMillis();
         stepRecords.forEach(stepRecord -> stepRecord.setCreateTime(currentTime));
-        return stepRecordMapper.batchInsertSelective(stepRecords) > 0 ? true : false;
+        return stepRecordMapper.batchInsert(stepRecords) > 0 ? true : false;
     }
 
     public StepRecord getStepRecordsById(Long stepId) {

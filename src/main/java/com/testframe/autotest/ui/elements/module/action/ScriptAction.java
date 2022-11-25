@@ -5,6 +5,7 @@ import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
  * @date:2022/10/27 21:12
  * @author: lyf
  */
+@Slf4j
 @Component
 public class ScriptAction extends BaseAction implements ActionI {
 
@@ -24,10 +26,11 @@ public class ScriptAction extends BaseAction implements ActionI {
         return OperateEnum.SCRIPT_OPERATE.getName();
     }
 
-    public static void executeJs(WebDriver driver, WebElement element, OperateData data) {
+    public static void executeDefineJs(WebDriver driver, WebElement element, OperateData data) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         try {
-            js.executeScript(data.getJsExt());
+            js.executeScript(data.getValue());
+            log.info("[ScriptAction:executeDefineJs] execute");
         } catch (Exception e) {
             e.printStackTrace();
             throw new SeleniumRunException("js文件操作失败");

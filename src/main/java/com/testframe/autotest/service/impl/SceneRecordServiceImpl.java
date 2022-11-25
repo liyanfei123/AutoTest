@@ -18,6 +18,7 @@ import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneRecordService;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +64,9 @@ public class SceneRecordServiceImpl implements SceneRecordService {
                 sceneRecordListVo.setSceneExeRecordDtos(Collections.EMPTY_LIST);
                 return sceneRecordListVo;
             }
+            // 执行中的数据返回
+
+
             List<Long> recordIds = new ArrayList<>(recordIdset);
             // 批量获取场景执行下的多个步骤执行顺序
             CompletableFuture<HashMap<Long, List<StepExecuteRecord>>> stepExecuteRecordsFuture = CompletableFuture
@@ -80,7 +84,8 @@ public class SceneRecordServiceImpl implements SceneRecordService {
                 return sceneRecordListVo;
             }).join();
         } catch (Exception e) {
-            log.error("[SceneDetailImpl:query] query execute records {} error, reason: ", sceneId, e.getMessage());
+            e.printStackTrace();
+            log.error("[SceneDetailImpl:query] query execute records {} error, reason: ", sceneId, e);
             throw new AutoTestException("查询执行记录失败");
         }
     }
@@ -89,13 +94,14 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     @Override
     public Long saveRecord(Long sceneId, List<Long> orderList, Integer status) {
         try {
-            log.info("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {}", sceneId);
             Scene scene = sceneDetailRepository.querySceneById(sceneId);
             Long currentTime = System.currentTimeMillis();
             SceneExecuteRecord sceneExecuteRecord = SceneExecuteRecord.build(scene);
             sceneExecuteRecord.setExecuteTime(currentTime);
             sceneExecuteRecord.setStepOrderList(orderList);
             sceneExecuteRecord.setStatus(status);
+            log.info("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneExecuteRecord = {}",
+                    JSON.toJSONString(sceneExecuteRecord));
             return sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecord);
         } catch (Exception e) {
             log.error("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneId {} error {}", sceneId, e);

@@ -15,7 +15,7 @@ public interface StepRecordMapper {
 
     int insertSelective(StepRecord record);
 
-    int batchInsertSelective(@Param("stepRecords") List<StepRecord> records);
+    int batchInsert(@Param("stepRecords") List<StepRecord> records);
 
     StepRecord selectByPrimaryKey(Long id);
 

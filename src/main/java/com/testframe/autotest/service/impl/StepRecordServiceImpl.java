@@ -51,6 +51,18 @@ public class StepRecordServiceImpl implements StepRecordService {
         }
     }
 
+    @Override
+    public boolean batchSaveRecord(List<StepExecuteRecord> stepExecuteRecords) {
+        try {
+            log.info("[StepRecordServiceImpl:batchSaveRecord] add step run records, data = {}",
+                    JSON.toJSONString(stepExecuteRecords));
+            return stepExecuteRecordRepository.batchSaveStepExecuteRecord(stepExecuteRecords);
+        } catch (Exception e) {
+            log.error("[StepRecordServiceImpl:batchSaveRecord] add step run records error, reason = {}", e);
+            throw new AutoTestException("批量保存步骤执行信息错误");
+        }
+    }
+
     private StepExecuteRecord build(Long recordId, StepExeInfo stepExeInfo, Integer status, String reason) {
         StepExecuteRecord stepExecuteRecord = new StepExecuteRecord();
         stepExecuteRecord.setRecordId(recordId);

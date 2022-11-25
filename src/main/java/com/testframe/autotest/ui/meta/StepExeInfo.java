@@ -12,6 +12,9 @@ public class StepExeInfo {
 
     private Integer operaType;
 
+    // 是否运行
+    private Integer status;
+
     // 定位方式
     private LocatorInfo locatorInfo;
 

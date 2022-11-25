@@ -5,6 +5,7 @@ import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
  * @date:2022/10/27 22:35
  * @author: lyf
  */
+@Slf4j
 @Component
 public class PopAction extends BaseAction implements ActionI {
 
@@ -34,6 +36,7 @@ public class PopAction extends BaseAction implements ActionI {
         try {
             Alert alert = driver.switchTo().alert();
             alert.accept();
+            log.info("[PopAction:handleAlert] handle alert");
         } catch (Exception e) {
             throw new SeleniumRunException("Alert弹窗操作失败");
         }
@@ -53,6 +56,7 @@ public class PopAction extends BaseAction implements ActionI {
             } else {
                 alert.dismiss();
             }
+            log.info("[PopAction:handleAlert] handle confirm");
         } catch (Exception e) {
             throw new SeleniumRunException("confirm弹窗操作失败");
         }
@@ -74,6 +78,7 @@ public class PopAction extends BaseAction implements ActionI {
             } else {
                 alert.dismiss();
             }
+            log.info("[PopAction:handleAlert] handle prompt");
         } catch (Exception e) {
             throw new SeleniumRunException("Prompt弹窗操作失败");
         }

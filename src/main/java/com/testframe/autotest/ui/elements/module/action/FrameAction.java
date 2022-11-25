@@ -5,6 +5,7 @@ import com.testframe.autotest.ui.elements.module.action.base.BaseAction;
 import com.testframe.autotest.ui.elements.module.action.base.ActionI;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.meta.OperateData;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
  * @date:2022/10/27 22:41
  * @author: lyf
  */
+@Slf4j
 @Component
 public class FrameAction extends BaseAction implements ActionI {
 
@@ -32,6 +34,7 @@ public class FrameAction extends BaseAction implements ActionI {
     public static void switchDefaultFrame(WebDriver driver, WebElement element, OperateData data) {
         try {
             driver.switchTo().defaultContent();
+            log.info("[FrameAction:switchDefaultFrame] switch to default frame");
         } catch (Exception e) {
             e.printStackTrace();
             throw new SeleniumRunException(String.format("切换到默认frame失败, e=%s", e.getMessage()));
@@ -48,10 +51,14 @@ public class FrameAction extends BaseAction implements ActionI {
         try {
             if (data.getValue() != null) {
                 driver.switchTo().frame(data.getValue());
+                log.info("[FrameAction:switchDefaultFrame] switch to frame by value = {}", data.getValue());
                 return;
             }
             if (data.getIndexes() != null) {
                 driver.switchTo().frame(data.getIndexes().get(0));
+                log.info("[FrameAction:switchDefaultFrame] switch to frame by indexes = {}",
+                        data.getIndexes().get(0));
+                return;
             }
         } catch (Exception e) {
             throw new SeleniumRunException("切换frame失败");
@@ -66,7 +73,8 @@ public class FrameAction extends BaseAction implements ActionI {
      */
     public static void switchFrameByElement(WebDriver driver, WebElement element, OperateData data) {
         try {
-                driver.switchTo().frame(element);
+            driver.switchTo().frame(element);
+            log.info("[FrameAction:switchDefaultFrame] switch to frame by element = {}",element);
         } catch (Exception e) {
             throw new SeleniumRunException("切换frame失败");
         }

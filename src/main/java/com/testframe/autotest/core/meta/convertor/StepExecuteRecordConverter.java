@@ -17,6 +17,7 @@ public class StepExecuteRecordConverter {
         StepRecord stepRecord = new StepRecord();
         stepRecord.setRecordId(stepExecuteRecord.getRecordId());
         stepRecord.setStepId(stepExecuteRecord.getStepId());
+        stepRecord.setStepName(stepExecuteRecord.getStepName());
         stepRecord.setReason(stepExecuteRecord.getReason());
         stepRecord.setStatus(stepExecuteRecord.getStatus());
         return stepRecord;

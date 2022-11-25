@@ -31,7 +31,7 @@ public class StringUtils {
     }
 
     public static List<Integer> strToList(String str) {
-        if (str.equals("")) {
+        if (str == null || str.equals("")) {
             return Collections.EMPTY_LIST;
         }
         String[] chs = str.split(",");

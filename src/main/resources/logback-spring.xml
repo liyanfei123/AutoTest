@@ -48,6 +48,7 @@
     </appender>
 
     <logger name="com.testframe.autotest" additivity="false" level="${log.level}">
+        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="stdout"/>
         <appender-ref ref="stderr"/>
     </logger>

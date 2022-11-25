@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Description:
- * 场景执行时的记录
+ * 场景执行时的单个记录
  * @date:2022/11/04 22:48
  * @author: lyf
  */
@@ -36,8 +36,8 @@ public class SceneExeRecordDto {
     public static void build(SceneExeRecordDto sceneExeRecordDto, SceneExecuteRecord sceneExecuteRecord) {
         sceneExeRecordDto.setSceneName(sceneExecuteRecord.getSceneName());
         sceneExeRecordDto.setTestUrl(sceneExecuteRecord.getUrl());
-        sceneExeRecordDto.setWaitType(sceneExeRecordDto.getWaitType());
-        sceneExeRecordDto.setWaitTime(sceneExeRecordDto.getWaitTime());
+        sceneExeRecordDto.setWaitType(sceneExecuteRecord.getWaitType());
+        sceneExeRecordDto.setWaitTime(sceneExecuteRecord.getWaitTime());
         sceneExeRecordDto.setSceneExeTime(sceneExecuteRecord.getExecuteTime());
     }
 }

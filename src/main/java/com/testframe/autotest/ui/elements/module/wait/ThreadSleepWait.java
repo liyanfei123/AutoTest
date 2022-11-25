@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 /**
  * Description:
  * 线程直接睡眠等待
@@ -19,7 +21,7 @@ public class ThreadSleepWait extends BaseWait implements WaitI {
 
     @Override
     public String waitIdentity() {
-        return WaitModeEnum.NO_WAIT.getWaitIdentity();
+        return WaitModeEnum.SLEEP_WAIT.getWaitIdentity();
     }
 
     @Override
@@ -34,5 +36,10 @@ public class ThreadSleepWait extends BaseWait implements WaitI {
         } catch (Exception e) {
             return;
         }
+    }
+
+    @Override
+    public void setTime(Integer time) {
+        return;
     }
 }

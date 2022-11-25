@@ -1,6 +1,7 @@
 package com.testframe.autotest.ui.elements.operate;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.ui.elements.ByFactory;
 import com.testframe.autotest.ui.elements.module.wait.*;
@@ -30,7 +31,7 @@ import java.util.List;
 @Component
 public class ChromeFindElement {
 
-    WebDriver driver;
+    private WebDriver driver;
 
     public ChromeFindElement() {}
 
@@ -54,9 +55,7 @@ public class ChromeFindElement {
             // 全局的等待方式
             globalWait = waitFactory.getWait(WaitModeEnum.getByType(waitInfo.getWaitMode()).getWaitIdentity(),
                     this.driver, waitInfo.getWaitTime());
-            if (waitInfo.getWaitTime() != null) {
-                globalWait.setTime(waitInfo.getWaitTime());
-            }
+            log.info("[ChromeFindElement:init] init global wait style, globalWait = {}", globalWait.waitIdentity());
         } catch (Exception e) {
             e.printStackTrace();
             throw new SeleniumRunException("寻找元素初始化失败");
@@ -70,21 +69,21 @@ public class ChromeFindElement {
         }
         try {
             By by = ByFactory.createBy(locatorInfo.getLocatedType(), express);
-            globalWait.wait(by);
+            globalWait.wait(by); // 先确保元素存在
             elements = driver.findElements(by);
             if (elements.isEmpty()) {
                 throw new SeleniumRunException(String.format("无当前控件, %s",express));
             }
-        } catch (NoSuchElementException e) {
+            List<Integer> indexes = locatorInfo.getIndexes();
+            if (indexes.isEmpty() || indexes == null) {
+                return elements.get(0);
+            }
+            return elements.get(indexes.get(0) - 1);
+        } catch (Exception e) {
             log.error("[FindElement:findElementsByType] can not find element by {}, reason = {}, stack = {}",
                     JSON.toJSONString(locatorInfo), e.getMessage(), e);
             throw new SeleniumRunException(String.format("查找控件 %s 出现异常", express));
         }
-        List<Integer> indexes = locatorInfo.getIndexes();
-        if (indexes.isEmpty() || indexes == null) {
-            return elements.get(0);
-        }
-        return elements.get(indexes.get(0) - 1);
     }
 
     public WebElement oldFindElementByType(LocatorInfo locatorInfo) {

@@ -80,50 +80,16 @@
     </trim>
   </insert>
 
-  <insert id="batchInsertSelective" parameterType="java.util.List">
-    <foreach collection="stepRecords" index="i" item="stepRecord" close=")" open="(" separator=",">
-      insert into AUTO_TEST_STEP_EXECUTE_RECORD
-      <trim prefix="(" suffix=")" suffixOverrides="," >
-        <if test="stepRecord.recordId != null" >
-          recordId,
-        </if>
-        <if test="stepRecord.stepId != null" >
-          stepId,
-        </if>
-        <if test="stepRecord.stepName != null" >
-          stepName,
-        </if>
-        <if test="stepRecord.reason != null" >
-          reason,
-        </if>
-        <if test="stepRecord.status != null" >
-          status,
-        </if>
-        <if test="stepRecord.createTime != null" >
-          createTime,
-        </if>
-      </trim>
-      <trim prefix="values (" suffix=")" suffixOverrides="," >
-
-        <if test="stepRecord.recordId != null" >
-          #{stepRecord.recordId,jdbcType=BIGINT},
-        </if>
-        <if test="stepRecord.stepId != null" >
-          #{stepRecord.stepId,jdbcType=BIGINT},
-        </if>
-        <if test="stepRecord.stepName != null" >
-          #{stepRecord.stepName,jdbcType=VARCHAR},
-        </if>
-        <if test="stepRecord.reason != null" >
-          #{stepRecord.reason,jdbcType=VARCHAR},
-        </if>
-        <if test="stepRecord.status != null" >
-          #{stepRecord.status,jdbcType=INTEGER},
-        </if>
-        <if test="stepRecord.createTime != null" >
-          #{stepRecord.createTime,jdbcType=BIGINT},
-        </if>
-      </trim>
+  <insert id="batchInsert"
+          parameterType="com.testframe.autotest.core.meta.po.StepRecord"
+          useGeneratedKeys="true" keyProperty="id">
+    insert into AUTO_TEST_STEP_EXECUTE_RECORD
+        (recordId,stepId, stepName, reason, status, createTime)
+    values
+    <foreach collection="stepRecords" item="stepRecord" separator=",">
+           (#{stepRecord.recordId,jdbcType=BIGINT},#{stepRecord.stepId,jdbcType=BIGINT},
+      #{stepRecord.stepName,jdbcType=VARCHAR},#{stepRecord.reason,jdbcType=VARCHAR},
+      #{stepRecord.status,jdbcType=INTEGER},  #{stepRecord.createTime,jdbcType=BIGINT})
     </foreach>
   </insert>
 
@@ -165,6 +131,6 @@
   <select id="getStepRecordByRecordId" resultType="com.testframe.autotest.core.meta.po.StepRecord">
     select *
     from AUTO_TEST_STEP_EXECUTE_RECORD
-    where sceneId = #{sceneId,jdbcType=BIGINT} order by createTime DESC limit #{offset},#{size}
+    where recordId = #{recordId,jdbcType=BIGINT} order by createTime DESC
   </select>
 </mapper>

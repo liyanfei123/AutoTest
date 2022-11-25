@@ -29,6 +29,7 @@ public class SceneExecuteRecordConverter {
         sceneRecord.setUrl(sceneExecuteRecord.getUrl());
         sceneRecord.setWaitType(sceneExecuteRecord.getWaitType());
         sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
+        sceneRecord.setStatus(sceneExecuteRecord.getStatus());
         sceneRecord.setExtInfo(sceneExecuteRecord.getExtInfo());
         sceneRecord.setOrderList(sceneExecuteRecord.getStepOrderList().toString());
         return sceneRecord;

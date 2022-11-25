@@ -1,6 +1,7 @@
 package com.testframe.autotest.ui.elements.module.wait;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
@@ -45,14 +46,14 @@ public class WaitFactory {
 //            }
 //        }
         waitTypes.forEach(e -> {
-            e.setIdentity(e.waitIdentity());
+            e.setIdentity(e.waitIdentity()); // 用于调试
             waitFactory.put(e.waitIdentity(), e);
         });
         log.info("register all wait form, {}", JSON.toJSONString(waitFactory));
     }
 
-    public WaitI getWait(String waitIdentity) {
-        return waitFactory.get(waitIdentity);
+    public WaitI getWait(String waitIdentity, WebDriver driver) {
+        return getWait(waitIdentity, driver, 0);
     }
 
     public WaitI getWait(String waitIdentity, WebDriver driver, Integer time) {

@@ -59,9 +59,9 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             }
             // 过滤掉执行状态关闭的步骤
             List<StepInfoDto> steps = sceneDetailInfo.getSteps();
-            steps = steps.stream().filter(step -> step.getStepStatus() == StepStatusEnum.OPEN.getType())
+            List<StepInfoDto> openSteps = steps.stream().filter(step -> step.getStepStatus() == StepStatusEnum.OPEN.getType())
                     .collect(Collectors.toList());
-            if (steps.isEmpty()) {
+            if (openSteps.isEmpty()) {
                 throw new AutoTestException("当前场景下无开启的步骤");
             }
             List<Long> stepOrderList = steps.stream().map(StepInfoDto::getStepId).collect(Collectors.toList());
@@ -78,7 +78,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 
     private void buildEvent(SeleniumRunEvent seleniumRunEvent, SceneInfoDto sceneInfoDto,
                             List<StepInfoDto> steps, Long recordId) {
-        SceneRunInfo sceneRunInfo = SceneRunInfo.build(sceneInfoDto);
+        List<Long> runOrderList = steps.stream().map(StepInfoDto::getStepId).collect(Collectors.toList());
+        SceneRunInfo sceneRunInfo = SceneRunInfo.build(sceneInfoDto, runOrderList);
         seleniumRunEvent.setSceneRunInfo(sceneRunInfo);
         SceneRunRecordInfo sceneRunRecordInfo = new SceneRunRecordInfo();
         sceneRunRecordInfo.setRecordId(recordId);
@@ -89,10 +90,13 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
         List<StepExeInfo> stepExeInfos = new ArrayList<>(steps.size());
         for (StepInfoDto stepInfoDto : steps) {
             StepUIInfo stepUIInfo = stepInfoDto.getStepUIInfo();
+
             StepExeInfo stepExeInfo = new StepExeInfo();
             stepExeInfo.setStepId(stepInfoDto.getStepId());
             stepExeInfo.setStepName(stepInfoDto.getStepName());
+            stepExeInfo.setStatus(stepInfoDto.getStepStatus());
             stepExeInfo.setOperaType(stepInfoDto.getStepUIInfo().getOperateType());
+
             // 根据操作类型来进行不同的包装
             if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.ASSERT.getType()) {
                 AssertData checkData = AssertData.build(stepUIInfo);
@@ -105,8 +109,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);
                 stepExeInfo.setCheckData(null);
-                // TODO: 2022/11/22 等待时间 
-                WaitInfo stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), 5);
+                WaitInfo stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), Integer.valueOf(stepUIInfo.getValue()));
                 stepExeInfo.setWaitInfo(stepWaitInfo);
             } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.OPERATE.getType()) {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);

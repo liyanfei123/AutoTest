@@ -16,8 +16,6 @@ public class BaseWait {
 
     public WebDriverWait driverWait;
 
-    public Integer time;
-
     public WebDriver driver;
 
     public String identity;
@@ -40,15 +38,16 @@ public class BaseWait {
         this.driver = webDriver;
     }
 
-    public void setTime(Integer time) {
-        this.time = time;
-    }
-
     public void setIdentity(String identity) {
         this.identity = identity;
     }
 
     public void setWebDriverWait(WebDriver driver, Integer time) {
-        this.driverWait = new WebDriverWait(driver, Duration.ofSeconds(time));
+        setWebDriver(driver);
+        if (time != null && time > 0) {
+            this.driverWait = new WebDriverWait(driver, Duration.ofSeconds(time));
+            return;
+        }
+        this.driverWait = new WebDriverWait(driver, Duration.ofSeconds(0));
     }
 }

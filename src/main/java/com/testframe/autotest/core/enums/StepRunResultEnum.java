@@ -5,11 +5,12 @@ package com.testframe.autotest.core.enums;
  */
 public enum StepRunResultEnum {
 
-    SUCCESS(0, "成功"),
-    FAIL(1, "失败"),
-    RUN(2, "执行中"),
-    STOP(3, "暂停"),
-    CLOSE(4, "终止"); // 因为失败导致未执行
+    SUCCESS(1, "成功"),
+    FAIL(2, "失败"),
+    RUN(3, "执行中"),
+    STOP(4, "暂停"),
+    CLOSE(5, "终止"), // 因为失败导致未执行
+    NORUN(6, "未执行"); // 初始状态
 
     private int type;
 
