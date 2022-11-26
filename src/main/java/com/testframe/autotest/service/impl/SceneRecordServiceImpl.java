@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepRunResultEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
@@ -56,9 +57,15 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             log.info("[SceneDetailImpl:query] query execute records in sceneId {}", sceneId);
             SceneRecordListVo sceneRecordListVo = new SceneRecordListVo();
             // 查询当前场景下的执行记录
-            HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId);
-            Set<Long> recordIdset = sceneExecuteRecordMap.keySet();
-            if (recordIdset.isEmpty()) {
+            PageQry pageQry = new PageQry(0, 20, -1L); // 最多返回20条
+            List<SceneExecuteRecord> sceneExecuteRecords = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, pageQry);
+            HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = new HashMap<>();
+            sceneExecuteRecords.forEach(sceneExecuteRecord -> {
+                sceneExecuteRecordMap.put(sceneExecuteRecord.getRecordId(), sceneExecuteRecord);
+            });
+            List<Long> recordIds = sceneExecuteRecords.stream().map(SceneExecuteRecord::getRecordId)
+                    .collect(Collectors.toList());
+            if (recordIds.isEmpty()) {
                 // 当前场景从未执行过
                 sceneRecordListVo.setSceneId(sceneId);
                 sceneRecordListVo.setSceneExeRecordDtos(Collections.EMPTY_LIST);
@@ -66,21 +73,22 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             }
             // 执行中的数据返回
 
+            // 步骤执行顺序
+            HashMap<Long, List<Long>> stepOrders = new HashMap<>();
+            recordIds.forEach(recordId -> {
+                stepOrders.put(recordId,
+                        sceneExecuteRecordMap.get(recordId).getStepOrderList());
+            } );
 
-            List<Long> recordIds = new ArrayList<>(recordIdset);
             // 批量获取场景执行下的多个步骤执行顺序
             CompletableFuture<HashMap<Long, List<StepExecuteRecord>>> stepExecuteRecordsFuture = CompletableFuture
                     .supplyAsync(() -> batchGetStepExeInfo(recordIds));
-            // 批量获取场景执行下的各个步骤的执行信息
-            CompletableFuture<HashMap<Long, SceneStepOrder>> stepOrderFuture = CompletableFuture
-                    .supplyAsync(() -> batchGetStepOrder(recordIds));
 
-            return CompletableFuture.allOf(stepExecuteRecordsFuture, stepOrderFuture).thenApply( e -> {
+            return CompletableFuture.allOf(stepExecuteRecordsFuture).thenApply( e -> {
                 HashMap<Long, List<StepExecuteRecord>> stepExecuteRecords = stepExecuteRecordsFuture.join();
-                HashMap<Long, SceneStepOrder> stepOrders = stepOrderFuture.join();
                 // 组装VO
                 sceneRecordListVo.setSceneId(sceneId);
-                toSceneDetailInfo(sceneRecordListVo, sceneExecuteRecordMap, stepExecuteRecords, stepOrders);
+                toSceneDetailInfo(recordIds, sceneRecordListVo, sceneExecuteRecordMap, stepExecuteRecords, stepOrders);
                 return sceneRecordListVo;
             }).join();
         } catch (Exception e) {
@@ -128,18 +136,16 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             log.error("[SceneRecordServiceImpl:updateRecord] update scene execute record, recordId {} error {}", recordId, e);
             throw new AutoTestException("更新场景执行记录失败");
         }
-
-
     }
 
     private HashMap<Long, List<StepExecuteRecord>> batchGetStepExeInfo(List<Long> recordIds) {
         HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordMap = stepExecuteRecordRepository.batchQueryStepExeRecord(recordIds);
         log.info("[SceneRecordServiceImpl:batchGetStepExeInfo] get step execute records: {}", JSON.toJSONString(stepExecuteRecordMap));
         return stepExecuteRecordMap;
-
     }
 
-    private HashMap<Long, SceneStepOrder> batchGetStepOrder(List<Long> recordIds) {
+    @Deprecated
+    private HashMap<Long, SceneStepOrder> batchGetRunStepOrder(List<Long> recordIds) {
         HashMap<Long, SceneStepOrder> sceneStepOrderMap = stepOrderRepository.bacthQueryStepExeOrderByRecordIds(recordIds);
         sceneStepOrderMap.forEach((recordId, sceneStepOrder) -> {
             List<Long> orderList = sceneStepOrder.getOrderList();
@@ -149,13 +155,13 @@ public class SceneRecordServiceImpl implements SceneRecordService {
         return sceneStepOrderMap;
     }
 
-    private void toSceneDetailInfo(SceneRecordListVo sceneRecordListVo,
+    private void toSceneDetailInfo(List<Long> recordIds, SceneRecordListVo sceneRecordListVo,
                                    HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap,
                                    HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordMap,
-                                   HashMap<Long, SceneStepOrder> stepOrders) {
+                                   HashMap<Long, List<Long>> stepOrders) {
         // 对场景步骤顺序重排
         stepExecuteRecordMap.forEach((recordId, stepExecuteRecords) -> {
-            List<Long> stepOrderList = stepOrders.get(recordId).getOrderList(); // 执行时的顺序
+            List<Long> stepOrderList = stepOrders.get(recordId); // 执行时的顺序
             // 使用匿名比较器排序
             Collections.sort(stepExecuteRecords, new Comparator<StepExecuteRecord>() {
                 @Override
@@ -165,12 +171,12 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             });
         });
         List<SceneExeRecordDto> sceneExeRecordDtos = new ArrayList<>(sceneExecuteRecordMap.size());
-        sceneExecuteRecordMap.forEach((recordId, sceneExecuteRecord) -> {
+        recordIds.forEach((recordId) -> {
             List<StepExecuteRecord> stepExecuteRecords = stepExecuteRecordMap.get(recordId);
             SceneExeRecordDto sceneExeRecordDto = new SceneExeRecordDto();
-            SceneExeRecordDto.build(sceneExeRecordDto, sceneExecuteRecord);
+            SceneExeRecordDto.build(sceneExeRecordDto, sceneExecuteRecordMap.get(recordId));
             // 根据步骤的执行状态来确定当前场景的执行结果
-            sceneExeRecordDto.setStatus(checkStatus(stepExecuteRecords));
+//            sceneExeRecordDto.setStatus(checkStatus(stepExecuteRecords));
             // 将步骤执行信息转化为dto
             List<StepExeRecordDto> stepExeRecordDtos = stepExecuteRecords.stream().map(StepExeRecordDto::build)
                     .collect(Collectors.toList());

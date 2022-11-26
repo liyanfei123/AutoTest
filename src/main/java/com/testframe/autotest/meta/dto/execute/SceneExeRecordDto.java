@@ -14,6 +14,9 @@ import java.util.List;
 @Data
 public class SceneExeRecordDto {
 
+    // 执行id，调试用
+    private Long recordId;
+
     // 场景名称
     private String sceneName;
 
@@ -34,10 +37,12 @@ public class SceneExeRecordDto {
     private List<StepExeRecordDto> stepExeRecordDtos;
 
     public static void build(SceneExeRecordDto sceneExeRecordDto, SceneExecuteRecord sceneExecuteRecord) {
+        sceneExeRecordDto.setRecordId(sceneExecuteRecord.getRecordId());
         sceneExeRecordDto.setSceneName(sceneExecuteRecord.getSceneName());
         sceneExeRecordDto.setTestUrl(sceneExecuteRecord.getUrl());
         sceneExeRecordDto.setWaitType(sceneExecuteRecord.getWaitType());
         sceneExeRecordDto.setWaitTime(sceneExecuteRecord.getWaitTime());
+        sceneExeRecordDto.setStatus(sceneExecuteRecord.getStatus());
         sceneExeRecordDto.setSceneExeTime(sceneExecuteRecord.getExecuteTime());
     }
 }

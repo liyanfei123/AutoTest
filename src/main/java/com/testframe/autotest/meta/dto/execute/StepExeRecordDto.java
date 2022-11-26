@@ -1,6 +1,7 @@
 package com.testframe.autotest.meta.dto.execute;
 
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 /**
@@ -11,6 +12,9 @@ import lombok.Data;
  */
 @Data
 public class StepExeRecordDto {
+
+    // 步骤id 调试用
+    private Long stepId;
 
     // 步骤名称
     private String stepName;
@@ -23,6 +27,7 @@ public class StepExeRecordDto {
 
     public static StepExeRecordDto build(StepExecuteRecord stepExecuteRecord) {
         StepExeRecordDto stepExeRecordDto = new StepExeRecordDto();
+        stepExeRecordDto.setStepId(stepExecuteRecord.getStepId());
         stepExeRecordDto.setStepName(stepExecuteRecord.getStepName());
         stepExeRecordDto.setStatus(stepExecuteRecord.getStatus());
         stepExeRecordDto.setErrInfo(stepExecuteRecord.getReason());

@@ -13,6 +13,8 @@ import java.util.List;
 @Data
 public class SceneExecuteRecord {
 
+    private Long recordId;
+
     private Long sceneId;
 
     private String sceneName;
@@ -34,6 +36,7 @@ public class SceneExecuteRecord {
 
     public static SceneExecuteRecord build(Scene scene) {
         SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();
+        sceneExecuteRecord.setRecordId(null);
         sceneExecuteRecord.setSceneId(scene.getId());
         sceneExecuteRecord.setSceneName(scene.getTitle());
         sceneExecuteRecord.setUrl(scene.getUrl());

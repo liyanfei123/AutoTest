@@ -58,15 +58,5 @@ public class SceneExecuteRecordRepository {
         return sceneExecuteRecords;
     }
 
-    public HashMap<Long, SceneExecuteRecord> querySceneExecuteRecordBySceneId(Long sceneId) {
-        PageQry pageQry = new PageQry(1, 20, -1L);
-        List<SceneExecuteRecord> sceneExecuteRecords = querySceneExecuteRecordBySceneId(sceneId, pageQry);
-        HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = new HashMap<>();
-        sceneExecuteRecords.forEach(sceneExecuteRecord -> {
-            sceneExecuteRecordMap.put(sceneExecuteRecord.getSceneId(), sceneExecuteRecord);
-        });
-        return sceneExecuteRecordMap;
-    }
-
 
 }

@@ -25,7 +25,9 @@ public class SceneExecuteRecordConverter {
 
     public SceneRecord toPo(SceneExecuteRecord sceneExecuteRecord) {
         SceneRecord sceneRecord = new SceneRecord();
+        sceneRecord.setId(null);
         sceneRecord.setSceneId(sceneExecuteRecord.getSceneId());
+        sceneRecord.setSceneName(sceneExecuteRecord.getSceneName());
         sceneRecord.setUrl(sceneExecuteRecord.getUrl());
         sceneRecord.setWaitType(sceneExecuteRecord.getWaitType());
         sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
@@ -37,6 +39,7 @@ public class SceneExecuteRecordConverter {
 
     public SceneExecuteRecord toSceneExecuteRecord(SceneRecord sceneRecord) {
         SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();
+        sceneExecuteRecord.setRecordId(sceneRecord.getId());
         sceneExecuteRecord.setSceneId(sceneRecord.getSceneId());
         sceneExecuteRecord.setSceneName(sceneRecord.getSceneName());
         sceneExecuteRecord.setUrl(sceneRecord.getUrl());
@@ -56,7 +59,6 @@ public class SceneExecuteRecordConverter {
         String tm = t.substring(1, t.length()-1);
         String[] ts = tm.split(",");
         System.out.println(t.substring(1, t.length()-1));
-
     }
 
 }

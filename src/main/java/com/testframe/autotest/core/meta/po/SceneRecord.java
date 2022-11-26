@@ -17,7 +17,6 @@ public class SceneRecord {
 
     private String orderList;
 
-    // 失败原因，待后续补充
     private String extInfo;
 
     private Long createTime;

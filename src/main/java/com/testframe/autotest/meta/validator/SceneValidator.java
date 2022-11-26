@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.validator;
 
+import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
@@ -55,6 +56,10 @@ public class SceneValidator {
         }
         if (sceneDetailRepository.querySceneById(sceneUpdateCmd.getId()) == null) {
             throw new AutoTestException("当前场景不存在");
+        }
+        Scene scene = sceneDetailRepository.querySceneById(sceneUpdateCmd.getId());
+        if (scene.getType() != sceneUpdateCmd.getType()) {
+            throw new AutoTestException("不允许更新场景类型");
         }
     }
 }

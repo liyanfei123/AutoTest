@@ -5,6 +5,7 @@ public class StepOrder {
 
     private Long sceneId;
 
+    // 废弃
     private Long recordId;
 
     private String orderList;
