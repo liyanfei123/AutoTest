@@ -28,6 +28,7 @@ public class MouseAction extends BaseAction implements ActionI {
 
     /**
      * 单击元素
+     * 默认是左击
      * @param driver
      * @param element
      * @param data
@@ -128,6 +129,5 @@ public class MouseAction extends BaseAction implements ActionI {
             throw new SeleniumRunException("在元素上方悬浮失败");
         }
     }
-
 
 }

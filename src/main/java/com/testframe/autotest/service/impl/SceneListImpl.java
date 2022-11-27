@@ -210,7 +210,7 @@ public class SceneListImpl implements SceneListService {
                 sceneSimpleInfoDto.setExecuteTime(0L);
             } else {
                 sceneSimpleInfoDto.setStatus(sceneExecuteDto.getStatus());
-                sceneExecuteDto.setExecuteTime(sceneExecuteDto.getExecuteTime());
+                sceneSimpleInfoDto.setExecuteTime(sceneExecuteDto.getExecuteTime());
             }
         }
     }

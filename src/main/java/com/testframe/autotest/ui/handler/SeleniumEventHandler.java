@@ -153,8 +153,11 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                 } catch (SeleniumRunException e) {
                     // 有异常进行步骤操作记录保存，并保存错误消息
                     sceneFailReason = e.getMessage();
+                    if (sceneFailReason == null || sceneFailReason.equals("")) {
+                        sceneFailReason = JSON.toJSONString(e);
+                    }
                     stepExecuteRecordMap.get(stepExeInfo.getStepId()).setStatus(StepRunResultEnum.FAIL.getType());
-                    stepExecuteRecordMap.get(stepExeInfo.getStepId()).setReason(e.getMessage());
+                    stepExecuteRecordMap.get(stepExeInfo.getStepId()).setReason(sceneFailReason);
                     log.info("[SeleniumEventHandler:eventHandler] run step fail, stepInfo = {}, reason = {}",
                             JSON.toJSONString(stepExeInfo), e);
                     break;
@@ -221,7 +224,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             throw new SeleniumRunException(e.getMessage());
         } catch (Exception e) {
             log.error("[SeleniumEventHandler:handler] unexpected exception, e = {}", e);
-            throw new AutoTestException(e.getMessage());
+            throw new SeleniumRunException(e.getMessage());
         }
     }
 
@@ -232,7 +235,8 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         log.info("[SeleniumEventHandler:runOperate] start run operate, operateData = {}",
                 JSON.toJSONString(operateData));
         try {
-            if (element == null) {
+            if (element == null &&
+                    !OperateModeEnum.OPERATE_SKIP_ELEMENT.contains(operateData.getOperateMode())) {
                 log.error("[SeleniumEventHandler:handler] no element can be operate");
                 throw new SeleniumRunException("没有可被执行的元素，请填写正确的定位方式");
             }

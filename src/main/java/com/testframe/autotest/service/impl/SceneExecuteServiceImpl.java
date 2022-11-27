@@ -109,7 +109,12 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);
                 stepExeInfo.setLocatorInfo(locatorInfo);
                 stepExeInfo.setCheckData(null);
-                WaitInfo stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), Integer.valueOf(stepUIInfo.getValue()));
+                WaitInfo stepWaitInfo;
+                if (stepUIInfo.getValue() == null) {
+                    stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), 0);
+                } else {
+                    stepWaitInfo = new WaitInfo(stepUIInfo.getWaitMode(), Integer.valueOf(stepUIInfo.getValue()));
+                }
                 stepExeInfo.setWaitInfo(stepWaitInfo);
             } else if (stepInfoDto.getStepUIInfo().getOperateType() == OperateTypeEnum.OPERATE.getType()) {
                 LocatorInfo locatorInfo = LocatorInfo.build(stepUIInfo, sceneInfoDto);

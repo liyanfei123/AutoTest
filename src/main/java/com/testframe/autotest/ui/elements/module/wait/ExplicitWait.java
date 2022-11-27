@@ -34,9 +34,10 @@ public class ExplicitWait extends BaseWait implements WaitI {
     @Override
     public void wait(By by) {
         try {
-            log.info("[ExplicitWait:wait] wait by by, by = {}", JSON.toJSONString(by));
+            log.info("[ExplicitWait:wait] wait by by, by = {}", by);
             this.driverWait.until(ExpectedConditions.presenceOfElementLocated(by));
         } catch (Exception e) {
+            log.error("[ExplicitWait:wait] wait by by error, reason = {}", e);
             throw new SeleniumRunException("显式等待-元素控件未出现");
         }
     }

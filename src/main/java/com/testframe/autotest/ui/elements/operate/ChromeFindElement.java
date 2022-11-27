@@ -78,6 +78,9 @@ public class ChromeFindElement {
             if (indexes.isEmpty() || indexes == null) {
                 return elements.get(0);
             }
+            if (indexes.get(0) == -1) { // 选中最后一个
+                return elements.get(elements.size()-1);
+            }
             return elements.get(indexes.get(0) - 1);
         } catch (Exception e) {
             log.error("[FindElement:findElementsByType] can not find element by {}, reason = {}, stack = {}",

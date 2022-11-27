@@ -12,7 +12,7 @@ import org.testng.Assert;
 
 /**
  * Description:
- *
+ * 元素值验证方法
  * @date:2022/10/27 21:26
  * @author: lyf
  */

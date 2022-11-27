@@ -32,7 +32,7 @@ public class SceneExecuteDto {
     public static SceneExecuteDto toDto(SceneExecuteRecord sceneExecuteRecord) {
         SceneExecuteDto sceneExecuteDto = new SceneExecuteDto();
         sceneExecuteDto.setStatus(sceneExecuteRecord.getStatus());
-        sceneExecuteDto.setExecuteTime(sceneExecuteDto.getExecuteTime());
+        sceneExecuteDto.setExecuteTime(sceneExecuteRecord.getExecuteTime());
 //        List<Integer> stepStatus = sceneExecuteRecord.getStepRecords().stream().map(StepExecuteRecord::getStatus).collect(Collectors.toList());
 //        if (stepStatus.isEmpty()) {
 //            sceneExecuteDto.setStatus(SceneStatusEnum.NEVER.getType());

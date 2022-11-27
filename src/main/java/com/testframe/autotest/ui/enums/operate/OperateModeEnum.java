@@ -35,6 +35,14 @@ public enum OperateModeEnum {
     // 窗口操作
     WINDOW_SWITCH(70, "切换窗口", "switchWindow");
 
+    // 当操作类型遇到元素null的时候可跳过的操作类型
+    public final static List<Integer> OPERATE_SKIP_ELEMENT = Arrays.asList(
+            OperateModeEnum.KEYBOARD_CTRL.getType(), OperateModeEnum.KEYBOARD_CTRL.getType(),
+            OperateModeEnum.KEYBOARD_SHIFT.getType(), OperateModeEnum.KEYBOARD_ALT.getType(),
+            OperateModeEnum.KEYBOARD_ENTER.getType(), OperateModeEnum.KEYBOARD_CTRLCV.getType(),
+            OperateModeEnum.FRAME_FRAME_BYID.getType(), OperateModeEnum.FRAME_DEFAULT_FRAME.getType(),
+            OperateModeEnum.EXECUTE_JS.getType(), OperateModeEnum.WINDOW_SWITCH.getType());
+
     private int type;
 
     private String name;

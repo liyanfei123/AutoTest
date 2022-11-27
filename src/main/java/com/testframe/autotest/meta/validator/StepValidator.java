@@ -8,6 +8,7 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
 import com.testframe.autotest.meta.model.StepInfoModel;
+import com.testframe.autotest.ui.enums.OperateTypeEnum;
 import com.testframe.autotest.ui.enums.check.AssertModeEnum;
 import com.testframe.autotest.ui.enums.operate.OperateModeEnum;
 import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
@@ -49,16 +50,28 @@ public class StepValidator {
         }
         StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
         // 验证元素操作类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
+                stepInfoModel.getOperateMode() == null) {
+            throw new AutoTestException("请输入元素操作类型");
+        }
         if (stepInfoModel.getOperateMode() != null &&
                 OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
             throw new AutoTestException("当前元素操作类型不被支持");
         }
         // 验证元素等待类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
+                stepInfoModel.getWaitMode() == null) {
+            throw new AutoTestException("请输入元素等待类型");
+        }
         if (stepInfoModel.getWaitMode() != null &&
                 WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
             throw new AutoTestException("当前元素操作类型不被支持");
         }
         // 验证元素检验类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
+                stepInfoModel.getAssertMode() == null) {
+            throw new AutoTestException("请输入元素检验类型");
+        }
         if (stepInfoModel.getAssertMode() != null &&
                 AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
             throw new AutoTestException("当前元素检验类型不被支持");

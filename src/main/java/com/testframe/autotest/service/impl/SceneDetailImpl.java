@@ -72,6 +72,7 @@ public class SceneDetailImpl implements SceneDetailService {
         log.info("[SceneDetailImpl:update] update scene, sceneUpdateCmd = {}", JSON.toJSONString(sceneUpdateCmd));
         Long sceneId = sceneUpdateCmd.getId();
         try {
+            sceneUpdateCmd.getStepUpdateCmds().forEach(stepUpdateCmd -> stepUpdateCmd.setSceneId(sceneId));
             // 更新场景概要
             sceneValidator.checkSceneUpdate(sceneUpdateCmd);
             stepValidator.checkStepUpdates(sceneUpdateCmd.getStepUpdateCmds());
@@ -91,7 +92,7 @@ public class SceneDetailImpl implements SceneDetailService {
             // 更新执行步骤顺序
             stepOrderService.updateStepOrder(sceneId, stepIds);
         } catch (AutoTestException e) {
-            log.error("[SceneDetailImpl:update] update scene error, reason: {}", e);
+            log.error("[SceneDetailImpl:update] update scene error, reason: ", e);
             throw new AutoTestException(e.getMessage());
         }
         return true;
