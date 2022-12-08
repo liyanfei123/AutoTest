@@ -50,7 +50,7 @@ public class StepOrderImpl implements StepOrderService {
     public void updateStepOrder(Long sceneId, Long stepId) {
         try {
             List<Long> stepOrderList;
-            SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
+            SceneStepOrder sceneStepOrder = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             if (sceneStepOrder == null || sceneStepOrder.getOrderList().isEmpty()) {
                 stepOrderList = new ArrayList<Long>(){{add(stepId);}};
             } else {
@@ -84,7 +84,7 @@ public class StepOrderImpl implements StepOrderService {
     @Override
     public List<Long> queryNowStepOrder(Long sceneId) {
         try {
-            SceneStepOrder sceneStepOrder = getStepBeforeOrder(sceneId);
+            SceneStepOrder sceneStepOrder = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             List<Long> stepOrderList = sceneStepOrder.getOrderList();
             log.info("[StepOrderImpl:queryNowStepOrder] step order {}", JSON.toJSONString(stepOrderList));
             return stepOrderList;
@@ -97,6 +97,7 @@ public class StepOrderImpl implements StepOrderService {
 
 
     // 获取执行前的顺序
+    @Deprecated
     private SceneStepOrder getStepBeforeOrder(Long sceneId) {
         List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
         sceneStepOrders = sceneStepOrders.stream().filter(

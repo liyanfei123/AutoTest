@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SceneDetailConvertor {
 
-
     public SceneDetail toPO(Scene scene) {
         SceneDetail sceneDetail = new SceneDetail();
         sceneDetail.setId(scene.getId());

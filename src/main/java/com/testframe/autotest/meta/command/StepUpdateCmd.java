@@ -2,11 +2,15 @@ package com.testframe.autotest.meta.command;
 
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.meta.bo.Step;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class StepUpdateCmd {
 
     private Long sceneId;
@@ -31,5 +35,7 @@ public class StepUpdateCmd {
         }
         return step;
     }
+
+
 
 }

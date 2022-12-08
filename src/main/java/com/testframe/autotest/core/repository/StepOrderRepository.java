@@ -1,6 +1,7 @@
 package com.testframe.autotest.core.repository;
 
 import com.testframe.autotest.core.enums.StepOrderEnum;
+import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.convertor.SceneStepOrderConverter;
 import com.testframe.autotest.core.meta.po.StepOrder;
 import com.testframe.autotest.core.repository.dao.StepOrderDao;
@@ -50,6 +51,20 @@ public class StepOrderRepository {
             return Collections.EMPTY_LIST;
         }
         return sceneStepOrders;
+    }
+
+    public SceneStepOrder queryBeforeStepRunOrder(Long sceneId) {
+        List<SceneStepOrder> sceneStepOrders = queryStepOrderBySceneId(sceneId);
+        if (sceneStepOrders.isEmpty()) {
+            return null;
+        }
+        sceneStepOrders = sceneStepOrders.stream().filter(sceneStepOrder -> sceneStepOrder.getType().equals(
+                StepOrderEnum.BEFORE.getType()
+        )).collect(Collectors.toList());
+        if (sceneStepOrders.size() > 1) {
+            throw new AutoTestException("当前场景执行顺序存在脏数据");
+        }
+        return sceneStepOrders.get(0);
     }
 
     public HashMap<Long, SceneStepOrder> bacthQueryStepExeOrderByRecordIds(List<Long> recordIds) {

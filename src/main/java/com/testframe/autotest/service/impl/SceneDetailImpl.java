@@ -83,7 +83,6 @@ public class SceneDetailImpl implements SceneDetailService {
             }
             List<Step> steps = new ArrayList<>();
             for (StepUpdateCmd stepUpdateCmd : sceneUpdateCmd.getStepUpdateCmds()) {
-                stepUpdateCmd.setSceneId(sceneId);
                 Step step = StepUpdateCmd.toStep(stepUpdateCmd);
                 steps.add(step);
             }
@@ -110,17 +109,14 @@ public class SceneDetailImpl implements SceneDetailService {
             SceneDetailInfo sceneDetailInfo = new SceneDetailInfo();
             sceneDetailInfo.setScene(sceneInfoDto);
             // 查询步骤执行信息
-            // TODO: 2022/11/13 可以先查询步骤执行顺序，再查询步骤详情 
-//            List<Long> stepIds = stepOrderService.queryNowStepOrder(sceneId);
-            List<Long> stepIds = sceneStepService.queryStepBySceneId(sceneId);
+            List<Long> stepIds = stepOrderService.queryNowStepOrder(sceneId);
             if (stepIds.isEmpty()) {
                 sceneDetailInfo.setSteps(null);
             } else {
                 HashMap<Long, StepInfoDto> stepInfoDtoMap = stepDetailService.batchQueryStepDetail(stepIds);
-                List<Long> stepOrderList = stepOrderService.queryNowStepOrder(sceneId);
-                List<StepInfoDto> steps = new ArrayList<>(stepOrderList.size());
+                List<StepInfoDto> steps = new ArrayList<>(stepIds.size());
                 // 根据执行步骤编排信息
-                stepOrderList.forEach(stepId -> {
+                stepIds.forEach(stepId -> {
                     StepInfoDto stepInfoDto = stepInfoDtoMap.get(stepId);
                     if (stepInfoDto == null) {
                         throw new AutoTestException("当前场景下步骤被删除，数据有误");
@@ -136,17 +132,6 @@ public class SceneDetailImpl implements SceneDetailService {
             throw new AutoTestException(e.getMessage());
         }
     }
-
-    private List<Long> orderListStr(String stepIdsStr) {
-        List<Long> stepIds = new ArrayList<>();
-        String tm = stepIdsStr.substring(1, stepIdsStr.length()-1);
-        String[] ts = tm.split(",");
-        for (String k : ts) {
-            stepIds.add(Long.parseLong(k));
-        }
-        return stepIds;
-    }
-
 
     private Scene build(SceneCreateCmd sceneCreateCmd) {
         Scene sceneCreate = new Scene();

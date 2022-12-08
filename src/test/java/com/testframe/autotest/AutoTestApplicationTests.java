@@ -2,6 +2,7 @@ package com.testframe.autotest;
 
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
@@ -12,8 +13,14 @@ import java.util.List;
 @SpringBootTest
 class AutoTestApplicationTests {
 
+    @Value("copy.switch")
+    private Boolean copySwitch;
+
     @Test
     void contextLoads() {
+        System.out.println(copySwitch);
+    }
+    void contextLoads2() {
         List<Person> list = new ArrayList<Person>() {{
             add(new Person(1, "北京"));
             add(new Person(2, "西安"));

@@ -37,7 +37,7 @@ public class SceneStepImpl implements SceneStepService {
 
     @Override
     public List<Long> updateSceneStep(Long sceneId, List<Step> steps) {
-        // 查询当前场景下关联的步骤
+        // 查询当前场景下已经关联的步骤
         HashMap<Long,SceneStepRel> existedStepMap = new HashMap<>();
         List<Long> stepIds = new ArrayList<>(); // 步骤执行顺序
         SceneStepRel sceneStepRel;

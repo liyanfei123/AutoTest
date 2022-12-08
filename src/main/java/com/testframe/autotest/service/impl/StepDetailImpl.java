@@ -103,6 +103,7 @@ public class StepDetailImpl implements StepDetailService {
                 steps.add(step);
             });
             if (sceneId == null) {
+                // 首次创建
                 for (Step step : steps) {
                     Long stepId = stepDetailRepository.saveStep(step);
                     stepIds.add(stepId);
@@ -116,7 +117,6 @@ public class StepDetailImpl implements StepDetailService {
                     stepIds.add(sceneId);
                     stepDetailRepository.update(step);
                 }
-                // TODO: 2022/11/11 需要添加执行状态的更新 
             }
         } catch (AutoTestException e) {
             log.error("[StepDetailImpl:batchSaveStepDetail] create step, reason = {}", e.getMessage());
