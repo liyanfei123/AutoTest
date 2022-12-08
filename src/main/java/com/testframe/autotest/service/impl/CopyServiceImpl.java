@@ -147,7 +147,7 @@ public class CopyServiceImpl implements CopyService {
                 newSceneStepRel.setStatus(orgSceneStepRel.getStatus());
                 sceneStepRepository.saveSceneStep(newSceneStepRel);
                 // 更新场景的执行顺序
-                SceneStepOrder sceneStepOrder = stepOrderRepository.queryBeforeStepRunOrder(sceneId)
+                SceneStepOrder sceneStepOrder = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
                 List<Long> newStepIds;
                 if (sceneStepOrder == null) {
                     // 新增执行顺序
