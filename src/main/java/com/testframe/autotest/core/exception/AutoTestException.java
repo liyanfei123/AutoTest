@@ -1,5 +1,8 @@
 package com.testframe.autotest.core.exception;
 
+import lombok.Data;
+
+@Data
 public class AutoTestException extends RuntimeException {
 
     private Integer errCode;

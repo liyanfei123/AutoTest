@@ -75,6 +75,5 @@ public class StepController {
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
-
     }
 }

@@ -14,14 +14,14 @@ import javax.servlet.http.HttpServletRequest;
  * @date:2021/07/29 16:36
  * @author: lyf
  */
-@ControllerAdvice(basePackages = {"com.team"})
+@ControllerAdvice(basePackages = {"com.testframe.autotest"})
 public class GlobalDefaultExceptionHandler {
 
     @ExceptionHandler({AutoTestException.class})
     @ResponseBody
-    public ErrorInfo<Object> defaultErrorhandler(HttpServletRequest request, Exception e) {
+    public ErrorInfo<Object> defaultErrorhandler(HttpServletRequest request, AutoTestException e) {
         ErrorInfo errorInfo = new ErrorInfo();
-        errorInfo.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        errorInfo.setCode(e.getErrCode());
         errorInfo.setMsg(e.getMessage());
         errorInfo.setUrl(request.getRequestURI());
         return errorInfo;
