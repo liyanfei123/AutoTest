@@ -9,6 +9,7 @@
     <result column="waitType" property="waitType" jdbcType="INTEGER" />
     <result column="waitTime" property="waitTime" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
     <result column="orderList" property="orderList" jdbcType="VARCHAR" />
     <result column="extInfo" property="extInfo" jdbcType="VARCHAR" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
@@ -33,12 +34,13 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_SCENE_EXECUTE_RECORD (sceneId, sceneName, url, 
-      waitType, waitTime, status, 
+      waitType, waitTime, status, type,
       orderList, extInfo, createTime
       )
     values (#{sceneId,jdbcType=BIGINT}, #{sceneName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, 
-      #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{orderList,jdbcType=VARCHAR}, #{extInfo,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}
+      #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+      #{type,jdbcType=INTEGER}, #{orderList,jdbcType=VARCHAR}, #{extInfo,jdbcType=VARCHAR},
+      #{createTime,jdbcType=BIGINT}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
@@ -64,6 +66,9 @@
       </if>
       <if test="status != null" >
         status,
+      </if>
+      <if test="type != null" >
+        type,
       </if>
       <if test="orderList != null" >
         orderList,
@@ -93,6 +98,9 @@
       </if>
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
       </if>
       <if test="orderList != null" >
         #{orderList,jdbcType=VARCHAR},
@@ -126,6 +134,9 @@
       <if test="status != null" >
         status = #{status,jdbcType=INTEGER},
       </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
       <if test="orderList != null" >
         orderList = #{orderList,jdbcType=VARCHAR},
       </if>
@@ -146,6 +157,7 @@
       waitType = #{waitType,jdbcType=INTEGER},
       waitTime = #{waitTime,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
       orderList = #{orderList,jdbcType=VARCHAR},
       extInfo = #{extInfo,jdbcType=VARCHAR},
       createTime = #{createTime,jdbcType=BIGINT}
@@ -155,6 +167,13 @@
   <select id="getRecordBySceneId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
-    where sceneId = #{sceneId,jdbcType=BIGINT} order by createTime DESC limit #{pageQry.offset},#{pageQry.size}
+    where sceneId = #{sceneId,jdbcType=BIGINT} AND type = #{pageQry.type,jdbcType=INTEGER}
+    order by createTime DESC limit #{pageQry.offset},#{pageQry.size}
+  </select>
+
+  <select id="getSceneRecordByRecordId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
+    select *
+    from AUTO_TEST_SCENE_EXECUTE_RECORD
+    where recordId = #{recordId,jdbcType=BIGINT}
   </select>
 </mapper>

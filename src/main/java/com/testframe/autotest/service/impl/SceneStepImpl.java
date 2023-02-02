@@ -173,23 +173,21 @@ public class SceneStepImpl implements SceneStepService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void batchSaveSceneStep(List<Long> stepIds, Long sceneId) {
+    public void batchSaveSceneStep(List<Step> steps, Long sceneId) {
         try {
             log.info("[SceneStepImpl:batchSaveSceneStep] bacth save step scene rel, steps {}, scene {}",
-                    JSON.toJSONString(stepIds), sceneId);
+                    JSON.toJSONString(steps), sceneId);
             List<SceneStepRel> newSceneStepRels = new ArrayList<>();
-            for (Long stepId : stepIds) {
-                SceneStepRel sceneStepRel = new SceneStepRel();
-                sceneStepRel.setSceneId(stepId);
-                sceneStepRel.setStatus(StepStatusEnum.OPEN.getType());
-                sceneStepRel.setStepId(stepId);
+            for (Step step : steps) {
+                SceneStepRel sceneStepRel = SceneStepRel.build(sceneId, step);
+                sceneStepRel.setStatus(StepStatusEnum.OPEN.getType()); // 步骤默认为开启状态
                 sceneStepRel.setIsDelete(0);
                 newSceneStepRels.add(sceneStepRel);
             }
             sceneStepRepository.batchSaveSceneStep(newSceneStepRels);
         } catch (Exception e) {
             log.info("[SceneStepImpl:batchSaveSceneStep] bacth save step scene rel, steps {}, scene {}, error, ",
-                    JSON.toJSONString(stepIds), sceneId, e);
+                    JSON.toJSONString(steps), sceneId, e);
             throw new AutoTestException("批量保存步骤关联关系失败");
         }
 

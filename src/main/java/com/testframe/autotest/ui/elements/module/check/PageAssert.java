@@ -35,7 +35,7 @@ public class PageAssert extends BaseAssert implements AssertI {
     public static Boolean assertPageTitle(WebDriver driver, WebElement element, AssertData assertData) {
         try {
             String title = driver.getTitle();
-            Assert.assertEquals(title, assertData.getExpectString());
+            Assert.assertEquals(title, assertData.getExpectString().trim());
             log.info("[PageAssert:assertPageTitle] now value = {}, expected value = {}",
                     title, assertData.getExpectString());
             return true;
@@ -51,13 +51,15 @@ public class PageAssert extends BaseAssert implements AssertI {
      * @param assertData
      * @return
      */
-    public static Boolean assetPageSource(WebDriver driver, WebElement element, AssertData assertData) {
+    public static Boolean assertPageSource(WebDriver driver, WebElement element, AssertData assertData) {
         String pageSource = driver.getPageSource();
+//        log.info("[PageAssert:assetPageSource] pageSource={}, assertData={}", pageSource, assertData.getExpectString());
         try {
-            Assert.assertTrue(pageSource.contains(assertData.getExpectString()));
+            Assert.assertTrue(pageSource.contains(assertData.getExpectString().trim()));
             log.info("[PageAssert:assetPageSource] expected value = {}", assertData.getExpectString());
             return true;
         } catch (AssertionError e) {
+            e.printStackTrace();
             return false;
         }
     }

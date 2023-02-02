@@ -18,6 +18,7 @@ CREATE TABLE AUTO_TEST_SCENE_DETAIL(
 CREATE TABLE AUTO_TEST_STEP_DETAIL(
       id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
       stepName VARCHAR(1024) NULL DEFAULT '' COMMENT '步骤名称' ,
+      sceneId BIGINT NULL  DEFAULT 0 COMMENT '子场景id' ,
       stepInfo varchar(10000) NULL DEFAULT '' COMMENT '步骤执行信息' ,
       createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
       updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
@@ -30,6 +31,7 @@ CREATE TABLE AUTO_TEST_SCENE_STEP(
      sceneId BIGINT NOT NULL  DEFAULT 0 COMMENT '场景id' ,
      stepId BIGINT NOT NULL  DEFAULT 0 COMMENT '步骤id' ,
      status INT NULL  DEFAULT 0 COMMENT '状态 0:未启用,1:启用' ,
+     type INT NULL  DEFAULT 0 COMMENT '步骤类型 1:单步骤,2:子场景' ,
      isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
      createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
      updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
@@ -57,6 +59,7 @@ CREATE TABLE AUTO_TEST_SCENE_EXECUTE_RECORD(
    waitType INT NULL  DEFAULT 1 COMMENT '等待方式 执行时所定义的超时等待方式' ,
    waitTime INT NULL  DEFAULT 0 COMMENT '等待时间 执行时所定义的超时等待时间' ,
    status INT NULL  DEFAULT 0 COMMENT '执行结果 0:成功,1:失败,2:中止' ,
+   type INT NULL  DEFAULT 0 COMMENT '执行类型 1:单独执行,2:子场景执行' ,
    orderList VARCHAR(10000) NULL  DEFAULT '[]' COMMENT '步骤执行顺序' ,
    extInfo VARCHAR(10000) NULL  DEFAULT '' COMMENT '失败原因' ,
    createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
@@ -67,6 +70,7 @@ CREATE TABLE AUTO_TEST_STEP_EXECUTE_RECORD(
   id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
   recordId BIGINT NOT NULL DEFAULT 0  COMMENT '场景执行记录id' ,
   stepId BIGINT NOT NULL DEFAULT 0  COMMENT '步骤id' ,
+  sceneRecordId BIGINT NOT NULL DEFAULT 0  COMMENT '子场景执行记录id' ,
   stepName VARCHAR(1024) NULL DEFAULT '' COMMENT '步骤名称',
   reason VARCHAR(10000) NULL DEFAULT ''  COMMENT '失败原因' ,
   status INT NULL DEFAULT 0  COMMENT '执行结果 0:成功，1:失败，2:跳过，3:中止' ,
@@ -79,3 +83,9 @@ alter table AUTO_TEST_STEP_EXECUTE_RECORD add column `stepName` VARCHAR(1024) NO
 -- 步骤执行记录表中需增加步骤名称，用于返回执行结果记录
 
 alter table AUTO_TEST_STEP_ORDER ADD COLUMN `recordId` BIGINT NOT NULL  DEFAULT 0 COMMENT '场景执行记录id' after `sceneId`;
+
+-- 增加子场景执行功能
+alter table AUTO_TEST_STEP_DETAIL ADD COLUMN `sceneId` BIGINT NOT NULL DEFAULT 0 COMMENT '子场景id' after `stepName`;
+alter table AUTO_TEST_SCENE_STEP ADD COLUMN `type` INT NOT NULL DEFAULT 1 COMMENT '步骤类型 1:单步骤,2:子场景' after `stepId`;
+alter table AUTO_TEST_STEP_EXECUTE_RECORD ADD COLUMN `sceneRecordId` BIGINT NOT NULL DEFAULT 0 COMMENT '子场景执行记录id' after `stepId`;
+alter table AUTO_TEST_SCENE_EXECUTE_RECORD ADD COLUMN `type` INT NOT NULL DEFAULT 1 COMMENT '执行类型 1:单独执行,2:子场景执行' after `status`;

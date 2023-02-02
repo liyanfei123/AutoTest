@@ -102,6 +102,7 @@ public class SceneDetailRepository {
         scene.setWaitType(sceneDetail.getWaitType());
         scene.setWaitTime(sceneDetail.getWaitTime());
         scene.setCreateBy(sceneDetail.getCreateBy());
+        scene.setIsDelete(sceneDetail.getIsDelete());
         return scene;
 
     }

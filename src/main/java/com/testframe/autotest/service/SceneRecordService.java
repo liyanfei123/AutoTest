@@ -14,7 +14,7 @@ public interface SceneRecordService {
 
     SceneRecordListVo records(Long sceneId);
 
-    Long saveRecord(Long sceneId, List<Long> stepOrderList, Integer status);
+    Long saveRecord(Long sceneId, List<Long> stepOrderList, Integer status, Integer type);
 
     Boolean updateRecord(Long recordId, Integer status, String extInfo);
 

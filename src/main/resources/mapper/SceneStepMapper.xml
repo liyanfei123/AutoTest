@@ -6,6 +6,7 @@
     <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="stepId" property="stepId" jdbcType="BIGINT" />
     <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
     <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
@@ -28,11 +29,12 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_SCENE_STEP (sceneId, stepId, status, 
+    insert into AUTO_TEST_SCENE_STEP (sceneId, stepId, status, type,
       isDelete, createTime, updateTime
       )
-    values (#{sceneId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, 
-      #{isDelete,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT}
+    values (#{sceneId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER},
+      #{type,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT},
+      #{updateTime,jdbcType=BIGINT}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneStep" >
@@ -49,6 +51,9 @@
       </if>
       <if test="status != null" >
         status,
+      </if>
+      <if test="type != null" >
+        type,
       </if>
       <if test="isDelete != null" >
         isDelete,
@@ -69,6 +74,9 @@
       </if>
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
       </if>
       <if test="isDelete != null" >
         #{isDelete,jdbcType=INTEGER},
@@ -93,6 +101,9 @@
       <if test="status != null" >
         status = #{status,jdbcType=INTEGER},
       </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
       <if test="isDelete != null" >
         isDelete = #{isDelete,jdbcType=INTEGER},
       </if>
@@ -110,6 +121,7 @@
     set sceneId = #{sceneId,jdbcType=BIGINT},
       stepId = #{stepId,jdbcType=BIGINT},
       status = #{status,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
       isDelete = #{isDelete,jdbcType=INTEGER},
       createTime = #{createTime,jdbcType=BIGINT},
       updateTime = #{updateTime,jdbcType=BIGINT}

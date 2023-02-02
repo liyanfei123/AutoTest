@@ -5,6 +5,7 @@
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="recordId" property="recordId" jdbcType="BIGINT" />
     <result column="stepId" property="stepId" jdbcType="BIGINT" />
+    <result column="sceneRecordId" property="sceneRecordId" jdbcType="BIGINT" />
     <result column="stepName" property="stepName" jdbcType="VARCHAR" />
     <result column="reason" property="reason" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="INTEGER" />
@@ -30,8 +31,9 @@
     </selectKey>
     insert into AUTO_TEST_STEP_EXECUTE_RECORD (recordId, stepId, stepName, reason,
       status, createTime)
-    values (#{recordId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{stepName,jdbcType=VARCHAR},
-      #{reason,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT})
+    values (#{recordId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{sceneRecordId,jdbcType=BIGINT},
+      #{stepName,jdbcType=VARCHAR}, #{reason,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
+    #{createTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.StepRecord" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -44,6 +46,9 @@
       </if>
       <if test="stepId != null" >
         stepId,
+      </if>
+      <if test="sceneRecordId != null" >
+        sceneRecordId,
       </if>
       <if test="stepName != null" >
         stepName,
@@ -65,6 +70,9 @@
       <if test="stepId != null" >
         #{stepId,jdbcType=BIGINT},
       </if>
+      <if test="sceneRecordId != null" >
+        #{sceneRecordId,jdbcType=BIGINT},
+      </if>
       <if test="stepName != null" >
         #{stepName,jdbcType=VARCHAR},
       </if>
@@ -84,12 +92,13 @@
           parameterType="com.testframe.autotest.core.meta.po.StepRecord"
           useGeneratedKeys="true" keyProperty="id">
     insert into AUTO_TEST_STEP_EXECUTE_RECORD
-        (recordId,stepId, stepName, reason, status, createTime)
+        (recordId, stepId, sceneRecordId, stepName, reason, status, createTime)
     values
     <foreach collection="stepRecords" item="stepRecord" separator=",">
            (#{stepRecord.recordId,jdbcType=BIGINT},#{stepRecord.stepId,jdbcType=BIGINT},
-      #{stepRecord.stepName,jdbcType=VARCHAR},#{stepRecord.reason,jdbcType=VARCHAR},
-      #{stepRecord.status,jdbcType=INTEGER},  #{stepRecord.createTime,jdbcType=BIGINT})
+      #{stepRecord.sceneRecordId,jdbcType=BIGINT}, #{stepRecord.stepName,jdbcType=VARCHAR},
+      #{stepRecord.reason,jdbcType=VARCHAR}, #{stepRecord.status,jdbcType=INTEGER},
+      #{stepRecord.createTime,jdbcType=BIGINT})
     </foreach>
   </insert>
 
@@ -101,6 +110,9 @@
       </if>
       <if test="stepId != null" >
         stepId = #{stepId,jdbcType=BIGINT},
+      </if>
+      <if test="sceneRecordId != null" >
+        sceneRecordId = #{sceneRecordId,jdbcType=BIGINT},
       </if>
       <if test="stepName != null" >
         stepName = #{stepName,jdbcType=VARCHAR},
@@ -121,6 +133,7 @@
     update AUTO_TEST_STEP_EXECUTE_RECORD
     set recordId = #{recordId,jdbcType=BIGINT},
       stepId = #{stepId,jdbcType=BIGINT},
+      sceneRecordId = #{sceneRecordId,jdbcType=BIGINT},
       stepName = #{stepName,jdbcType=VARCHAR},
       reason = #{reason,jdbcType=VARCHAR},
       status = #{status,jdbcType=INTEGER},

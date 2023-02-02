@@ -1,5 +1,6 @@
 package com.testframe.autotest.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.enums.StepStatusEnum;
@@ -75,15 +76,18 @@ public class CopyServiceImpl implements CopyService {
             List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
             if (sceneStepRels.isEmpty()) {
                 // 当前场景下没有步骤需要保存
+                log.info("[SceneCopyServiceImpl:copy] new scene {}", newSceneId);
                 return newSceneId;
             }
 
+            // 对所有步骤进行复制
             List<SceneStepOrder> sceneStepOrders = stepOrderRepository.queryStepOrderBySceneId(sceneId);
             sceneStepOrders = sceneStepOrders.stream().filter(k -> k.getType() == StepOrderEnum.BEFORE.getType())
                     .collect(Collectors.toList());
             List<Long> orgStepOrder = sceneStepOrders.get(0).getOrderList();
             // 查询当前场景下的所有步骤并进行复制
             List<Step> originSteps = stepDetailRepository.queryStepByIds(orgStepOrder);
+            log.info("[SceneCopyServiceImpl:copy] new copy steps {}", JSON.toJSONString(originSteps));
             // 不改变步骤编排顺序
             Collections.sort(originSteps, new Comparator<Step>() {
                 @Override
@@ -98,7 +102,7 @@ public class CopyServiceImpl implements CopyService {
             });
             List<Long> newStepIds = stepDetailRepository.batchSaveStep(originSteps);
             // 构建新场景绑定关系,步骤默认为开启状态
-            sceneStepService.batchSaveSceneStep(newStepIds, sceneId);
+            sceneStepService.batchSaveSceneStep(originSteps, newSceneId);
 
             // 保存执行步骤
             SceneStepOrder sceneStepOrder = new SceneStepOrder();
@@ -126,14 +130,14 @@ public class CopyServiceImpl implements CopyService {
             Long newStepId;
             if (!autoTestConfig.getCopySwitch()) {
                 // 被复制到最后面，默认开启态
-                StepUpdateCmd newStep = new StepUpdateCmd(sceneId, null,
+                StepUpdateCmd newStep = new StepUpdateCmd(sceneId, null, copyStep.getSceneId(),
                         copyStep.getStepName() + RandomUtil.randomCode(8),
                         copyStep.getStepInfo(), StepStatusEnum.OPEN.getType());
                 newStepId = stepDetailService.saveStepDetail(newStep);
             } else {
                 // 紧贴着复制步骤，并且保持状态一致
                 Step newStep = new Step(null, copyStep.getStepName() + RandomUtil.randomCode(8),
-                        copyStep.getStepInfo(), copyStep.getStatus());
+                        copyStep.getSceneId(), copyStep.getStepInfo(), copyStep.getStatus());
                 newStepId = stepDetailRepository.saveStep(newStep);
                 newStep.setStepId(newStepId);
                 // 获取原场景的执行状态
@@ -182,7 +186,7 @@ public class CopyServiceImpl implements CopyService {
                 throw new AutoTestException("当前被复制的步骤不存在");
             }
             Step newStep = new Step(null, copyStep.getStepName() + RandomUtil.randomCode(8),
-                    copyStep.getStepInfo(), copyStep.getStatus());
+                    copyStep.getSceneId(), copyStep.getStepInfo(), copyStep.getStatus());
             Long newStepId = stepDetailRepository.saveStep(newStep);
             copyStep.setStepId(newStepId);
             // 获取原场景的执行状态

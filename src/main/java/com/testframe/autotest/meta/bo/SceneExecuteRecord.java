@@ -27,6 +27,8 @@ public class SceneExecuteRecord {
 
     private Integer status;
 
+    private Integer type;
+
     private Long executeTime;
 
     private String extInfo;

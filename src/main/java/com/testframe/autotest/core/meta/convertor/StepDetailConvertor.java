@@ -12,6 +12,7 @@ public class StepDetailConvertor {
         StepDetail stepDetail = new StepDetail();
         stepDetail.setId(step.getStepId());
         stepDetail.setStepName(step.getStepName());
+        stepDetail.setSceneId(step.getSceneId());
         stepDetail.setStepInfo(step.getStepInfo());
         return stepDetail;
     }
@@ -23,6 +24,7 @@ public class StepDetailConvertor {
         Step step = new Step();
         step.setStepId(stepDetail.getId());
         step.setStepName(stepDetail.getStepName());
+        step.setSceneId(stepDetail.getSceneId());
         step.setStepInfo(stepDetail.getStepInfo());
         return step;
     }

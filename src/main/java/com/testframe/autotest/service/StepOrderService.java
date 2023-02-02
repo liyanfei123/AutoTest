@@ -11,5 +11,4 @@ public interface StepOrderService {
     public void removeStepId(Long sceneId, Long stepId);
 
     public List<Long> queryNowStepOrder(Long sceneId);
-
 }

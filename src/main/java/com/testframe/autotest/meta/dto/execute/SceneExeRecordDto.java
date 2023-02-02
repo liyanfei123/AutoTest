@@ -1,6 +1,5 @@
 package com.testframe.autotest.meta.dto.execute;
 
-import com.testframe.autotest.meta.bo.SceneExecuteRecord;
 import lombok.Data;
 
 import java.util.List;
@@ -14,35 +13,12 @@ import java.util.List;
 @Data
 public class SceneExeRecordDto {
 
-    // 执行id，调试用
-    private Long recordId;
+    private Integer stepNum;
 
-    // 场景名称
-    private String sceneName;
-
-    // 访问地址
-    private String testUrl;
-
-    // 等待方式
-    private Integer waitType;
-
-    // 等待时间
-    private Integer waitTime;
-
-    // 执行结果
     private Integer status;
 
-    private Long sceneExeTime;
+    private SceneExeInfoDto sceneExeInfoDto;
 
-    private List<StepExeRecordDto> stepExeRecordDtos;
+    private List<StepExeRecordInfo> stepExeInfos;
 
-    public static void build(SceneExeRecordDto sceneExeRecordDto, SceneExecuteRecord sceneExecuteRecord) {
-        sceneExeRecordDto.setRecordId(sceneExecuteRecord.getRecordId());
-        sceneExeRecordDto.setSceneName(sceneExecuteRecord.getSceneName());
-        sceneExeRecordDto.setTestUrl(sceneExecuteRecord.getUrl());
-        sceneExeRecordDto.setWaitType(sceneExecuteRecord.getWaitType());
-        sceneExeRecordDto.setWaitTime(sceneExecuteRecord.getWaitTime());
-        sceneExeRecordDto.setStatus(sceneExecuteRecord.getStatus());
-        sceneExeRecordDto.setSceneExeTime(sceneExecuteRecord.getExecuteTime());
-    }
 }

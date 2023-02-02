@@ -6,7 +6,7 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import com.testframe.autotest.service.StepRecordService;
-import com.testframe.autotest.ui.meta.StepExeInfo;
+import com.testframe.autotest.ui.meta.StepExe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +22,9 @@ public class StepRecordServiceImpl implements StepRecordService {
     private StepExecuteRecordRepository stepExecuteRecordRepository;
 
     @Override
-    public Long saveRecord(Long recordId, StepExeInfo stepExeInfo, Integer status, String reason) {
+    public Long saveRecord(Long recordId, StepExe stepExe, Integer status, String reason) {
         try {
-            StepExecuteRecord stepExecuteRecord = build(recordId, stepExeInfo, status, reason);
+            StepExecuteRecord stepExecuteRecord = build(recordId, stepExe, status, reason);
             log.info("[StepRecordServiceImpl:saveRecord] add step run record, data = {}",
                     JSON.toJSONString(stepExecuteRecord));
             return stepExecuteRecordRepository.saveStepExecuteRecord(stepExecuteRecord);
@@ -35,11 +35,11 @@ public class StepRecordServiceImpl implements StepRecordService {
     }
 
     @Override
-    public boolean batchSaveRecord(Long recordId, List<StepExeInfo> stepExeInfoList, Integer status, String reason) {
+    public boolean batchSaveRecord(Long recordId, List<StepExe> stepExes, Integer status, String reason) {
         try {
             List<StepExecuteRecord> stepExecuteRecords = new ArrayList<>();
-            stepExeInfoList.forEach(stepExeInfo -> {
-                StepExecuteRecord stepExecuteRecord = build(recordId, stepExeInfo, status, reason);
+            stepExes.forEach(stepExe -> {
+                StepExecuteRecord stepExecuteRecord = build(recordId, stepExe, status, reason);
                 stepExecuteRecords.add(stepExecuteRecord);
             });
             log.info("[StepRecordServiceImpl:batchSaveRecord] add step run records, data = {}",
@@ -63,11 +63,11 @@ public class StepRecordServiceImpl implements StepRecordService {
         }
     }
 
-    private StepExecuteRecord build(Long recordId, StepExeInfo stepExeInfo, Integer status, String reason) {
+    private StepExecuteRecord build(Long recordId, StepExe stepExe, Integer status, String reason) {
         StepExecuteRecord stepExecuteRecord = new StepExecuteRecord();
         stepExecuteRecord.setRecordId(recordId);
-        stepExecuteRecord.setStepId(stepExeInfo.getStepId());
-        stepExecuteRecord.setStepName(stepExeInfo.getStepName());
+        stepExecuteRecord.setStepId(stepExe.getStepId());
+        stepExecuteRecord.setStepName(stepExe.getStepName());
         if (status == null) {
             status = StepRunResultEnum.CLOSE.getType();
         }

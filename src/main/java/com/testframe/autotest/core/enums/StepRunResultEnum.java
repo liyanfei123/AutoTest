@@ -1,5 +1,10 @@
 package com.testframe.autotest.core.enums;
 
+import com.testframe.autotest.meta.bo.StepExecuteRecord;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 步骤运行结果
  */
@@ -27,6 +32,19 @@ public enum StepRunResultEnum {
 
     public String getName() {
         return name;
+    }
+
+    public static Integer stepStatusToSceneStatus(List<StepExecuteRecord> stepExecuteRecords) {
+        List<Integer> status = stepExecuteRecords.stream().map(StepExecuteRecord::getStatus)
+                .collect(Collectors.toList());
+        if (status.isEmpty()) {
+            return SceneStatusEnum.NEVER.getType();
+        } else if (status.contains(StepRunResultEnum.RUN.getType())) {
+            return SceneStatusEnum.ING.getType();
+        } else if (status.contains(StepRunResultEnum.FAIL.getType())) {
+            return SceneStatusEnum.FAIL.getType();
+        }
+        return SceneStatusEnum.SUCCESS.getType();
     }
 
 }

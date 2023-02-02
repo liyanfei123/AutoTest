@@ -7,7 +7,7 @@ public enum AssertModeEnum {
 
     // 页面验证
     PAGE_TITLE(10, "页面标题验证", "assertPageTitle"),
-    PAGE_SOURCE(11, "源码关键字检验", "assetPageSource"),
+    PAGE_SOURCE(11, "源码关键字检验", "assertPageSource"),
     // 元素验证
     ELEMENT_TEXT(20, "检验元素文本是否复合预期", "checkElementText"),
     ELEMENT_ATTR(21, "检查元素属性", "checkElementAttr");

@@ -56,6 +56,10 @@ public class StepDetailImpl implements StepDetailService {
                 throw new AutoTestException("当前场景id无效");
             }
             Step step = StepUpdateCmd.toStep(stepUpdateCmd);
+            // 对于子场景的化需要单独处理
+            if (step.getSceneId() > 0) {
+                stepIsScene(stepUpdateCmd);
+            }
             if (stepUpdateCmd.getStepId() == null || stepUpdateCmd.getStepId() == 0) {
                 // 新增
                 Long stepId = stepDetailRepository.saveStep(step);
@@ -93,6 +97,8 @@ public class StepDetailImpl implements StepDetailService {
     @Override
     public List<Long> batchSaveStepDetail(List<StepUpdateCmd> stepUpdateCmds) {
         log.info("[StepDetailImpl:batchSaveStepDetail] batch update steps, count = {}", stepUpdateCmds.stream().count());
+        // 检验参数的有效性
+        stepValidator.checkStepUpdates(stepUpdateCmds);
         Long sceneId = stepUpdateCmds.get(0).getSceneId();
         List<Long> stepIds = new ArrayList<>();
         try {
@@ -100,10 +106,16 @@ public class StepDetailImpl implements StepDetailService {
             stepUpdateCmds.forEach(stepUpdateCmd -> {
                 stepValidator.checkStepUpdate(stepUpdateCmd);
                 Step step = StepUpdateCmd.toStep(stepUpdateCmd);
+                // 对于子场景的化需要单独处理
+                if (step.getSceneId() > 0L) {
+                    stepIsScene(stepUpdateCmd);
+                    step.setStepName(stepUpdateCmd.getName());
+                    step.setStepInfo(stepUpdateCmd.getStepInfo());
+                }
                 steps.add(step);
             });
             if (sceneId == null) {
-                // 首次创建
+                // 场景首次创建步骤
                 for (Step step : steps) {
                     Long stepId = stepDetailRepository.saveStep(step);
                     stepIds.add(stepId);
@@ -149,15 +161,22 @@ public class StepDetailImpl implements StepDetailService {
            // 步骤状态
            List<Integer> status = sceneStepRels.stream().map(SceneStepRel::getStatus)
                    .collect(Collectors.toList());
+           List<Integer> types = sceneStepRels.stream().map(SceneStepRel::getType)
+                   .collect(Collectors.toList());
            HashMap<Long, StepInfoDto> stepInfoDtoMap = new HashMap<>();
            for (int i = 0; i< stepIds.size(); i++) {
                Step step = steps.get(i);
                StepInfoDto stepInfoDto = new StepInfoDto();
-               StepInfoModel stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
-               StepUIInfo stepUIInfo = StepUIInfo.build(stepInfoModel);
+               StepUIInfo stepUIInfo = null;
+               if (step.getSceneId() == null || step.getSceneId() == 0L) { // 单独的执行步骤，而不是子场景
+                   StepInfoModel stepInfoModel = JSON.parseObject(step.getStepInfo(), StepInfoModel.class);
+                   stepUIInfo = StepUIInfo.build(stepInfoModel);
+               }
                stepInfoDto.setStepId(step.getStepId());
+               stepInfoDto.setSonSceneId(step.getSceneId());
                stepInfoDto.setStepName(step.getStepName());
                stepInfoDto.setStepStatus(status.get(i));
+               stepInfoDto.setType(types.get(i));
                stepInfoDto.setStepUIInfo(stepUIInfo);
                stepInfoDtoMap.put(step.getStepId(), stepInfoDto);
            }
@@ -169,5 +188,12 @@ public class StepDetailImpl implements StepDetailService {
        }
     }
 
+
+    // 子场景额外处理请求输入参数
+    private void stepIsScene(StepUpdateCmd stepUpdateCmd) {
+        Scene scene = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
+        stepUpdateCmd.setName(scene.getTitle());
+        stepUpdateCmd.setStepInfo(scene.getDesc());
+    }
 
 }

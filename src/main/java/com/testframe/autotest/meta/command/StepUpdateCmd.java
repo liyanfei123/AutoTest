@@ -13,9 +13,13 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class StepUpdateCmd {
 
+    // 当前场景id
     private Long sceneId;
 
-    private Long stepId;
+    // 步骤id，当新增步骤时为0
+    private Long stepId = 0L;
+
+    private Long sonSceneId = 0L;
 
     private String name;
 
@@ -27,6 +31,7 @@ public class StepUpdateCmd {
     public static Step toStep(StepUpdateCmd stepUpdateCmd) {
         Step step = new Step();
         step.setStepId(stepUpdateCmd.getStepId());
+        step.setSceneId(stepUpdateCmd.getSonSceneId());
         step.setStepName(stepUpdateCmd.getName());
         step.setStepInfo(stepUpdateCmd.getStepInfo());
         step.setStatus(stepUpdateCmd.getStatus());

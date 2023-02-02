@@ -19,6 +19,9 @@ public class StepExecuteRecord {
 
     private Long stepId;
 
+    // 子场景的执行记录id
+    private Long sceneRecordId;
+
     private String stepName;
 
     private String reason;

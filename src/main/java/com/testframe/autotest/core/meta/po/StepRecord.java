@@ -7,6 +7,8 @@ public class StepRecord {
 
     private Long stepId;
 
+    private Long sceneRecordId;
+
     private String stepName;
 
     private String reason;
@@ -39,6 +41,13 @@ public class StepRecord {
         this.stepId = stepId;
     }
 
+    public Long getSceneRecordId() {
+        return sceneRecordId;
+    }
+
+    public void setSceneRecordId(Long sceneRecordId) {
+        this.sceneRecordId = sceneRecordId;
+    }
     public String getStepName() {
         return stepName;
     }

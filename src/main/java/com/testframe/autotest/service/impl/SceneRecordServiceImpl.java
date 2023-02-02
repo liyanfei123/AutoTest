@@ -1,8 +1,11 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.config.AutoTestConfig;
+import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepRunResultEnum;
+import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
@@ -13,13 +16,11 @@ import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.bo.SceneExecuteRecord;
 import com.testframe.autotest.meta.bo.SceneStepOrder;
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
-import com.testframe.autotest.meta.dto.execute.SceneExeRecordDto;
-import com.testframe.autotest.meta.dto.execute.StepExeRecordDto;
+import com.testframe.autotest.meta.dto.execute.*;
+import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.SceneRecordService;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,12 @@ import java.util.stream.Collectors;
 public class SceneRecordServiceImpl implements SceneRecordService {
 
     @Autowired
+    private AutoTestConfig autoTestConfig;
+
+    @Autowired
+    private SceneValidator sceneValidator;
+
+    @Autowired
     private SceneExecuteRecordRepository sceneExecuteRecordRepository;
 
     @Autowired
@@ -55,23 +62,28 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     public SceneRecordListVo records(Long sceneId) {
         try {
             log.info("[SceneDetailImpl:query] query execute records in sceneId {}", sceneId);
+            if (!sceneValidator.sceneIsExist(sceneId)){
+                throw new AutoTestException("请输入正确的场景id");
+            }
+
             SceneRecordListVo sceneRecordListVo = new SceneRecordListVo();
-            // 查询当前场景下的执行记录
-            PageQry pageQry = new PageQry(0, 20, -1L); // 最多返回20条
+            sceneRecordListVo.setSceneId(sceneId);
+            // 查询当前场景下的执行记录 作为子场景执行的记录不查询
+            PageQry pageQry = new PageQry(0, autoTestConfig.getRecordSize(), -1L, SceneExecuteEnum.SINGLE.getType());
             List<SceneExecuteRecord> sceneExecuteRecords = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, pageQry);
+            if (sceneExecuteRecords.isEmpty()) {
+                // 当前场景从未执行过
+                log.info("[SceneDetailImpl:query] scene {} no execute records", sceneId);
+                sceneRecordListVo.setSceneExeRecordDtos(Collections.EMPTY_LIST);
+                return sceneRecordListVo;
+            }
+
             HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap = new HashMap<>();
             sceneExecuteRecords.forEach(sceneExecuteRecord -> {
                 sceneExecuteRecordMap.put(sceneExecuteRecord.getRecordId(), sceneExecuteRecord);
             });
             List<Long> recordIds = sceneExecuteRecords.stream().map(SceneExecuteRecord::getRecordId)
                     .collect(Collectors.toList());
-            if (recordIds.isEmpty()) {
-                // 当前场景从未执行过
-                sceneRecordListVo.setSceneId(sceneId);
-                sceneRecordListVo.setSceneExeRecordDtos(Collections.EMPTY_LIST);
-                return sceneRecordListVo;
-            }
-            // 执行中的数据返回
 
             // 步骤执行顺序
             HashMap<Long, List<Long>> stepOrders = new HashMap<>();
@@ -81,13 +93,13 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             } );
 
             // 批量获取场景执行下的多个步骤执行顺序
+            // 对于子场景下的执行记录，同一个stepId下，会有多条记录
             CompletableFuture<HashMap<Long, List<StepExecuteRecord>>> stepExecuteRecordsFuture = CompletableFuture
                     .supplyAsync(() -> batchGetStepExeInfo(recordIds));
 
             return CompletableFuture.allOf(stepExecuteRecordsFuture).thenApply( e -> {
                 HashMap<Long, List<StepExecuteRecord>> stepExecuteRecords = stepExecuteRecordsFuture.join();
                 // 组装VO
-                sceneRecordListVo.setSceneId(sceneId);
                 toSceneDetailInfo(recordIds, sceneRecordListVo, sceneExecuteRecordMap, stepExecuteRecords, stepOrders);
                 return sceneRecordListVo;
             }).join();
@@ -100,7 +112,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveRecord(Long sceneId, List<Long> orderList, Integer status) {
+    public Long saveRecord(Long sceneId, List<Long> orderList, Integer status, Integer type) {
         try {
             Scene scene = sceneDetailRepository.querySceneById(sceneId);
             Long currentTime = System.currentTimeMillis();
@@ -108,6 +120,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             sceneExecuteRecord.setExecuteTime(currentTime);
             sceneExecuteRecord.setStepOrderList(orderList);
             sceneExecuteRecord.setStatus(status);
+            sceneExecuteRecord.setType(type);
             log.info("[SceneRecordServiceImpl:saveRecord] save step execute record, sceneExecuteRecord = {}",
                     JSON.toJSONString(sceneExecuteRecord));
             return sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecord);
@@ -116,7 +129,6 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             throw new AutoTestException("保存场景执行记录失败");
         }
     }
-
 
     /**
      *
@@ -159,9 +171,8 @@ public class SceneRecordServiceImpl implements SceneRecordService {
                                    HashMap<Long, SceneExecuteRecord> sceneExecuteRecordMap,
                                    HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordMap,
                                    HashMap<Long, List<Long>> stepOrders) {
-        // 对场景步骤顺序重排
         stepExecuteRecordMap.forEach((recordId, stepExecuteRecords) -> {
-            List<Long> stepOrderList = stepOrders.get(recordId); // 执行时的顺序
+            List<Long> stepOrderList = stepOrders.get(recordId); // 场景执行时的顺序
             // 使用匿名比较器排序
             Collections.sort(stepExecuteRecords, new Comparator<StepExecuteRecord>() {
                 @Override
@@ -174,31 +185,133 @@ public class SceneRecordServiceImpl implements SceneRecordService {
         recordIds.forEach((recordId) -> {
             List<StepExecuteRecord> stepExecuteRecords = stepExecuteRecordMap.get(recordId);
             SceneExeRecordDto sceneExeRecordDto = new SceneExeRecordDto();
-            SceneExeRecordDto.build(sceneExeRecordDto, sceneExecuteRecordMap.get(recordId));
-            // 根据步骤的执行状态来确定当前场景的执行结果
-//            sceneExeRecordDto.setStatus(checkStatus(stepExecuteRecords));
-            // 将步骤执行信息转化为dto
-            List<StepExeRecordDto> stepExeRecordDtos = stepExecuteRecords.stream().map(StepExeRecordDto::build)
-                    .collect(Collectors.toList());
-            sceneExeRecordDto.setStepExeRecordDtos(stepExeRecordDtos);
+            Integer stepNum = stepExecuteRecords.size();
+            sceneExeRecordDto.setStepNum(stepNum);
+
+            // 判读是否存在子场景执行记录
+            List<StepExecuteRecord> sceneStepExecuteRecord = stepExecuteRecords.stream().filter(stepExecuteRecord ->
+                    stepExecuteRecord.getSceneRecordId() != 0 || stepExecuteRecord.getSceneRecordId() != null)
+                    .collect(Collectors.toList()); // 所有子场景执行步骤
+            if (sceneStepExecuteRecord.size() > 0) {
+                log.info("[SceneRecordServiceImpl:toSceneDetailInfo] scene {} has son scene",
+                        sceneExecuteRecordMap.get(recordId).getSceneId());
+                // 由于当前执行步骤中，存在子场景，所以需要对子场景的执行步骤情况进行查询编排
+                buildSceneWithSceneExeRecordDto(sceneExeRecordDto, sceneExecuteRecordMap.get(recordId), stepExecuteRecords);
+            } else {
+                log.info("[SceneRecordServiceImpl:toSceneDetailInfo] scene {} don't have son scene",
+                        sceneExecuteRecordMap.get(recordId).getSceneId());
+                buildSceneExeRecordDto(sceneExeRecordDto, sceneExecuteRecordMap.get(recordId), stepExecuteRecords);
+            }
             sceneExeRecordDtos.add(sceneExeRecordDto);
         });
         sceneRecordListVo.setSceneExeRecordDtos(sceneExeRecordDtos);
     }
 
 
-    private Integer checkStatus(List<StepExecuteRecord> stepExecuteRecords) {
-        List<Integer> status = stepExecuteRecords.stream().map(StepExecuteRecord::getStatus)
-                .collect(Collectors.toList());
-        if (status.isEmpty()) {
-            return SceneStatusEnum.NEVER.getType();
-        } else if (status.contains(StepRunResultEnum.RUN.getType())) {
-            return SceneStatusEnum.ING.getType();
-        } else if (status.contains(StepRunResultEnum.FAIL.getType())) {
-            return SceneStatusEnum.FAIL.getType();
-        }
-        return SceneStatusEnum.SUCCESS.getType();
+    // 不具有子场景执行记录的构造
+    private void buildSceneExeRecordDto(SceneExeRecordDto sceneExeRecordDto,
+                                   SceneExecuteRecord sceneExecuteRecord,
+                                   List<StepExecuteRecord> stepExecuteRecords) {
+//        Integer stepNum = stepExecuteRecords.size();
+//        sceneExeRecordDto.setStepNum(stepNum);
+        // 根据步骤的执行状态来确定当前场景的执行结果
+        sceneExeRecordDto.setStatus(StepRunResultEnum.stepStatusToSceneStatus(stepExecuteRecords));
+        // 场景信息构造
+        sceneExeRecordDto.setSceneExeInfoDto(new SceneExeInfoDto());
+        SceneExeInfoDto.build(sceneExeRecordDto.getSceneExeInfoDto(), sceneExecuteRecord);
+        // 步骤执行信息构造
+        List<StepExeRecordInfo> stepExeInfos = buildStepExeInfos(stepExecuteRecords, StepTypeEnum.STEP.getType());
+        sceneExeRecordDto.setStepExeInfos(stepExeInfos);
     }
+
+    // 具有子场景执行记录的构造
+    private void buildSceneWithSceneExeRecordDto(SceneExeRecordDto sceneExeRecordDto,
+                                        SceneExecuteRecord sceneExecuteRecord,
+                                        List<StepExecuteRecord> stepExecuteRecords) {
+        Integer stepNum = 0;
+        // 场景信息构造
+        sceneExeRecordDto.setSceneExeInfoDto(new SceneExeInfoDto());
+        SceneExeInfoDto.build(sceneExeRecordDto.getSceneExeInfoDto(), sceneExecuteRecord);
+        // 步骤执行信息构造
+        List<StepExeRecordInfo> stepExeInfos = new ArrayList<>();
+        for (StepExecuteRecord stepExecuteRecord : stepExecuteRecords) {
+            StepExeRecordInfo stepExeInfo = new StepExeRecordInfo();
+            if (stepExecuteRecord.getSceneRecordId() > 0) {
+                // 子场景执行记录处理
+                Long sceneRunRecordId = stepExecuteRecord.getSceneRecordId();
+                List<StepExecuteRecord> sceneStepExecuteRecords =
+                        stepExecuteRecordRepository.queryStepExecuteRecordByRecordId(sceneRunRecordId); // 子场景的单步骤执行记录
+//                stepNum += sceneStepExecuteRecords.size();
+                // 编排顺序
+                SceneExecuteRecord sonSceneExecuteRecord =
+                        sceneExecuteRecordRepository.getSceneExeRecordById(sceneRunRecordId); // 子场景执行记录
+                List<Long> stepOrderList = sonSceneExecuteRecord.getStepOrderList(); // 子场景步骤执行顺序
+                Collections.sort(sceneStepExecuteRecords, new Comparator<StepExecuteRecord>() {
+                    @Override
+                    public int compare(StepExecuteRecord record1, StepExecuteRecord record2) {
+                        return stepOrderList.indexOf(record1.getStepId()) - stepOrderList.indexOf(record2.getStepId());
+                    }
+                });
+                List<StepExeRecordInfo> sceneStepExeInfos =
+                        buildStepExeInfos(sceneStepExecuteRecords, StepTypeEnum.SCENE.getType());
+                stepExeInfo = sceneStepExeInfos.get(0);
+            } else {
+                // 单步骤
+//                stepNum += 1;
+                List<StepExecuteRecord> stepExecuteRecordList = new ArrayList<>();
+                stepExecuteRecordList.add(stepExecuteRecord);
+                List<StepExeRecordInfo> stepExeInfoList =
+                        buildStepExeInfos(stepExecuteRecordList, StepTypeEnum.STEP.getType());
+                stepExeInfo = stepExeInfoList.get(0);
+            }
+            stepExeInfos.add(stepExeInfo);
+        }
+        sceneExeRecordDto.setStepExeInfos(stepExeInfos);
+//        sceneExeRecordDto.setStepNum(stepNum);
+        // 根据步骤的执行状态来确定当前场景的执行结果
+        sceneExeRecordDto.setStatus(StepRunResultEnum.stepStatusToSceneStatus(stepExecuteRecords));
+    }
+
+
+    private List<StepExeRecordInfo> buildStepExeInfos(List<StepExecuteRecord> stepExecuteRecords, Integer type) {
+        List<StepExeRecordInfo> stepExeInfos = new ArrayList<>();
+        if (!stepExecuteRecords.isEmpty()) {
+            if (type == StepTypeEnum.STEP.getType()) {
+                // 单步骤执行
+                for (StepExecuteRecord stepExecuteRecord : stepExecuteRecords) {
+                    StepExeRecordInfo stepExeInfo = new StepExeRecordInfo();
+                    stepExeInfo.setType(StepTypeEnum.STEP.getType());
+                    stepExeInfo.setStatus(stepExecuteRecord.getStatus());
+                    StepExeRecordDto stepExeRecordDto = StepExeRecordDto.build(stepExecuteRecord);
+                    stepExeInfo.setStepExeRecordDto(stepExeRecordDto);
+                    stepExeInfo.setSceneStepExeRecordDto(null);
+                    stepExeInfos.add(stepExeInfo);
+                }
+            } else if (type == StepTypeEnum.SCENE.getType()) {
+                // 子场景执行
+                List<StepExeRecordDto> sceneStepExeRecordDtos = new ArrayList<>();
+                for (StepExecuteRecord stepExecuteRecord : stepExecuteRecords) {
+                    StepExeRecordDto stepExeRecordDto = StepExeRecordDto.build(stepExecuteRecord);
+                    sceneStepExeRecordDtos.add(stepExeRecordDto);
+                }
+                SceneStepExeRecordDto sceneStepExeRecordDto = new SceneStepExeRecordDto();
+                sceneStepExeRecordDto.setStatus(StepRunResultEnum.stepStatusToSceneStatus(stepExecuteRecords));
+                sceneStepExeRecordDto.setSceneStepExeRecordDtos(sceneStepExeRecordDtos);
+
+                StepExeRecordInfo stepExeInfo = new StepExeRecordInfo();
+                stepExeInfo.setType(StepTypeEnum.SCENE.getType());
+                stepExeInfo.setStepExeRecordDto(null);
+                stepExeInfo.setStatus(SceneStatusEnum.sceneStatusToStepStatus(sceneStepExeRecordDto.getStatus()));
+                stepExeInfo.setSceneStepExeRecordDto(sceneStepExeRecordDto);
+                stepExeInfos.add(stepExeInfo);
+            }
+        }
+        return stepExeInfos;
+    }
+
+
+
+
 
 
 }

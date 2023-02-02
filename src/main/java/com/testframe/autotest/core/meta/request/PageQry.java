@@ -18,4 +18,5 @@ public class PageQry {
     private int offset = 1;
     private int size = 10;
     private Long lastId = -1L;
+    private Integer type;
 }

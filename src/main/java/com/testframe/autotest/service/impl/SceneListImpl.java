@@ -1,6 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.enums.StepStatusEnum;
@@ -165,7 +166,7 @@ public class SceneListImpl implements SceneListService {
      */
     private HashMap<Long, SceneExecuteDto> batchGetSceneExeRecord(List<Long> sceneIds) {
         HashMap<Long, SceneExecuteDto> sceneExecuteDtoMap = new HashMap<>();
-        PageQry pageQry = new PageQry(0, 1, -1L); // 仅需要最新的一条记录
+        PageQry pageQry = new PageQry(0, 1, -1L, SceneExecuteEnum.SINGLE.getType()); // 仅需要最新的一条记录
         for (Long sceneId : sceneIds) {
             List<SceneExecuteRecord> sceneExecuteRecords = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, pageQry);
             if (sceneExecuteRecords.isEmpty()) {

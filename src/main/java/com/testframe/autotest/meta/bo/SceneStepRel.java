@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.bo;
 
+import com.testframe.autotest.core.enums.StepTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ public class SceneStepRel {
 
     private Integer status;
 
+    private Integer type;
+
     private Integer isDelete;
 
     public static SceneStepRel build(Long sceneId, Step step) {
@@ -26,6 +29,8 @@ public class SceneStepRel {
                 sceneId(sceneId).
                 stepId(step.getStepId()).
                 status(step.getStatus()).
+                type(step.getSceneId() == 0L || step.getSceneId() == null ?
+                        StepTypeEnum.STEP.getType() : StepTypeEnum.SCENE.getType()).
                 isDelete(0).build();
     }
 

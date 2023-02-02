@@ -28,6 +28,6 @@ public class SeleniumRunEvent {
     // 全局等待方式
     private WaitInfo waitInfo;
 
-    private List<StepExeInfo> stepExeInfos;
+    private List<StepExe> stepExes;
 
 }

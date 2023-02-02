@@ -2,6 +2,9 @@ package com.testframe.autotest.meta.validator;
 
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.repository.SceneDetailRepository;
+import com.testframe.autotest.meta.bo.Scene;
+import com.testframe.autotest.meta.bo.SceneStepRel;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 // 场景步骤检验
 @Component
@@ -29,6 +33,9 @@ public class StepValidator {
     @Autowired
     private StepDetailRepository stepDetailRepository;
 
+    @Autowired
+    private SceneDetailRepository sceneDetailRepository;
+
     public void checkStepUpdates(List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
             checkStepUpdate(stepUpdateCmd);
@@ -39,42 +46,58 @@ public class StepValidator {
     public void checkStepUpdate(StepUpdateCmd stepUpdateCmd) {
         if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName().equals("")) {
             throw new AutoTestException("步骤name不能为空");
-        } else if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
-            throw new AutoTestException("步骤信息不能为空");
         } else if (stepUpdateCmd.getSceneId() == null) {
             throw new AutoTestException("场景id不能为空");
         }
-        // 检验执行状态参数是否正确
-        if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
-            throw new AutoTestException("步骤状态错误");
-        }
-        StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
-        // 验证元素操作类型
-        if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
-                stepInfoModel.getOperateMode() == null) {
-            throw new AutoTestException("请输入元素操作类型");
-        }
-        if (stepInfoModel.getOperateMode() != null &&
-                OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
-            throw new AutoTestException("当前元素操作类型不被支持");
-        }
-        // 验证元素等待类型
-        if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
-                stepInfoModel.getWaitMode() == null) {
-            throw new AutoTestException("请输入元素等待类型");
-        }
-        if (stepInfoModel.getWaitMode() != null &&
-                WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
-            throw new AutoTestException("当前元素操作类型不被支持");
-        }
-        // 验证元素检验类型
-        if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
-                stepInfoModel.getAssertMode() == null) {
-            throw new AutoTestException("请输入元素检验类型");
-        }
-        if (stepInfoModel.getAssertMode() != null &&
-                AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
-            throw new AutoTestException("当前元素检验类型不被支持");
+        if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
+            // 单独的步骤、非子场景
+            if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
+                throw new AutoTestException("步骤信息不能为空");
+            }
+            // 检验执行状态参数是否正确
+            if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+                throw new AutoTestException("步骤状态错误");
+            }
+            StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
+            // 验证元素操作类型
+            if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
+                    stepInfoModel.getOperateMode() == null) {
+                throw new AutoTestException("请输入元素操作类型");
+            }
+            if (stepInfoModel.getOperateMode() != null &&
+                    OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
+                throw new AutoTestException("当前元素操作类型不被支持");
+            }
+            // 验证元素等待类型
+            if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
+                    stepInfoModel.getWaitMode() == null) {
+                throw new AutoTestException("请输入元素等待类型");
+            }
+            if (stepInfoModel.getWaitMode() != null &&
+                    WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
+                throw new AutoTestException("当前元素操作类型不被支持");
+            }
+            // 验证元素检验类型
+            if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
+                    stepInfoModel.getAssertMode() == null) {
+                throw new AutoTestException("请输入元素检验类型");
+            }
+            if (stepInfoModel.getAssertMode() != null &&
+                    AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
+                throw new AutoTestException("当前元素检验类型不被支持");
+            }
+        } else {
+            // 子场景判断
+            Scene sonScene = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
+            if (sonScene == null || sonScene.getIsDelete() == 1) {
+                throw new AutoTestException("子场景不存在");
+            }
+            List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(stepUpdateCmd.getSonSceneId());
+            List<Integer> status = sceneStepRels.stream().map(sceneStepRel -> sceneStepRel.getStatus())
+                    .collect(Collectors.toList());
+            if (!status.contains(StepStatusEnum.OPEN.getType())) {
+                throw new AutoTestException("子场景所有步骤均未开启");
+            }
         }
     }
 

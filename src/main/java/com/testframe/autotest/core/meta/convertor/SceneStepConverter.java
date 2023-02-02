@@ -14,11 +14,12 @@ public class SceneStepConverter {
         sceneStep.setId(sceneStepRel.getId());
         sceneStep.setSceneId(sceneStepRel.getSceneId());
         sceneStep.setStepId(sceneStepRel.getStepId());
+        sceneStep.setStatus(sceneStepRel.getStatus());
+        sceneStep.setType(sceneStepRel.getType());
         sceneStep.setIsDelete(sceneStepRel.getIsDelete());
         if (sceneStep.getIsDelete() == null) {
             sceneStep.setIsDelete(0);
         }
-        sceneStep.setStatus(sceneStepRel.getStatus());
         return sceneStep;
     }
 
@@ -31,6 +32,7 @@ public class SceneStepConverter {
         sceneStepRel.setSceneId(sceneStep.getSceneId());
         sceneStepRel.setStepId(sceneStep.getStepId());
         sceneStepRel.setStatus(sceneStep.getStatus());
+        sceneStepRel.setType(sceneStep.getType());
         sceneStepRel.setIsDelete(sceneStep.getIsDelete());
         return sceneStepRel;
     }

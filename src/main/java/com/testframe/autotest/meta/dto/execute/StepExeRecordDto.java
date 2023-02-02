@@ -16,6 +16,9 @@ public class StepExeRecordDto {
     // 步骤id 调试用
     private Long stepId;
 
+    // 子场景步骤id
+    private Long sceneRecordId;
+
     // 步骤名称
     private String stepName;
 
@@ -28,6 +31,7 @@ public class StepExeRecordDto {
     public static StepExeRecordDto build(StepExecuteRecord stepExecuteRecord) {
         StepExeRecordDto stepExeRecordDto = new StepExeRecordDto();
         stepExeRecordDto.setStepId(stepExecuteRecord.getStepId());
+        stepExeRecordDto.setSceneRecordId(stepExecuteRecord.getSceneRecordId());
         stepExeRecordDto.setStepName(stepExecuteRecord.getStepName());
         stepExeRecordDto.setStatus(stepExecuteRecord.getStatus());
         stepExeRecordDto.setErrInfo(stepExecuteRecord.getReason());

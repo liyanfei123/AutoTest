@@ -1,5 +1,7 @@
 package com.testframe.autotest.meta.dto;
 
+import com.testframe.autotest.meta.bo.SceneExecuteRecord;
+import com.testframe.autotest.meta.dto.execute.SceneExeRecordDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

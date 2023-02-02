@@ -4,9 +4,11 @@ import lombok.Data;
 
 // 步骤执行时的相关信息
 @Data
-public class StepExeInfo {
+public class StepExe {
 
     private Long stepId;
+
+    private Long stepSceneId = 0L;
 
     private String stepName;
 

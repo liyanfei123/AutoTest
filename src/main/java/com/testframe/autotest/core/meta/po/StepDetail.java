@@ -5,6 +5,8 @@ public class StepDetail {
 
     private String stepName;
 
+    private Long sceneId;
+
     private String stepInfo;
 
     private Long createTime;
@@ -27,6 +29,13 @@ public class StepDetail {
         this.stepName = stepName == null ? null : stepName.trim();
     }
 
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
     public String getStepInfo() {
         return stepInfo;
     }

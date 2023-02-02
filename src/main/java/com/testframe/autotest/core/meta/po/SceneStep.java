@@ -9,6 +9,9 @@ public class SceneStep {
 
     private Integer status;
 
+    // 步骤类型
+    private Integer type;
+
     private Integer isDelete;
 
     private Long createTime;
@@ -45,6 +48,14 @@ public class SceneStep {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Integer getType() {
+        return this.type;
     }
 
     public Integer getIsDelete() {

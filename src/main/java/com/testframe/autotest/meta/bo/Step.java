@@ -13,6 +13,9 @@ public class Step {
 
     private String stepName;
 
+    // 子场景id
+    private Long sceneId;
+
     private String StepInfo;
 
     private Integer status;

@@ -19,6 +19,6 @@ public interface SceneStepService {
 
     public List<Long> queryStepBySceneId(Long sceneId);
 
-    public void batchSaveSceneStep(List<Long> stepIds, Long sceneId);
+    public void batchSaveSceneStep(List<Step> steps, Long sceneId);
 
 }

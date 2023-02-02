@@ -40,11 +40,13 @@ public class StepDetailRepository {
     @Transactional(rollbackFor = Exception.class)
     public List<Long> batchSaveStep(List<Step> steps) {
         List<Long> stepIds = new ArrayList<>();
-        List<StepDetail> stepDetails = steps.stream().map(stepDetailConvertor::toPo).collect(Collectors.toList());
+//        List<StepDetail> stepDetails = steps.stream().map(stepDetailConvertor::toPo).collect(Collectors.toList());
         try {
-            for (StepDetail sceneStep : stepDetails) {
-                stepDetailDao.saveStepDetail(sceneStep);
-                stepIds.add(sceneStep.getId());
+            for (Step step : steps) {
+                StepDetail stepDetail = stepDetailConvertor.toPo(step);
+                stepDetailDao.saveStepDetail(stepDetail);
+                stepIds.add(stepDetail.getId());
+                step.setStepId(stepDetail.getId());
             }
             return stepIds;
         } catch (Exception e) {

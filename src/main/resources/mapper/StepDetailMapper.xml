@@ -4,6 +4,7 @@
   <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.StepDetail" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="stepName" property="stepName" jdbcType="VARCHAR" />
+    <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="stepInfo" property="stepInfo" jdbcType="VARCHAR" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
@@ -26,9 +27,9 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_STEP_DETAIL (stepName, stepInfo, createTime, 
+    insert into AUTO_TEST_STEP_DETAIL (stepName, sceneId, stepInfo, createTime,
       updateTime)
-    values (#{stepName,jdbcType=VARCHAR}, #{stepInfo,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
+    values (#{stepName,jdbcType=VARCHAR}, #{sceneId,jdbcType=BIGINT}, #{stepInfo,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
       #{updateTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.StepDetail" >
@@ -39,6 +40,9 @@
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="stepName != null" >
         stepName,
+      </if>
+      <if test="sceneId != null" >
+        sceneId,
       </if>
       <if test="stepInfo != null" >
         stepInfo,
@@ -53,6 +57,9 @@
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="stepName != null" >
         #{stepName,jdbcType=VARCHAR},
+      </if>
+      <if test="sceneId != null" >
+        #{sceneId,jdbcType=BIGINT},
       </if>
       <if test="stepInfo != null" >
         #{stepInfo,jdbcType=VARCHAR},
@@ -71,6 +78,9 @@
       <if test="stepName != null" >
         stepName = #{stepName,jdbcType=VARCHAR},
       </if>
+      <if test="sceneId != null" >
+        sceneId = #{sceneId,jdbcType=BIGINT},
+      </if>
       <if test="stepInfo != null" >
         stepInfo = #{stepInfo,jdbcType=VARCHAR},
       </if>
@@ -86,6 +96,7 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.StepDetail" >
     update AUTO_TEST_STEP_DETAIL
     set stepName = #{stepName,jdbcType=VARCHAR},
+      sceneId = #{sceneId,jdbcType=BIGINT},
       stepInfo = #{stepInfo,jdbcType=VARCHAR},
       createTime = #{createTime,jdbcType=BIGINT},
       updateTime = #{updateTime,jdbcType=BIGINT}

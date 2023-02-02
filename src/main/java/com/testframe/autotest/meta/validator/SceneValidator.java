@@ -62,4 +62,12 @@ public class SceneValidator {
             throw new AutoTestException("不允许更新场景类型");
         }
     }
+
+    public boolean sceneIsExist(Long sceneId) {
+        Scene scene = sceneDetailRepository.querySceneById(sceneId);
+        if (scene == null || scene.getIsDelete() == 1) {
+            return false;
+        }
+        return true;
+    }
 }

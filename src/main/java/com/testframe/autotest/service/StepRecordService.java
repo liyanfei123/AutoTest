@@ -1,15 +1,15 @@
 package com.testframe.autotest.service;
 
 import com.testframe.autotest.meta.bo.StepExecuteRecord;
-import com.testframe.autotest.ui.meta.StepExeInfo;
+import com.testframe.autotest.ui.meta.StepExe;
 
 import java.util.List;
 
 public interface StepRecordService {
 
-    Long saveRecord(Long recordId, StepExeInfo stepExeInfo, Integer status, String reason);
+    Long saveRecord(Long recordId, StepExe stepExe, Integer status, String reason);
 
-    boolean batchSaveRecord(Long recordId, List<StepExeInfo> stepExeInfoList, Integer status, String reason);
+    boolean batchSaveRecord(Long recordId, List<StepExe> stepExeList, Integer status, String reason);
 
     boolean batchSaveRecord(List<StepExecuteRecord> stepExecuteRecords);
 }
