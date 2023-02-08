@@ -57,9 +57,10 @@ public class StepController {
     // 改变步骤状态
     @GetMapping("/changeStatus")
     public HttpResult<Boolean> changeStatus(@RequestParam(required = true) Long stepId,
+                                            @RequestParam(required = true) Long sceneId,
                                             @RequestParam(required = true) int status) {
         try {
-            sceneStepService.changeStepStatus(stepId, status);
+            sceneStepService.changeStepStatus(stepId, sceneId, status);
             return HttpResult.ok();
         } catch (Exception e) {
             return HttpResult.error(e.getMessage());

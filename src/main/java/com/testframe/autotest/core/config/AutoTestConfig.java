@@ -26,7 +26,7 @@ public class AutoTestConfig {
     @Value("${white.userIds:1,2,3}")
     private List<Long> whiteUserIds;
 
-    // 场景执行记录展示的条数
+    // 场景执行记录展示的默认条数
     @Value("${record.size:20}")
     private Integer recordSize;
 }

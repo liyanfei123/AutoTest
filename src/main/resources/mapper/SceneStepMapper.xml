@@ -128,6 +128,12 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <update id="batchUpdateStepStatus" parameterType="java.util.Map" >
+    update AUTO_TEST_SCENE_STEP
+    set status = #{status,jdbcType=INTEGER},
+    updateTime = #{updateTime,jdbcType=BIGINT}
+    where id in (#{ids,jdbcType=INTEGER})
+  </update>
 
   <select id="queryStepsBySceneId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select *

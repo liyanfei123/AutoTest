@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -89,16 +90,34 @@ public class SceneStepImpl implements SceneStepService {
     }
 
     @Override
-    public Boolean changeStepStatus(Long stepId, int status) {
+    public Boolean changeStepStatus(Long stepId, Long sceneId, int status) {
+        if (stepId != null && sceneId != null) {
+            throw new AutoTestException("不可同时输入步骤id和场景id");
+        }
         try {
-            log.info("[SceneStepInterImpl:changeStepStatus] step = {}, status = {}", stepId, status);
-            SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepId);
-            if (sceneStepRel.getStatus() != status) {
-                sceneStepRel.setStatus(status);
-                sceneStepRepository.updateSceneStep(sceneStepRel);
+            if (stepId != null) {
+                // 修改单个步骤的状态
+                log.info("[SceneStepInterImpl:changeStepStatus] step = {}, status = {}", stepId, status);
+                SceneStepRel sceneStepRel = sceneStepRepository.queryByStepId(stepId);
+                if (sceneStepRel == null) {
+                    throw new AutoTestException("请输入正确的步骤id");
+                }
+                if (sceneStepRel.getStatus() != status) {
+                    sceneStepRel.setStatus(status);
+                    sceneStepRepository.updateSceneStep(sceneStepRel);
+                }
+            } else if (sceneId != null) {
+                // 修改场景下的所有有效步骤
+                List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(sceneId);
+                if (sceneStepRels == null || sceneStepRels.isEmpty()) {
+                    return true;
+                }
+                sceneStepRels.stream().forEach(sceneStepRel -> sceneStepRel.setStatus(status));
+                sceneStepRepository.batchUpdateSceneStep(sceneStepRels);
             }
         } catch (Exception e) {
-            log.info("[SceneStepInterImpl:changeStepStatus] step = {}, status = {} error, reason ", stepId, status, e);
+            log.info("[SceneStepInterImpl:changeStepStatus] step = {}, sceneId = {}, status = {} error, reason ",
+                    stepId, sceneId, status, e);
             throw new AutoTestException("步骤状态更新失败");
         }
         return true;

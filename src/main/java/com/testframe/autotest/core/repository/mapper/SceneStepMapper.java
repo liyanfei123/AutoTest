@@ -21,6 +21,9 @@ public interface SceneStepMapper {
 
     int updateByPrimaryKey(SceneStep record);
 
+    Boolean batchUpdateStepStatus(@Param("status") Integer status,
+                          @Param("updateTime") Long updateTime, @Param("ids") List<Long> ids);
+
     List<SceneStep> queryStepsBySceneId(@Param("sceneId") Long sceneId);
 
     SceneStep queryStepByStepId(@Param("stepId") Long stepId);

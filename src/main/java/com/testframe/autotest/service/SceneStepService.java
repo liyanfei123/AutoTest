@@ -9,7 +9,7 @@ public interface SceneStepService {
 
     public List<Long> updateSceneStep(Long sceneId, List<Step> steps);
 
-    public Boolean changeStepStatus(Long stepId, int status);
+    public Boolean changeStepStatus(Long stepId, Long sceneId, int status);
 
     public void removeSceneStepRel(Long stepId);
 
