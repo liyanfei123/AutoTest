@@ -53,14 +53,4 @@ public class SceneExecuteRecordConverter {
         return sceneExecuteRecord;
     }
 
-    public static void main(String[] args) {
-        List<Integer> stepIds = new ArrayList<>();
-        stepIds.add(1);
-        stepIds.add(2);
-        String t = stepIds.toString();
-        String tm = t.substring(1, t.length()-1);
-        String[] ts = tm.split(",");
-        System.out.println(t.substring(1, t.length()-1));
-    }
-
 }

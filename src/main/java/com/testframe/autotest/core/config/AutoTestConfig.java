@@ -29,4 +29,8 @@ public class AutoTestConfig {
     // 场景执行记录展示的默认条数
     @Value("${record.size:20}")
     private Integer recordSize;
+
+    // 类目名称长度上限
+    @Value("${category.name.length:20}")
+    private Integer categoryNameLength;
 }

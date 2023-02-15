@@ -1,5 +1,7 @@
 package com.testframe.autotest.meta.validator;
 
+import com.testframe.autotest.domain.category.CategoryDomain;
+import com.testframe.autotest.meta.bo.CategoryDetailBo;
 import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
@@ -20,10 +22,14 @@ public class SceneValidator {
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
 
+    @Autowired
+    private CategoryDomain categoryDomain;
+
     public void validateCreate(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
         try {
             checkSceneType(sceneCreateCmd);
             checkSceneTitle(sceneCreateCmd);
+            checkSceneCategoryId(sceneCreateCmd);
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         }
@@ -46,8 +52,24 @@ public class SceneValidator {
         }
     }
 
+    private void checkSceneTitle(SceneUpdateCmd sceneUpdateCmd) {
+        if (sceneDetailRepository.querySceneByTitle(sceneUpdateCmd.getTitle())) {
+            throw new AutoTestException("当前测试场景标题重复");
+        }
+    }
+
+    private void checkSceneCategoryId(SceneCreateCmd sceneCreateCmd) {
+        if (sceneCreateCmd.getCategoryId() != null) {
+            CategoryDetailBo categoryDetailBo = categoryDomain.getCategoryById(sceneCreateCmd.getCategoryId());
+            if (categoryDetailBo == null) {
+                throw new AutoTestException("当前类目id错误");
+            }
+        }
+    }
+
     // 检验更新的场景
     public void checkSceneUpdate(SceneUpdateCmd sceneUpdateCmd) {
+        checkSceneTitle(sceneUpdateCmd);
         if (!WaitModeEnum.allTypes().contains(sceneUpdateCmd.getWaitType())) {
             throw new AutoTestException("等待类型错误");
         }

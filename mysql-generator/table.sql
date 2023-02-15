@@ -89,3 +89,26 @@ alter table AUTO_TEST_STEP_DETAIL ADD COLUMN `sceneId` BIGINT NOT NULL DEFAULT 0
 alter table AUTO_TEST_SCENE_STEP ADD COLUMN `type` INT NOT NULL DEFAULT 1 COMMENT '步骤类型 1:单步骤,2:子场景' after `stepId`;
 alter table AUTO_TEST_STEP_EXECUTE_RECORD ADD COLUMN `sceneRecordId` BIGINT NOT NULL DEFAULT 0 COMMENT '子场景执行记录id' after `stepId`;
 alter table AUTO_TEST_SCENE_EXECUTE_RECORD ADD COLUMN `type` INT NOT NULL DEFAULT 1 COMMENT '执行类型 1:单独执行,2:子场景执行' after `status`;
+
+
+CREATE TABLE AUTO_TEST_CATEGORY(
+  id INT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
+  categoryName VARCHAR(256) NOT NULL DEFAULT ''  COMMENT '类目名' ,
+  relateCategoryId INT NULL DEFAULT 0  COMMENT '父目录id' ,
+  type INT NULL DEFAULT 1  COMMENT '目录类型 1:一级目录，2:子目录' ,
+  isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '目录表 ';
+
+
+CREATE TABLE AUTO_TEST_CATEGORY_SCENE(
+  id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
+  categoryId INT NULL DEFAULT 0  COMMENT '目录id' ,
+  sceneId BIGINT NULL DEFAULT 0  COMMENT '场景id' ,
+  isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '目录场景关联表 ';

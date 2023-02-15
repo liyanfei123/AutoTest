@@ -10,7 +10,7 @@ public class SceneInfoDto {
     private Long sceneId;
 
     // 场景名称
-    private String name;
+    private String sceneName;
 
     // 场景描述
     private String desc;
@@ -26,7 +26,7 @@ public class SceneInfoDto {
     public static SceneInfoDto build(Scene scene) {
         SceneInfoDto sceneInfoDto = new SceneInfoDto();
         sceneInfoDto.setSceneId(scene.getId());
-        sceneInfoDto.setName(scene.getTitle());
+        sceneInfoDto.setSceneName(scene.getTitle());
         sceneInfoDto.setDesc(scene.getDesc());
         sceneInfoDto.setUrl(scene.getUrl());
         sceneInfoDto.setWaitTime(scene.getWaitTime());

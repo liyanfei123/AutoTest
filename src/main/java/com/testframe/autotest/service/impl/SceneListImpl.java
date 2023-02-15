@@ -102,7 +102,7 @@ public class SceneListImpl implements SceneListService {
 
             List<SceneSimpleInfoDto> sceneSimpleInfoDtos = scenes.stream().map(scene -> {
                 SceneSimpleInfoDto sceneSimpleInfoDto = new SceneSimpleInfoDto();
-                sceneSimpleInfoDto.setId(scene.getId());
+                sceneSimpleInfoDto.setSceneId(scene.getId());
                 sceneSimpleInfoDto.setSceneName(scene.getTitle());
                 return sceneSimpleInfoDto;
             }).collect(Collectors.toList());
@@ -202,7 +202,7 @@ public class SceneListImpl implements SceneListService {
             scenes.remove(scenes.size()-1); // 由于存在下一页，故多了一个
         }
         for (SceneSimpleInfoDto sceneSimpleInfoDto : scenes) {
-            Long sceneId = sceneSimpleInfoDto.getId();
+            Long sceneId = sceneSimpleInfoDto.getSceneId();
             SceneExecuteDto sceneExecuteDto = sceneExeRecords.get(sceneId);
             sceneSimpleInfoDto.setStepNum(sceneStepNums.get(sceneId));
             if (sceneExecuteDto == null) {

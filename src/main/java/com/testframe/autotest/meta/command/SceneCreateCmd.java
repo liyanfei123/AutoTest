@@ -23,5 +23,8 @@ public class SceneCreateCmd {
     // 测试场景描述
     private String desc;
 
+    // 关联的类目id
+    private Integer categoryId;
+
 
 }

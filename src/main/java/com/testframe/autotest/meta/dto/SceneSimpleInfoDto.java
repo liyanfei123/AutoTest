@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SceneSimpleInfoDto {
 
-    private Long id;
+    private Long sceneId;
 
     private String sceneName;
 

@@ -91,8 +91,26 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--        </table>-->
 
-        <table schema="AUTOTEST" tableName="AUTO_TEST_STEP_ORDER"
-               domainObjectName="StepOrder"
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_STEP_ORDER"-->
+<!--               domainObjectName="StepOrder"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
+
+        <table schema="AUTOTEST" tableName="AUTO_TEST_CATEGORY"
+               domainObjectName="CategoryDetail"
+               enableSelectByExample="false" enableDeleteByExample="false"
+               enableCountByExample="false"  enableUpdateByExample="false"
+               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
+
+        <table schema="AUTOTEST" tableName="AUTO_TEST_CATEGORY_SCENE"
+               domainObjectName="CategoryScene"
                enableSelectByExample="false" enableDeleteByExample="false"
                enableCountByExample="false"  enableUpdateByExample="false"
                selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">

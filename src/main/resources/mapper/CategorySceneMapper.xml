@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.testframe.autotest.core.repository.mapper.CategorySceneMapper" >
+  <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.CategoryScene" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="categoryId" property="categoryId" jdbcType="INTEGER" />
+    <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
+    <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="BIGINT" />
+    <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, categoryId, sceneId, isDelete, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_CATEGORY_SCENE
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByCategoryId" resultType="com.testframe.autotest.core.meta.po.CategoryScene"
+          parameterType="java.lang.Integer">
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_CATEGORY_SCENE
+    where categoryId = #{categoryId,jdbcType=INTEGER} AND isDelete = 0
+  </select>
+
+    <select id="selectBySceneId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
+      select 'false' as QUERYID,
+      <include refid="Base_Column_List" />
+      from AUTO_TEST_CATEGORY_SCENE
+      where sceneId = #{sceneId,jdbcType=BIGINT} AND isDelete = 0
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from AUTO_TEST_CATEGORY_SCENE
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_CATEGORY_SCENE (categoryId, sceneId, isDelete,
+      createTime, updateTime)
+    values (#{categoryId,jdbcType=INTEGER}, #{sceneId,jdbcType=BIGINT}, #{isDelete,jdbcType=INTEGER},
+      #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_CATEGORY_SCENE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="categoryId != null" >
+        categoryId,
+      </if>
+      <if test="sceneId != null" >
+        sceneId,
+      </if>
+      <if test="isDelete != null" >
+        isDelete,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="categoryId != null" >
+        #{categoryId,jdbcType=INTEGER},
+      </if>
+      <if test="sceneId != null" >
+        #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="isDelete != null" >
+        #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
+    update AUTO_TEST_CATEGORY_SCENE
+    <set >
+      <if test="categoryId != null" >
+        categoryId = #{categoryId,jdbcType=INTEGER},
+      </if>
+      <if test="sceneId != null" >
+        sceneId = #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="isDelete != null" >
+        isDelete = #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
+    update AUTO_TEST_CATEGORY_SCENE
+    set categoryId = #{categoryId,jdbcType=INTEGER},
+      sceneId = #{sceneId,jdbcType=BIGINT},
+      isDelete = #{isDelete,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=BIGINT},
+      updateTime = #{updateTime,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
