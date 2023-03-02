@@ -24,14 +24,4 @@ public class SceneStepRel {
 
     private Integer isDelete;
 
-    public static SceneStepRel build(Long sceneId, Step step) {
-        return SceneStepRel.builder().
-                sceneId(sceneId).
-                stepId(step.getStepId()).
-                status(step.getStatus()).
-                type(step.getSceneId() == 0L || step.getSceneId() == null ?
-                        StepTypeEnum.STEP.getType() : StepTypeEnum.SCENE.getType()).
-                isDelete(0).build();
-    }
-
 }

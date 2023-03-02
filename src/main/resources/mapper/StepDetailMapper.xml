@@ -10,7 +10,7 @@
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, stepName, stepInfo, createTime, updateTime
+    id, stepName, sceneId, stepInfo, createTime, updateTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -112,5 +112,15 @@
     </foreach>
     order by id desc
    </select>
+
+    <select id="queryStepBySceneId" resultType="com.testframe.autotest.core.meta.po.StepDetail">
+      select *
+      from AUTO_TEST_STEP_DETAIL
+      where sceneId in
+      <foreach collection="sceneIds" index="i" item="sceneId" close=")" open="(" separator=",">
+        #{sceneId}
+      </foreach>
+      order by id desc
+    </select>
 
 </mapper>

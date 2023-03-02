@@ -1,16 +1,10 @@
 package com.testframe.autotest.core.meta.convertor;
 
+import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
 import com.testframe.autotest.core.meta.po.SceneRecord;
-import com.testframe.autotest.core.meta.po.SceneStep;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneExecuteRecord;
-import com.testframe.autotest.meta.bo.StepExecuteRecord;
-import io.swagger.models.auth.In;
+import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static com.testframe.autotest.util.StringUtils.orderToList;
 
@@ -23,23 +17,23 @@ import static com.testframe.autotest.util.StringUtils.orderToList;
 @Component
 public class SceneExecuteRecordConverter {
 
-    public SceneRecord toPo(SceneExecuteRecord sceneExecuteRecord) {
+    public SceneRecord DoToPo(SceneExecuteRecordDo sceneExecuteRecordDo) {
         SceneRecord sceneRecord = new SceneRecord();
-        sceneRecord.setId(null);
-        sceneRecord.setSceneId(sceneExecuteRecord.getSceneId());
-        sceneRecord.setSceneName(sceneExecuteRecord.getSceneName());
-        sceneRecord.setUrl(sceneExecuteRecord.getUrl());
-        sceneRecord.setWaitType(sceneExecuteRecord.getWaitType());
-        sceneRecord.setWaitTime(sceneExecuteRecord.getWaitTime());
-        sceneRecord.setStatus(sceneExecuteRecord.getStatus());
-        sceneRecord.setType(sceneExecuteRecord.getType());
-        sceneRecord.setExtInfo(sceneExecuteRecord.getExtInfo());
-        sceneRecord.setOrderList(sceneExecuteRecord.getStepOrderList().toString());
+        sceneRecord.setId(sceneExecuteRecordDo.getRecordId());
+        sceneRecord.setSceneId(sceneExecuteRecordDo.getSceneId());
+        sceneRecord.setSceneName(sceneExecuteRecordDo.getSceneName());
+        sceneRecord.setUrl(sceneExecuteRecordDo.getUrl());
+        sceneRecord.setWaitType(sceneExecuteRecordDo.getWaitType());
+        sceneRecord.setWaitTime(sceneExecuteRecordDo.getWaitTime());
+        sceneRecord.setStatus(sceneExecuteRecordDo.getStatus());
+        sceneRecord.setType(sceneExecuteRecordDo.getType());
+        sceneRecord.setExtInfo(sceneExecuteRecordDo.getExtInfo());
+        sceneRecord.setOrderList(sceneExecuteRecordDo.getStepOrderList().toString());
         return sceneRecord;
     }
 
-    public SceneExecuteRecord toSceneExecuteRecord(SceneRecord sceneRecord) {
-        SceneExecuteRecord sceneExecuteRecord = new SceneExecuteRecord();
+    public SceneExecuteRecordDo PoToDo(SceneRecord sceneRecord) {
+        SceneExecuteRecordDo sceneExecuteRecord = new SceneExecuteRecordDo();
         sceneExecuteRecord.setRecordId(sceneRecord.getId());
         sceneExecuteRecord.setSceneId(sceneRecord.getSceneId());
         sceneExecuteRecord.setSceneName(sceneRecord.getSceneName());
@@ -51,6 +45,36 @@ public class SceneExecuteRecordConverter {
         sceneExecuteRecord.setExecuteTime(sceneRecord.getCreateTime());
         sceneExecuteRecord.setStepOrderList(orderToList(sceneRecord.getOrderList()));
         return sceneExecuteRecord;
+    }
+
+    public SceneExecuteRecordDo DtoToDo(SceneExecuteRecordDto sceneExecuteRecordDto) {
+        SceneExecuteRecordDo sceneExecuteRecordDo = new SceneExecuteRecordDo();
+        sceneExecuteRecordDo.setRecordId(sceneExecuteRecordDto.getRecordId());
+        sceneExecuteRecordDo.setSceneId(sceneExecuteRecordDto.getSceneId());
+        sceneExecuteRecordDo.setSceneName(sceneExecuteRecordDto.getSceneName());
+        sceneExecuteRecordDo.setUrl(sceneExecuteRecordDto.getUrl());
+        sceneExecuteRecordDo.setWaitType(sceneExecuteRecordDto.getWaitType());
+        sceneExecuteRecordDo.setWaitTime(sceneExecuteRecordDto.getWaitTime());
+        sceneExecuteRecordDo.setStatus(sceneExecuteRecordDto.getStatus());
+        sceneExecuteRecordDo.setType(sceneExecuteRecordDto.getType());
+        sceneExecuteRecordDo.setExecuteTime(null);
+        sceneExecuteRecordDo.setStepOrderList(sceneExecuteRecordDto.getStepOrderList());
+        return sceneExecuteRecordDo;
+    }
+
+    public SceneExecuteRecordDto DoToDto(SceneExecuteRecordDo sceneExecuteRecordDo) {
+        SceneExecuteRecordDto sceneExecuteRecordDto = new SceneExecuteRecordDto();
+        sceneExecuteRecordDto.setRecordId(sceneExecuteRecordDo.getRecordId());
+        sceneExecuteRecordDto.setSceneId(sceneExecuteRecordDo.getSceneId());
+        sceneExecuteRecordDto.setSceneName(sceneExecuteRecordDo.getSceneName());
+        sceneExecuteRecordDto.setUrl(sceneExecuteRecordDo.getUrl());
+        sceneExecuteRecordDto.setWaitType(sceneExecuteRecordDo.getWaitType());
+        sceneExecuteRecordDto.setWaitTime(sceneExecuteRecordDo.getWaitTime());
+        sceneExecuteRecordDto.setStatus(sceneExecuteRecordDo.getStatus());
+        sceneExecuteRecordDto.setType(sceneExecuteRecordDo.getType());
+        sceneExecuteRecordDto.setExecuteTime(sceneExecuteRecordDo.getExecuteTime());
+        sceneExecuteRecordDto.setStepOrderList(sceneExecuteRecordDo.getStepOrderList());
+        return sceneExecuteRecordDto;
     }
 
 }

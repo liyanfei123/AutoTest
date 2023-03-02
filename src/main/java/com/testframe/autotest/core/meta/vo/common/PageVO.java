@@ -22,9 +22,11 @@ public class PageVO {
 
     private int pageSize;
 
+    private Long lastId;
+
     public PageVO(PageRequest pageParam) {
         this.pageNum = pageParam.getPage();
         this.pageSize = pageParam.getPageSize();
-
+        this.lastId = pageParam.getLastId();
     }
 }

@@ -9,6 +9,4 @@ public interface SceneListService {
 
     public SceneListVO queryScenes(SceneQry sceneQry);
 
-    public Boolean deleteScene(Long sceneId);
-
 }

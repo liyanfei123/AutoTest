@@ -6,6 +6,7 @@ import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.convertor.CategorySceneConverter;
 import com.testframe.autotest.core.meta.po.CategoryDetail;
 import com.testframe.autotest.core.meta.po.CategoryScene;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.dao.CategorySceneDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,16 @@ public class CategorySceneRepository {
         return true;
     }
 
-    public List<CategorySceneDo> queryByCategoryId(Integer categoryId) {
-        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId);
+    public Long countByCategoryId(Long categoryId) {
+        Long count = categorySceneDao.countByCategoryId(categoryId);
+        if (count == null) {
+            return 0L;
+        }
+        return count;
+    }
+
+    public List<CategorySceneDo> queryByCategoryId(Integer categoryId, PageQry pageQry) {
+        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
         if (categoryScenes.isEmpty()) {
             return Collections.EMPTY_LIST;
         }

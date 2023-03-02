@@ -2,7 +2,7 @@ package com.testframe.autotest.service;
 
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
-import com.testframe.autotest.meta.dto.SceneDetailInfo;
+import com.testframe.autotest.meta.vo.SceneDetailVo;
 
 public interface SceneDetailService {
 
@@ -10,6 +10,10 @@ public interface SceneDetailService {
 
     public Boolean update(SceneUpdateCmd sceneUpdateCmd);
 
-    public SceneDetailInfo query(Long sceneId);
+    public SceneDetailVo query(Long sceneId);
+
+    public Long sceneCopy(Long sceneId);
+
+    public Boolean deleteScene(Long sceneId);
 
 }

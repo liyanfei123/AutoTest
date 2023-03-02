@@ -15,7 +15,7 @@
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, sceneId, sceneName, url, waitType, waitTime, status, orderList, extInfo, createTime
+    id, sceneId, sceneName, url, waitType, waitTime, status, type, orderList, extInfo, createTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -167,13 +167,13 @@
   <select id="getRecordBySceneId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
-    where sceneId = #{sceneId,jdbcType=BIGINT} AND type = #{pageQry.type,jdbcType=INTEGER}
-    order by createTime DESC limit #{pageQry.offset},#{pageQry.size}
+    where sceneId = #{sceneId,jdbcType=BIGINT} AND type = #{recordQry.type,jdbcType=INTEGER}
+    order by createTime DESC limit #{recordQry.offset}, #{recordQry.size}
   </select>
 
   <select id="getSceneRecordByRecordId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
-    where recordId = #{recordId,jdbcType=BIGINT}
+    where id = #{recordId,jdbcType=BIGINT}
   </select>
 </mapper>

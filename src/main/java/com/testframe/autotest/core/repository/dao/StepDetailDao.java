@@ -5,9 +5,7 @@ import com.testframe.autotest.core.repository.mapper.StepDetailMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -27,14 +25,10 @@ public class StepDetailDao {
         return null;
     }
 
-    public Long updateStepDetail(StepDetail stepDetail) {
+    public Boolean updateStepDetail(StepDetail stepDetail) {
         Long currentTime = System.currentTimeMillis();
         stepDetail.setUpdateTime(currentTime);
-        if (stepDetailMapper.updateByPrimaryKeySelective(stepDetail) > 0) {
-            return stepDetail.getId();
-        }
-        return null;
-
+        return stepDetailMapper.updateByPrimaryKeySelective(stepDetail) > 0 ? true : false;
     }
 
     public StepDetail queryByStepId(Long stepId) {
@@ -44,6 +38,11 @@ public class StepDetailDao {
 
     public List<StepDetail> queryByStepIds(List<Long> stepIds) {
         List<StepDetail> stepDetails = stepDetailMapper.queryStepByIds(stepIds);
+        return stepDetails;
+    }
+
+    public List<StepDetail> queryStepBySceneId(List<Long> sceneIds) {
+        List<StepDetail> stepDetails = stepDetailMapper.queryStepBySceneId(sceneIds);
         return stepDetails;
     }
 

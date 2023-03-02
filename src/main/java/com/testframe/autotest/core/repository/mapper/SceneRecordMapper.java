@@ -3,6 +3,7 @@ package com.testframe.autotest.core.repository.mapper;
 import com.testframe.autotest.core.meta.po.SceneRecord;
 
 import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.meta.query.RecordQry;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,5 +23,5 @@ public interface SceneRecordMapper {
 
     int updateByPrimaryKey(SceneRecord record);
 
-    List<SceneRecord> getRecordBySceneId(@Param("sceneId") Long sceneId, @Param("pageQry") PageQry pageQry);
+    List<SceneRecord> getRecordBySceneId(@Param("sceneId") Long sceneId, @Param("recordQry") RecordQry recordQry);
 }

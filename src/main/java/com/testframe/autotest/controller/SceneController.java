@@ -4,13 +4,12 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
-import com.testframe.autotest.meta.dto.SceneDetailInfo;
 import com.testframe.autotest.meta.query.SceneQry;
+import com.testframe.autotest.meta.vo.SceneDetailVo;
 import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.service.SceneListService;
-import com.testframe.autotest.service.impl.CopyServiceImpl;
 import com.testframe.autotest.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -32,9 +31,6 @@ public class SceneController {
     private SceneListService sceneListService;
 
     @Autowired
-    private CopyServiceImpl sceneCopyService;
-
-    @Autowired
     private SceneExecuteService sceneExecuteService;
 
     // 创建场景
@@ -48,8 +44,12 @@ public class SceneController {
         }
     }
 
+    // 仅更新场景信息，不可更新步骤
+    // 更新时，未传入的字段不做更新
+    // 仅用于快速更新一个场景
+    // 不支持步骤执行顺序的同步更新
     @PostMapping("/update")
-    public HttpResult<Long> createScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
+    public HttpResult<Long> updateScene(@RequestBody SceneUpdateCmd sceneUpdateCmd) {
         try {
             sceneDetailService.update(sceneUpdateCmd);
             return HttpResult.ok("场景更新成功");
@@ -58,8 +58,9 @@ public class SceneController {
         }
     }
 
+
     @GetMapping("query")
-    public HttpResult<SceneDetailInfo> queryScene(@RequestParam(required = true) Long sceneId) {
+    public HttpResult<SceneDetailVo> queryScene(@RequestParam(required = true) Long sceneId) {
         try {
             return HttpResult.ok(sceneDetailService.query(sceneId));
         } catch (AutoTestException e) {
@@ -70,12 +71,14 @@ public class SceneController {
     @PostMapping("/list")
     public HttpResult<SceneListVO> sceneList(@RequestBody SceneQry sceneQry) {
         try {
+            if (sceneQry.getCategoryId() == null) {
+                return HttpResult.error("请输入正确的参数");
+            }
             SceneListVO sceneListVO = sceneListService.queryScenes(sceneQry);
             return  HttpResult.ok(sceneListVO);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
-
     }
 
     @GetMapping("/delete")
@@ -84,12 +87,14 @@ public class SceneController {
             if (sceneId == null || !StringUtils.isNumeric(sceneId.toString())) {
                 return HttpResult.error("请输入正确的场景id");
             }
-            sceneListService.deleteScene(sceneId);
+            sceneDetailService.deleteScene(sceneId);
             return HttpResult.ok("删除成功");
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
     }
+
+
 
     @GetMapping("/copy")
     public HttpResult<Object> copyScene(@RequestParam(required = true) Long sceneId) {
@@ -97,7 +102,7 @@ public class SceneController {
             if (sceneId == null) {
                 return HttpResult.error("请输入场景id");
             }
-            Long newSceneId = sceneCopyService.sceneCopy(sceneId);
+            Long newSceneId = sceneDetailService.sceneCopy(sceneId);
             return HttpResult.ok(newSceneId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());

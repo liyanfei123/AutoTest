@@ -12,7 +12,7 @@
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, sceneId, stepId, status, isDelete, createTime, updateTime
+    id, sceneId, stepId, status, type, isDelete, createTime, updateTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -132,7 +132,10 @@
     update AUTO_TEST_SCENE_STEP
     set status = #{status,jdbcType=INTEGER},
     updateTime = #{updateTime,jdbcType=BIGINT}
-    where id in (#{ids,jdbcType=INTEGER})
+    where id in
+    <foreach collection="ids" index="i" item="id" close=")" open="(" separator=",">
+      #{id}
+    </foreach>
   </update>
 
   <select id="queryStepsBySceneId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
@@ -158,5 +161,12 @@
     </foreach>
     AND isDelete = 0
   </select>
+
+    <select id="queryStepByStepIdAndSceneId" resultType="com.testframe.autotest.core.meta.po.SceneStep">
+      select *
+      from AUTO_TEST_SCENE_STEP
+      where sceneId = #{sceneId,jdbcType=BIGINT} AND stepId = #{stepId,jdbcType=BIGINT}
+      AND isDelete = 0
+    </select>
 
 </mapper>

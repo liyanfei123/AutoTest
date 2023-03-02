@@ -4,6 +4,7 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.convertor.CategorySceneConverter;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.CategoryDetailRepository;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.domain.category.CategorySceneDomain;
@@ -41,7 +42,9 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
         List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry); // 子目录
         if (categoryDetailDos.isEmpty()) {
             // 判断是否存在关联的有效场景
-            List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(categoryId);
+            PageQry pageQry = new PageQry();
+            pageQry.setSize(1);
+            List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(categoryId, pageQry);
             return !categorySceneDos.isEmpty();
         }
         for (CategoryDetailDo categoryDetailDo : categoryDetailDos) {
@@ -93,7 +96,9 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
 
     @Override
     public CategorySceneBo listSceneInCategory(Integer categoryId) {
-        List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(categoryId);
+        PageQry pageQry = new PageQry();
+        pageQry.setSize(-1);
+        List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(categoryId, pageQry);
         if (categorySceneDos.isEmpty()) {
             return null;
         }

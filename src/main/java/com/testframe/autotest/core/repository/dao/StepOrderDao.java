@@ -41,6 +41,14 @@ public class StepOrderDao {
         return stepOrders;
     }
 
+
+    public List<StepOrder> getStepOrderBySceneIdAndType(Long sceneId, Integer type) {
+        List<StepOrder> stepOrders = stepOrderMapper.getStepOrderBySceneIdAndType(sceneId, type);
+        if (CollectionUtils.isEmpty(stepOrders)) {
+            return Collections.EMPTY_LIST;
+        }
+        return stepOrders;
+    }
     public StepOrder queryStepOrderByRecordId(Long recordId) {
         StepOrder stepOrder = stepOrderMapper.getStepOrderByRecordId(recordId);
         return stepOrder;

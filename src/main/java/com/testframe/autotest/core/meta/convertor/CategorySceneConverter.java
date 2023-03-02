@@ -4,7 +4,6 @@ package com.testframe.autotest.core.meta.convertor;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.po.CategoryScene;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
-import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Component

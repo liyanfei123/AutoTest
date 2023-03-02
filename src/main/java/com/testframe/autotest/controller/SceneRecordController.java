@@ -1,7 +1,6 @@
 package com.testframe.autotest.controller;
 
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
-import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.impl.SceneRecordServiceImpl;
 import lombok.extern.slf4j.Slf4j;

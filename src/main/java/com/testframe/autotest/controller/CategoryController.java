@@ -45,6 +45,7 @@ public class CategoryController {
         }
     }
 
+    // 删除类目
     @GetMapping("/delete")
     public HttpResult<Boolean> deleteCategory(@RequestParam Integer categoryId) {
         try {

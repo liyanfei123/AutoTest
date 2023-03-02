@@ -194,7 +194,7 @@
     select *
     from AUTO_TEST_SCENE_DETAIL
     where id > #{pageQry.lastId} and isDelete = 0
-    order by id
+    order by id Desc
     limit #{pageQry.offset}, #{pageQry.size}
   ]]></select>
 
@@ -217,5 +217,15 @@
       and id= #{sceneId}
     </if>
     </select>
+
+  <select id="listBySceneIds" resultType="com.testframe.autotest.core.meta.po.SceneDetail">
+    select *
+    from AUTO_TEST_SCENE_DETAIL
+    where id in
+    <foreach collection="sceneIds" index="i" item="sceneId" close=")" open="(" separator=",">
+      #{sceneId}
+    </foreach>
+    order By id DESC
+  </select>
 
 </mapper>

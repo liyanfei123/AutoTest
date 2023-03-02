@@ -6,6 +6,7 @@ import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.convertor.CategoryDetailConverter;
 import com.testframe.autotest.core.meta.po.CategoryScene;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.CategoryDetailRepository;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.domain.category.CategorySceneDomain;
@@ -78,46 +79,16 @@ public class CategoryDomainImpl implements CategoryDomain {
     @Override
     public Integer updateCategory(CategoryDto categoryDto) {
         try {
-            CategoryQry categoryQry = new CategoryQry(null, categoryDto.getCategoryName(), null, null);
-            List<CategoryDetailDo> existNameCategoryDetailDos = categoryDetailRepository.
-                    queryCategory(categoryQry);
-            if (categoryDto.getCategoryId() > 0 && existNameCategoryDetailDos.size() > 0 &&
-                    existNameCategoryDetailDos.get(0).getType() == CategoryTypeEnum.PRIMARY.getType()) {
-                throw new AutoTestException("存在同名一级类目");
-            }
             if (categoryDto.getCategoryId() > 0) {
                 // 更新
-                categoryQry = new CategoryQry(categoryDto.getCategoryId(), null, null, null);
-                List<CategoryDetailDo> existCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-                if (existCategoryDetailDos.size() == 0) {
-                    throw new AutoTestException("当前类目id错误");
-                }
-                CategoryDetailDo updateCategoryDetailDo = existCategoryDetailDos.get(0);
-                if (updateCategoryDetailDo.getIsDelete() == 1) {
-                    throw new AutoTestException("已删除场景不支持更新");
-                }
-                if (categoryDto.getRelatedCategoryId() == 0) {
-                    categoryDto.setRelatedCategoryId(updateCategoryDetailDo.getRelateCategoryId());
-                } else {
-                    categoryQry = new CategoryQry(null, null, categoryDto.getRelatedCategoryId(), null);
-                    List<CategoryDetailDo> relatedCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-                    if (relatedCategoryDetailDos.isEmpty()) {
-                        throw new AutoTestException("当前关联类目id错误");
-                    }
-                }
+                CategoryQry categoryQry = new CategoryQry(categoryDto.getCategoryId(), null, null, null);
+                List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
+                CategoryDetailDo updateCategoryDetailDo = categoryDetailDos.get(0);
                 updateCategoryDetailDo = categoryDetailConverter.DtoToDo(updateCategoryDetailDo, categoryDto);
                 categoryDetailRepository.updateCategory(updateCategoryDetailDo);
             } else {
                 // 新增
                 CategoryDetailDo newCategoryDetailDo = categoryDetailConverter.DtoToDo(categoryDto);
-                if (categoryDto.getRelatedCategoryId() > 0) {
-                    // 新增子目录
-                    categoryQry = new CategoryQry(null, null, categoryDto.getRelatedCategoryId(), null);
-                    List<CategoryDetailDo> relatedCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-                    if (relatedCategoryDetailDos.isEmpty()) {
-                        throw new AutoTestException("当前关联类目id错误");
-                    }
-                }
                 newCategoryDetailDo.setType(categoryDto.getRelatedCategoryId() > 0 ? CategoryTypeEnum.MULTI.getType() :
                         CategoryTypeEnum.PRIMARY.getType());
                 newCategoryDetailDo.setIsDelete(0);
@@ -143,13 +114,16 @@ public class CategoryDomainImpl implements CategoryDomain {
             throw new AutoTestException("当前目录下有关联的场景，不允许删除");
         }
         categoryDetailDo.setIsDelete(1);
-        categoryDetailRepository.updateCategory(categoryDetailDo);
+        categoryDetailRepository.deleteCategory(categoryId);
         return true;
     }
 
     @Override
     public CategoryDetailBo getCategoryById(Integer categoryId) {
         CategoryDetailDo categoryDetailDo = getCategory(categoryId);
+        if (categoryDetailDo == null) {
+            return null;
+        }
         CategoryDetailBo categoryDetailBo = new CategoryDetailBo();
         categoryDetailBo.setCategoryId(categoryDetailDo.getCategoryId());
         categoryDetailBo.setCategoryName(categoryDetailDo.getCategoryName());

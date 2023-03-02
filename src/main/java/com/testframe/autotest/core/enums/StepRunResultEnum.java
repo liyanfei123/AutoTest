@@ -1,6 +1,6 @@
 package com.testframe.autotest.core.enums;
 
-import com.testframe.autotest.meta.bo.StepExecuteRecord;
+import com.testframe.autotest.meta.dto.record.StepExecuteRecordDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,8 +34,8 @@ public enum StepRunResultEnum {
         return name;
     }
 
-    public static Integer stepStatusToSceneStatus(List<StepExecuteRecord> stepExecuteRecords) {
-        List<Integer> status = stepExecuteRecords.stream().map(StepExecuteRecord::getStatus)
+    public static Integer stepStatusToSceneStatus(List<StepExecuteRecordDto> stepExecuteRecords) {
+        List<Integer> status = stepExecuteRecords.stream().map(StepExecuteRecordDto::getStatus)
                 .collect(Collectors.toList());
         if (status.isEmpty()) {
             return SceneStatusEnum.NEVER.getType();

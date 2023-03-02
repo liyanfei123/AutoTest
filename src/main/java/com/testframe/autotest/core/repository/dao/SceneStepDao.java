@@ -35,8 +35,22 @@ public class SceneStepDao {
         return sceneStepMapper.updateByPrimaryKeySelective(sceneStep) > 0 ? true : false;
     }
 
+    public Boolean deleteSceneStep(SceneStep sceneStep) {
+        Long currentTime = System.currentTimeMillis();
+        sceneStep.setUpdateTime(currentTime);
+        sceneStep.setIsDelete(1);
+        return sceneStepMapper.updateByPrimaryKeySelective(sceneStep) > 0 ? true : false;
+    }
+
+
+
     public SceneStep queryById(Long id) {
         return sceneStepMapper.selectByPrimaryKey(id);
+    }
+
+    public SceneStep queryStepByStepIdAndSceneId(Long stepId, Long sceneId) {
+        SceneStep sceneStep = sceneStepMapper.queryStepByStepIdAndSceneId(stepId, sceneId);
+        return sceneStep;
     }
 
     public List<SceneStep> queryBySceneId(Long sceneId) {

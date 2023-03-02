@@ -1,25 +1,27 @@
 package com.testframe.autotest.service.impl;
 
+import com.testframe.autotest.core.enums.StepTypeEnum;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.*;
-import com.testframe.autotest.meta.bo.*;
+import com.testframe.autotest.domain.scene.SceneDomain;
+import com.testframe.autotest.domain.step.StepDomain;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
-import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.meta.dto.SceneDetailInfo;
-import com.testframe.autotest.meta.dto.SceneInfoDto;
-import com.testframe.autotest.meta.dto.StepInfoDto;
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
+import com.testframe.autotest.meta.dto.step.StepDetailDto;
+import com.testframe.autotest.meta.dto.step.StepsDto;
+import com.testframe.autotest.meta.vo.SceneDetailVo;
+import com.testframe.autotest.meta.vo.StepInfoVo;
 import com.testframe.autotest.service.SceneDetailService;
-import com.testframe.autotest.service.SceneStepService;
-import com.testframe.autotest.service.StepDetailService;
-import com.testframe.autotest.service.StepOrderService;
 import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.validator.StepValidator;
+import com.testframe.autotest.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,117 +41,177 @@ public class SceneDetailImpl implements SceneDetailService {
     private SceneDetailRepository sceneDetailRepository;
 
     @Autowired
-    private SceneStepService sceneStepService;
+    private SceneDomain sceneDomain;
 
     @Autowired
-    private StepDetailService stepDetailService;
-
-    @Autowired
-    private StepOrderService stepOrderService;
+    private StepDomain stepDomain;
 
     // 创建测试场景
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public Long create(SceneCreateCmd sceneCreateCmd) {
         log.info("[SceneDetailImpl:create] create scene, sceneCreateCmd = {}", JSON.toJSONString(sceneCreateCmd));
-        // 检验参数是否符合要求
         try {
             sceneValidator.validateCreate(sceneCreateCmd);
-            Scene sceneCreate = build(sceneCreateCmd);
+            SceneDetailDto sceneDetailDto = this.build(sceneCreateCmd);
             // todo:获取当前登录的用户信息
-            sceneCreate.setCreateBy(1234L);
-            log.info("[SceneDetailImpl:create] create scene, scene = {}", JSON.toJSONString(sceneCreate));
-            return sceneDetailRepository.saveScene(sceneCreate);
+            sceneDetailDto.setCreateBy(1234L);
+            log.info("[SceneDetailImpl:create] create scene, scene = {}", JSON.toJSONString(sceneDetailDto));
+            return sceneDomain.updateScene(sceneDetailDto);
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:create] create scene error, reason: {}", e.getMessage());
             throw new AutoTestException(e.getMessage());
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean update(SceneUpdateCmd sceneUpdateCmd) {
         log.info("[SceneDetailImpl:update] update scene, sceneUpdateCmd = {}", JSON.toJSONString(sceneUpdateCmd));
-        Long sceneId = sceneUpdateCmd.getId();
         try {
-            sceneUpdateCmd.getStepUpdateCmds().forEach(stepUpdateCmd -> stepUpdateCmd.setSceneId(sceneId));
-            // 更新场景概要
-            sceneValidator.checkSceneUpdate(sceneUpdateCmd);
-            stepValidator.checkStepUpdates(sceneUpdateCmd.getStepUpdateCmds());
-            Scene sceneUpdate = build(sceneUpdateCmd);
-            sceneDetailRepository.update(sceneUpdate);
-            if (sceneUpdateCmd.getStepUpdateCmds().isEmpty()) {
+            SceneDetailDto sceneDetailDto = sceneDomain.getSceneById(sceneUpdateCmd.getId());
+            if (sceneDetailDto == null) {
+                throw new AutoTestException("请输入正确的场景id");
+            }
+            // null值处理
+            if (sceneUpdateCmd.getCategoryId() == null) {
+                sceneUpdateCmd.setCategoryId(sceneDetailDto.getCategoryId());
+            }
+            sceneValidator.validateUpdate(sceneUpdateCmd);
+            sceneDetailDto = this.buildUpdate(sceneDetailDto, sceneUpdateCmd);
+            if (sceneDetailDto == null) {
                 return true;
             }
-            List<Step> steps = new ArrayList<>();
-            for (StepUpdateCmd stepUpdateCmd : sceneUpdateCmd.getStepUpdateCmds()) {
-                Step step = StepUpdateCmd.toStep(stepUpdateCmd);
-                steps.add(step);
-            }
-            // 更新场景下的所有步骤
-            List<Long> stepIds = sceneStepService.updateSceneStep(sceneId, steps);
-            // 更新执行步骤顺序
-            stepOrderService.updateStepOrder(sceneId, stepIds);
+            return sceneDomain.updateScene(sceneDetailDto) == 0L;
         } catch (AutoTestException e) {
             log.error("[SceneDetailImpl:update] update scene error, reason: ", e);
             throw new AutoTestException(e.getMessage());
         }
-        return true;
     }
 
     @Override
-    public SceneDetailInfo query(Long sceneId) {
+    public SceneDetailVo query(Long sceneId) {
         try {
             log.info("[SceneDetailImpl:query] query scene {}", sceneId);
-            Scene scene = sceneDetailRepository.querySceneById(sceneId);
-            if (scene == null) {
+            SceneDetailVo sceneDetailVo = new SceneDetailVo();
+            SceneDetailDto sceneDetailDto = sceneDomain.getSceneById(sceneId);
+            if (sceneDetailDto == null) {
                 throw new AutoTestException("当前场景不存在");
             }
-            SceneInfoDto sceneInfoDto = SceneInfoDto.build(scene);
-            SceneDetailInfo sceneDetailInfo = new SceneDetailInfo();
-            sceneDetailInfo.setScene(sceneInfoDto);
-            // 查询步骤执行信息
-            List<Long> stepIds = stepOrderService.queryNowStepOrder(sceneId);
-            if (stepIds.isEmpty()) {
-                sceneDetailInfo.setSteps(null);
-            } else {
-                HashMap<Long, StepInfoDto> stepInfoDtoMap = stepDetailService.batchQueryStepDetail(stepIds);
-                List<StepInfoDto> steps = new ArrayList<>(stepIds.size());
-                // 根据执行步骤编排信息
-                stepIds.forEach(stepId -> {
-                    StepInfoDto stepInfoDto = stepInfoDtoMap.get(stepId);
-                    if (stepInfoDto == null) {
-                        throw new AutoTestException("当前场景下步骤被删除，数据有误");
-                    }
-                    steps.add(stepInfoDto);
-                });
-                sceneDetailInfo.setSteps(steps);
-            }
-            log.info("[SceneDetailImpl:query] scene detail {}", JSON.toJSONString(sceneDetailInfo));
-            return sceneDetailInfo;
+            sceneDetailVo.setSceneInfo(sceneDetailDto);
+            List<StepInfoVo> steps = this.buildStepInfo(sceneId);
+            sceneDetailVo.setSteps(steps);
+            log.info("[SceneDetailImpl:query] scene detail {}", JSON.toJSONString(sceneDetailVo));
+            return sceneDetailVo;
         } catch (Exception e) {
             log.error("[SceneDetailImpl:query] query scene {} error, reason = {}", sceneId, e);
             throw new AutoTestException(e.getMessage());
         }
     }
 
-    private Scene build(SceneCreateCmd sceneCreateCmd) {
-        Scene sceneCreate = new Scene();
-        sceneCreate.setTitle(sceneCreateCmd.getTitle());
-        sceneCreate.setDesc(sceneCreateCmd.getDesc());
-        sceneCreate.setType(sceneCreateCmd.getType());
-        return sceneCreate;
+    private List<StepInfoVo> buildStepInfo(Long sceneId) {
+        List<StepInfoVo> stepInfoVos = new ArrayList<>();
+        List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
+        if (stepDetailDtos.isEmpty()) {
+            return stepInfoVos;
+        }
+        for (StepDetailDto stepDetailDto : stepDetailDtos) {
+            StepInfoVo stepInfoVo = new StepInfoVo();
+            BeanUtils.copyProperties(stepDetailDto, stepInfoVo);
+            if (stepDetailDto.getType() == StepTypeEnum.STEP.getType()) {
+                // 单步骤
+                stepInfoVo.setSonSteps(Collections.EMPTY_LIST);
+            } else if (stepDetailDto.getType() == StepTypeEnum.SCENE.getType()) {
+                // 子场景
+                List<StepInfoVo> sonStepInfoVos = this.buildStepInfo(stepDetailDto.getSonSceneId());
+                stepInfoVo.setSonSteps(sonStepInfoVos);
+            }
+            stepInfoVos.add(stepInfoVo);
+        }
+        return stepInfoVos;
     }
 
-    private Scene build(SceneUpdateCmd sceneUpdateCmd) {
-        Scene sceneUpdate = new Scene();
-        sceneUpdate.setId(sceneUpdateCmd.getId());
-        sceneUpdate.setTitle(sceneUpdateCmd.getTitle());
-        sceneUpdate.setDesc(sceneUpdateCmd.getDesc());
-        sceneUpdate.setType(sceneUpdateCmd.getType());
-        sceneUpdate.setUrl(sceneUpdateCmd.getUrl());
-        sceneUpdate.setWaitType(sceneUpdateCmd.getWaitType());
-        sceneUpdate.setWaitTime(sceneUpdateCmd.getWaitTime());
-        return sceneUpdate;
+    @Override
+    public Long sceneCopy(Long sceneId) {
+        log.info("");
+        try {
+            // 复制场景详情
+            SceneDetailDto sceneDetailDto = sceneDomain.getSceneById(sceneId);
+            if (sceneDetailDto == null) {
+                return 0L;
+            }
+            sceneDetailDto.setSceneId(null);
+            sceneDetailDto.setCreateBy(123456L);
+            String sceneSuffix = RandomUtil.randomCode(8);
+            sceneDetailDto.setSceneName(sceneDetailDto.getSceneName() + sceneSuffix);
+            Long newSceneId = sceneDomain.updateScene(sceneDetailDto);
+
+            // 复制场景下的所有步骤
+            List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
+            if (stepDetailDtos.isEmpty()) {
+                return newSceneId;
+            }
+            stepDetailDtos = stepDetailDtos.stream().map(stepDetailDto -> {
+                stepDetailDto.setStepId(null);
+                stepDetailDto.setSceneId(newSceneId);
+                return stepDetailDto;
+            }).collect(Collectors.toList());
+            StepsDto stepsDto = new StepsDto();
+            stepsDto.setSceneId(sceneId);
+            stepsDto.setStepDetailDtos(stepDetailDtos);
+            stepDomain.saveSteps(stepsDto);
+            return newSceneId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("xx");
+            throw new AutoTestException("场景复制失败");
+        }
+    }
+
+    @Override
+    public Boolean deleteScene(Long sceneId) {
+        return sceneDomain.deleteScene(sceneId);
+    }
+
+    private SceneDetailDto build(SceneCreateCmd sceneCreateCmd) {
+        SceneDetailDto sceneDetailDto = new SceneDetailDto();
+        sceneDetailDto.setSceneName(sceneCreateCmd.getTitle());
+        sceneDetailDto.setSceneDesc(sceneCreateCmd.getDesc());
+        sceneDetailDto.setType(sceneCreateCmd.getType());
+        sceneDetailDto.setCategoryId(sceneCreateCmd.getCategoryId());
+        return sceneDetailDto;
+    }
+
+    // 判断场景是否需要更新
+    private SceneDetailDto buildUpdate(SceneDetailDto sceneDetailDto, SceneUpdateCmd sceneUpdateCmd) {
+        sceneDetailDto.setSceneId(sceneUpdateCmd.getId());
+        Boolean flag = false;
+        if (sceneUpdateCmd.getTitle() != null && !sceneUpdateCmd.getTitle().equals(sceneDetailDto.getSceneName())) {
+            sceneDetailDto.setSceneName(sceneUpdateCmd.getTitle());
+            flag = true;
+        }
+        if (sceneUpdateCmd.getDesc() != null && !sceneUpdateCmd.getDesc().equals(sceneDetailDto.getSceneDesc())) {
+            sceneDetailDto.setSceneDesc(sceneUpdateCmd.getDesc());
+            flag = true;
+        }
+        if (sceneUpdateCmd.getUrl() != null && !sceneUpdateCmd.getUrl().equals(sceneDetailDto.getUrl())) {
+            sceneDetailDto.setUrl(sceneUpdateCmd.getUrl());
+            flag = true;
+        }
+        if (sceneUpdateCmd.getWaitType() != null && sceneUpdateCmd.getWaitType() != sceneDetailDto.getWaitType()) {
+            sceneDetailDto.setWaitType(sceneUpdateCmd.getWaitType());
+            flag = true;
+        }
+        if (sceneUpdateCmd.getWaitTime() != null && sceneUpdateCmd.getWaitTime() != sceneDetailDto.getWaitTime()) {
+            sceneDetailDto.setWaitTime(sceneUpdateCmd.getWaitTime());
+            flag = true;
+        }
+        if (sceneUpdateCmd.getCategoryId() != null && sceneUpdateCmd.getCategoryId() != sceneDetailDto.getCategoryId()) {
+            sceneDetailDto.setCategoryId(sceneUpdateCmd.getCategoryId());
+            flag = true;
+        }
+        if (flag == true) {
+            return sceneDetailDto;
+        } else {
+            return null;
+        }
     }
 }

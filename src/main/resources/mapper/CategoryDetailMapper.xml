@@ -17,7 +17,7 @@
     select 'false' as QUERYID,
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER} AND isDelete=0
   </select>
 
   <select id="queryAllByRelateCategoryId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >

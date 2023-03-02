@@ -1,12 +1,12 @@
 package com.testframe.autotest.core.repository;
 
-
-import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
+import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.meta.convertor.SceneStepConverter;
+import com.testframe.autotest.core.meta.convertor.StepOrderConverter;
 import com.testframe.autotest.core.meta.po.SceneStep;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.dao.SceneStepDao;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneStepRel;
+import com.testframe.autotest.core.repository.dao.StepOrderDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,31 +26,17 @@ public class SceneStepRepository {
     private SceneStepDao sceneStepDao;
 
     @Autowired
+    private StepOrderDao stepOrderDao;
+
+    @Autowired
     private SceneStepConverter sceneStepConverter;
 
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean saveSceneStep(SceneStepRel sceneStepRel) {
-        SceneStep sceneStep = sceneStepConverter.toPO(sceneStepRel);
-        return sceneStepDao.saveSceneStep(sceneStep);
-    }
+    @Autowired
+    private StepOrderConverter stepOrderConverter;
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean batchSaveSceneStep(List<SceneStepRel> sceneStepRels) {
-        List<SceneStep> sceneSteps = sceneStepRels.stream().map(sceneStepConverter::toPO).collect(Collectors.toList());
-       try {
-           for (SceneStep sceneStep : sceneSteps) {
-               sceneStepDao.saveSceneStep(sceneStep);
-           }
-           return true;
-       } catch (Exception e) {
-           log.error("[SceneStepRepository:batchSaveSceneStep] save scene-steps error, reason ={}", e.getMessage());
-           return false;
-       }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean batchUpdateSceneStep(List<SceneStepRel> sceneStepRels) {
-        List<SceneStep> sceneSteps = sceneStepRels.stream().map(sceneStepConverter::toPO).collect(Collectors.toList());
+    public Boolean batchUpdateSceneStep(List<SceneStepRelDo> sceneStepRelDos) {
+        List<SceneStep> sceneSteps = sceneStepRelDos.stream().map(sceneStepConverter::DoToPO).collect(Collectors.toList());
         try {
             for (SceneStep sceneStep : sceneSteps) {
                 sceneStepDao.updateSceneStep(sceneStep);
@@ -62,44 +48,55 @@ public class SceneStepRepository {
         }
     }
 
-    public Boolean updateSceneStep(SceneStepRel sceneStepRel) {
-        SceneStep sceneStep = sceneStepConverter.toPO(sceneStepRel);
-        return sceneStepDao.updateSceneStep(sceneStep);
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateSceneStep(SceneStepRelDo sceneStepRelDo) {
+        SceneStep sceneStep = sceneStepConverter.DoToPO(sceneStepRelDo);
+        if (!sceneStepDao.updateSceneStep(sceneStep)) {
+            return false;
+        }
+        return true;
     }
 
-    public List<SceneStepRel> querySceneStepsBySceneId(Long sceneId) {
+    public SceneStepRelDo queryByStepIdAndSceneId(Long stepId, Long sceneId) {
+        SceneStep sceneStep = sceneStepDao.queryStepByStepIdAndSceneId(stepId, sceneId);
+        if (sceneStep == null) {
+            return null;
+        }
+        SceneStepRelDo sceneStepRelDo = sceneStepConverter.PoToDo(sceneStep);
+        return sceneStepRelDo;
+    }
+
+    public List<SceneStepRelDo> querySceneStepsBySceneId(Long sceneId) {
         List<SceneStep> sceneSteps = sceneStepDao.queryBySceneId(sceneId);
         if (CollectionUtils.isEmpty(sceneSteps)) {
             return Collections.EMPTY_LIST;
         }
-        List<SceneStepRel> sceneStepRels = new ArrayList<>();
+        List<SceneStepRelDo> sceneStepRelDos = new ArrayList<>();
         sceneSteps.forEach(sceneStep -> {
-            SceneStepRel sceneStepRel = sceneStepConverter.PoToDo(sceneStep);
-            sceneStepRels.add(sceneStepRel);
+            SceneStepRelDo sceneStepRelDo = sceneStepConverter.PoToDo(sceneStep);
+            sceneStepRelDos.add(sceneStepRelDo);
         });
-        return sceneStepRels;
+        return sceneStepRelDos;
     }
 
-    public SceneStepRel queryByStepId(Long stepId) {
-        if (stepId == null) {
+    public SceneStepRelDo queryByStepId(Long stepId) {
+        SceneStep sceneStep = sceneStepDao.queryByStepId(stepId);
+        if (sceneStep == null) {
             return null;
         }
-        SceneStep sceneStep = sceneStepDao.queryByStepId(stepId);
         return sceneStepConverter.PoToDo(sceneStep);
     }
 
-    public List<SceneStepRel> queryByStepIds(List<Long> stepIds) {
-        if (stepIds == null) {
-            return null;
-        }
+    public List<SceneStepRelDo> queryByStepIds(List<Long> stepIds) {
         List<SceneStep> sceneStep = sceneStepDao.queryByStepIds(stepIds);
         if (sceneStep.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        List<SceneStepRel> sceneStepRels = sceneStep.stream().map(sceneStepConverter::PoToDo)
+        List<SceneStepRelDo> sceneStepRelDos = sceneStep.stream().map(sceneStepConverter::PoToDo)
                 .collect(Collectors.toList());
-        return sceneStepRels;
+        return sceneStepRelDos;
     }
+
 
 
 }

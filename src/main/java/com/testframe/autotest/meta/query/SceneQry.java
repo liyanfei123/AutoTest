@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.query;
 
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.meta.request.PageRequest;
 import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
@@ -15,18 +16,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SceneQry {
+public class SceneQry  {
 
     private String sceneName;
 
-    private Long sceneId;
-
     private Integer status;
 
-    private Integer page;
+    private Integer categoryId;
 
-    private Integer size;
-
-    private Long lastId;
+    private PageQry pageQry;
 
 }

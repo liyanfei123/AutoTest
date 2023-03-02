@@ -2,9 +2,7 @@ package com.testframe.autotest.core.repository.dao;
 
 import com.testframe.autotest.core.meta.po.SceneDetail;
 import com.testframe.autotest.core.meta.request.PageQry;
-import com.testframe.autotest.core.meta.request.PageRequest;
 import com.testframe.autotest.core.repository.mapper.SceneDetailMapper;
-import com.testframe.autotest.meta.bo.Scene;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,11 +19,12 @@ public class SceneDetailDao {
     @Autowired
     private SceneDetailMapper sceneDetailMapper;
 
-    public Boolean querySceneByTitle(String title) {
-        if (sceneDetailMapper.selectByTitle(title) == null) {
-            return false;
+    public List<SceneDetail> querySceneByTitle(String title) {
+        List<SceneDetail> sceneDetails = sceneDetailMapper.selectByTitle(title);
+        if (CollectionUtils.isEmpty(sceneDetails)) {
+            return Collections.EMPTY_LIST;
         }
-        return true;
+        return sceneDetails;
     }
 
     public List<SceneDetail> querySceneLikeTitle(String sceneName, PageQry pageQry) {
@@ -43,7 +42,7 @@ public class SceneDetailDao {
         if (sceneDetailMapper.insertSelective(sceneDetail) > 0) {
             return sceneDetail.getId();
         };
-        return null;
+        return 0L;
     }
 
     public Boolean updateScene(SceneDetail sceneDetail) {
@@ -55,6 +54,14 @@ public class SceneDetailDao {
     public SceneDetail querySceneById(Long sceneId) {
         SceneDetail sceneDetail = sceneDetailMapper.selectByPrimaryKey(sceneId);
         return sceneDetail;
+    }
+
+    public List<SceneDetail> batchQuerySceneByIds(List<Long> sceneIds) {
+        List<SceneDetail> sceneDetails = sceneDetailMapper.listBySceneIds(sceneIds);
+        if (CollectionUtils.isEmpty(sceneDetails)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneDetails;
     }
 
     public List<SceneDetail> queryScenes(PageQry pageQry) {

@@ -8,11 +8,13 @@ import java.util.List;
  */
 public enum SceneStatusEnum {
 
+    INT(0, "初始化中"),
     NEVER(1, "从未执行"),
     ING(2, "执行中"),
     SUCCESS(3, "执行成功"),
     FAIL(4, "执行失败"),
-    STOP(5, "手动终止");
+    STOP(5, "手动终止"),
+    INTFAIL(6, "初始化失败");
 
     private int type;
 
@@ -42,9 +44,11 @@ public enum SceneStatusEnum {
     public static Integer sceneStatusToStepStatus(Integer sceneStatus) {
         if (sceneStatus == SceneStatusEnum.NEVER.getType()) {
             return StepRunResultEnum.NORUN.getType();
-        } else if (sceneStatus == SceneStatusEnum.ING.getType()) {
+        } else if (sceneStatus == SceneStatusEnum.ING.getType()
+                || sceneStatus == SceneStatusEnum.INT.getType()) {
             return StepRunResultEnum.RUN.getType();
-        } else if (sceneStatus == SceneStatusEnum.FAIL.getType()) {
+        } else if (sceneStatus == SceneStatusEnum.FAIL.getType()
+                || sceneStatus == SceneStatusEnum.INTFAIL.getType()) {
             return StepRunResultEnum.FAIL.getType();
         } else if (sceneStatus == SceneStatusEnum.STOP.getType()) {
             return StepRunResultEnum.CLOSE.getType();

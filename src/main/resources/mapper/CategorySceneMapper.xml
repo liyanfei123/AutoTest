@@ -24,7 +24,14 @@
     select 'false' as QUERYID,
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY_SCENE
-    where categoryId = #{categoryId,jdbcType=INTEGER} AND isDelete = 0
+    where categoryId = #{categoryId,jdbcType=INTEGER} AND isDelete = 0 order by
+    <if test="pageQry.orderType == 1" >
+      createTime desc
+    </if>
+    <if test="pageQry.orderType == 2" >
+      createTime asc
+    </if>
+    limit #{pageQry.offset}, #{pageQry.size}
   </select>
 
     <select id="selectBySceneId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
@@ -117,4 +124,11 @@
       updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="countByCategoryId" resultType="java.lang.Long">
+    select count(*)
+    from AUTO_TEST_CATEGORY_SCENE
+    where isDelete = 0 and categoryId= #{categoryId,jdbcType=INTEGER}
+  </select>
+
 </mapper>

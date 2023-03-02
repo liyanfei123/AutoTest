@@ -7,7 +7,6 @@ import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.repository.CategoryDetailRepository;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.meta.command.SceneCategoryCmd;
-import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.meta.query.CategoryQry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

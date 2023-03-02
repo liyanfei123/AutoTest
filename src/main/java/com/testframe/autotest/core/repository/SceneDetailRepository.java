@@ -1,12 +1,21 @@
 package com.testframe.autotest.core.repository;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.Do.CategorySceneDo;
+import com.testframe.autotest.core.meta.Do.SceneDetailDo;
+import com.testframe.autotest.core.meta.Do.SceneDo;
+import com.testframe.autotest.core.meta.convertor.CategorySceneConverter;
 import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
+import com.testframe.autotest.core.meta.po.CategoryScene;
+import com.testframe.autotest.core.meta.po.SceneStep;
+import com.testframe.autotest.core.meta.po.StepOrder;
 import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.repository.dao.CategorySceneDao;
 import com.testframe.autotest.core.repository.dao.SceneDetailDao;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.query.SceneQry;
+import com.testframe.autotest.core.repository.dao.SceneStepDao;
+import com.testframe.autotest.core.repository.dao.StepOrderDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.testframe.autotest.core.meta.po.SceneDetail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,61 +36,136 @@ public class SceneDetailRepository {
     private SceneDetailDao sceneDao;
 
     @Autowired
+    private SceneStepDao sceneStepDao;
+
+    @Autowired
+    private StepOrderDao stepOrderDao;
+
+    @Autowired
+    private CategorySceneDao categorySceneDao;
+
+    @Autowired
     private SceneDetailConvertor sceneDetailConvertor;
 
+    @Autowired
+    private CategorySceneConverter categorySceneConverter;
 
-    public Boolean querySceneByTitle(String title) {
-        return sceneDao.querySceneByTitle(title);
+    public List<SceneDetailDo> querySceneByTitle(String title) {
+        List<SceneDetail> sceneDetails = sceneDao.querySceneByTitle(title);
+        List<SceneDetailDo> sceneDetailDos = sceneDetails.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
+        return sceneDetailDos;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Long saveScene(Scene sceneCreate) {
-        SceneDetail sceneDetail = sceneDetailConvertor.toPO(sceneCreate);
+    public Long saveSceneInit(SceneDo sceneDo) {
+        // 保存场景
+        SceneDetail sceneDetail = sceneDetailConvertor.DoToPO(sceneDo.getSceneDetailDo());
         Long sceneId = sceneDao.saveScene(sceneDetail);
-        if (sceneId <= 0 || sceneId == null) {
-            return 0L;
+        if (sceneId == 0L) {
+            throw new AutoTestException("新增场景失败");
+        }
+        // 保存场景类目关系
+        sceneDo.getCategorySceneDo().setSceneId(sceneId);
+        CategoryScene categoryScene = categorySceneConverter.DoToPo(sceneDo.getCategorySceneDo());
+        if (categorySceneDao.saveCategoryScene(categoryScene) == 0L) {
+            throw new AutoTestException("新增场景关联类目保存失败");
+        }
+        // 初始化步骤执行顺序
+        List<Long> orderList = new ArrayList<>();
+        StepOrder stepOrder = new StepOrder(null, sceneId, 0L, orderList.toString(),
+                StepOrderEnum.BEFORE.getType(), null, null);
+        if (!stepOrderDao.saveStepOrder(stepOrder)) {
+            throw new AutoTestException("步骤执行顺序添加失败");
         }
         return sceneId;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean update(Scene sceneUpdate) {
-        SceneDetail sceneDetail = sceneDetailConvertor.toPO(sceneUpdate);
+    public boolean updateScene(SceneDo sceneDo) {
+        // 更新场景
+        SceneDetail sceneDetail = sceneDetailConvertor.DoToPO(sceneDo.getSceneDetailDo());
         log.info("[SceneDetailRepository:update] update scene, {}", JSON.toJSONString(sceneDetail));
         if (!sceneDao.updateScene(sceneDetail)) {
             throw new AutoTestException("场景更新失败");
         }
+        // 更新类目
+        if (sceneDo.getCategorySceneDo() != null) {
+            CategorySceneDo categorySceneDo = sceneDo.getCategorySceneDo();
+            CategoryScene categoryScene = categorySceneConverter.DoToPo(categorySceneDo);
+            if (!categorySceneDao.updateCategoryScene(categoryScene)) {
+                throw new AutoTestException("新增场景关联类目保存失败");
+            }
+        }
         return true;
     }
 
-    public Scene querySceneById(Long sceneId) {
+    public SceneDetailDo querySceneById(Long sceneId) {
         SceneDetail sceneDetail = sceneDao.querySceneById(sceneId);
         if (sceneDetail == null || sceneDetail.getIsDelete() == 1) {
             return null;
         } else {
-            return buildScene(sceneDetail);
+            return sceneDetailConvertor.PoToDo(sceneDetail);
         }
+    }
 
+    public List<SceneDetailDo> batchQuerySceneByIds(List<Long> sceneIds) {
+        List<SceneDetail> sceneDetails = sceneDao.batchQuerySceneByIds(sceneIds);
+        if (sceneDetails.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        List<SceneDetailDo> sceneDetailDos = sceneDetails.stream().map(sceneDetailConvertor::PoToDo)
+                .collect(Collectors.toList());
+        return sceneDetailDos;
+    }
+
+    // delete
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteScene(Long sceneId) {
+        SceneDetail sceneDetail = sceneDao.querySceneById(sceneId);
+        sceneDetail.setIsDelete(1);
+        if (!sceneDao.updateScene(sceneDetail)) {
+            return false;
+        }
+        // 判断当前场景下是否存在有效步骤，若存在需要删除
+        List<SceneStep> sceneSteps = sceneStepDao.queryBySceneId(sceneId);
+        if (!sceneSteps.isEmpty()) {
+            sceneSteps.forEach(sceneStep -> sceneStep.setIsDelete(1));
+            for (SceneStep sceneStep : sceneSteps) {
+                if (!sceneStepDao.updateSceneStep(sceneStep)) {
+                    throw new AutoTestException("删除失败");
+                }
+            }
+        }
+        // 执行顺序删除
+        List<StepOrder> stepOrders = stepOrderDao.getStepOrderBySceneIdAndType(sceneId, StepOrderEnum.BEFORE.getType());
+        for (StepOrder stepOrder : stepOrders) {
+            stepOrder.setOrderList(Collections.EMPTY_LIST.toString());
+            stepOrderDao.updateStepOrder(stepOrder);
+        }
+        return true;
     }
 
     /**
      * 根据相关条件查找场景
      * 优先级：场景id, 场景名称
-     * 多返回一个用户计算lastId
      * @param
      * @return
      */
-    public List<Scene> queryScenes(Long sceneId, String sceneName, PageQry pageQry) {
-        List<Scene> scenes = new ArrayList<>();
+    // TODO: 2023/2/27 添加场景状态查询，需要先查询最近执行状态的场景
+    public List<SceneDetailDo> queryScenes(Long sceneId, String sceneName, Integer status, PageQry pageQry) {
+        List<SceneDetailDo> scenes = new ArrayList<>();
         if (sceneId != null && sceneId != 0L) {
-            Scene scene = querySceneById(sceneId);
-            scenes.add(scene);
+            // 根据场景id搜索
+            SceneDetailDo sceneDetailDo = querySceneById(sceneId);
+            scenes.add(sceneDetailDo);
         } else if (sceneName != null && !sceneName.trim().equals("")) {
+            // 根据场景名称搜索
             List<SceneDetail> sceneDetailList = sceneDao.querySceneLikeTitle(sceneName, pageQry);
-            scenes = sceneDetailList.stream().map(this::buildScene).collect(Collectors.toList());
+            scenes = sceneDetailList.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
         } else {
+            // 全局无区别搜索
             List<SceneDetail> sceneDetailList = sceneDao.queryScenes(pageQry);
-            scenes = sceneDetailList.stream().map(this::buildScene).collect(Collectors.toList());
+            scenes = sceneDetailList.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
         }
         return scenes;
     }
@@ -89,21 +174,4 @@ public class SceneDetailRepository {
         return sceneDao.countScenes(sceneId, sceneName);
     }
 
-    public Scene buildScene(SceneDetail sceneDetail) {
-        if (sceneDetail == null) {
-            return null;
-        }
-        Scene scene = new Scene();
-        scene.setId(sceneDetail.getId());
-        scene.setType(sceneDetail.getType());
-        scene.setTitle(sceneDetail.getSceneName());
-        scene.setDesc(sceneDetail.getSceneDesc());
-        scene.setUrl(sceneDetail.getUrl());
-        scene.setWaitType(sceneDetail.getWaitType());
-        scene.setWaitTime(sceneDetail.getWaitTime());
-        scene.setCreateBy(sceneDetail.getCreateBy());
-        scene.setIsDelete(sceneDetail.getIsDelete());
-        return scene;
-
-    }
 }

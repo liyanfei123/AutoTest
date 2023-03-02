@@ -1,11 +1,10 @@
 package com.testframe.autotest.core.repository;
 
 
+import com.testframe.autotest.core.meta.Do.StepExecuteRecordDo;
 import com.testframe.autotest.core.meta.convertor.StepExecuteRecordConverter;
 import com.testframe.autotest.core.meta.po.StepRecord;
 import com.testframe.autotest.core.repository.dao.StepExecuteRecordDao;
-import com.testframe.autotest.meta.bo.SceneExecuteRecord;
-import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,29 +25,29 @@ public class StepExecuteRecordRepository {
     private StepExecuteRecordConverter stepExecuteRecordConverter;
 
     @Transactional(rollbackFor = Exception.class)
-    public Long saveStepExecuteRecord(StepExecuteRecord stepExecuteRecord) {
-        StepRecord stepRecord = stepExecuteRecordConverter.toPo(stepExecuteRecord);
+    public Long saveStepExecuteRecord(StepExecuteRecordDo stepExecuteRecordDo) {
+        StepRecord stepRecord = stepExecuteRecordConverter.DoToPo(stepExecuteRecordDo);
         return stepExecuteRecordDao.saveStepExecuteRecord(stepRecord);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean batchSaveStepExecuteRecord(List<StepExecuteRecord> stepExecuteRecords) {
-        List<StepRecord> stepRecords = stepExecuteRecords.stream().map(stepExecuteRecordConverter::toPo)
+    public boolean batchSaveStepExecuteRecord(List<StepExecuteRecordDo> stepExecuteRecordDos) {
+        List<StepRecord> stepRecords = stepExecuteRecordDos.stream().map(stepExecuteRecordConverter::DoToPo)
                 .collect(Collectors.toList());
         return stepExecuteRecordDao.batchSaveStepExecuteRecord(stepRecords);
     }
 
-    public List<StepExecuteRecord> queryStepExecuteRecordByRecordId(Long recordId) {
+    public List<StepExecuteRecordDo> queryStepExecuteRecordByRecordId(Long recordId) {
         List<StepRecord> stepRecords = stepExecuteRecordDao.getStepRecordsByRecordId(recordId);
-        List<StepExecuteRecord> stepExecuteRecords = stepRecords.stream().map(stepExecuteRecordConverter::toStepRecord)
+        List<StepExecuteRecordDo> stepExecuteRecords = stepRecords.stream().map(stepExecuteRecordConverter::PoToDo)
                 .collect(Collectors.toList());
         return stepExecuteRecords;
     }
 
-    public HashMap<Long, List<StepExecuteRecord>> batchQueryStepExeRecord(List<Long> recordIds) {
-        HashMap<Long, List<StepExecuteRecord>> stepExecuteRecordHashMap = new HashMap<>();
+    public HashMap<Long, List<StepExecuteRecordDo>> batchQueryStepExeRecord(List<Long> recordIds) {
+        HashMap<Long, List<StepExecuteRecordDo>> stepExecuteRecordHashMap = new HashMap<>();
         for (Long recordId : recordIds) {
-            List<StepExecuteRecord> stepExecuteRecords = queryStepExecuteRecordByRecordId(recordId);
+            List<StepExecuteRecordDo> stepExecuteRecords = queryStepExecuteRecordByRecordId(recordId);
             stepExecuteRecordHashMap.put(recordId, stepExecuteRecords);
         }
         return stepExecuteRecordHashMap;

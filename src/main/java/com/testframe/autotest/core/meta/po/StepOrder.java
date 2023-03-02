@@ -1,5 +1,12 @@
 package com.testframe.autotest.core.meta.po;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class StepOrder {
     private Long id;
 

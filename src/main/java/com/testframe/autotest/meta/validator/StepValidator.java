@@ -2,9 +2,10 @@ package com.testframe.autotest.meta.validator;
 
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.meta.Do.SceneDetailDo;
+import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneStepRel;
+import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -36,70 +37,167 @@ public class StepValidator {
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
 
-    public void checkStepUpdates(List<StepUpdateCmd> stepUpdateCmds) {
+    public void checkStepSave(List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
-            checkStepUpdate(stepUpdateCmd);
+            if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
+                checkStepSaveNoSon(stepUpdateCmd);
+            }
+//            else {
+//                checkStepIsSon(stepUpdateCmd);
+//            }
         }
     }
 
-    // 验证场景创建参数是否正确
-    public void checkStepUpdate(StepUpdateCmd stepUpdateCmd) {
-        if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName().equals("")) {
-            throw new AutoTestException("步骤name不能为空");
-        } else if (stepUpdateCmd.getSceneId() == null) {
-            throw new AutoTestException("场景id不能为空");
-        }
-        if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
-            // 单独的步骤、非子场景
-            if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
-                throw new AutoTestException("步骤信息不能为空");
+    public void checkStepUpdate(List<StepUpdateCmd> stepUpdateCmds) {
+        for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
+            if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
+                checkStepUpdateNoSon(stepUpdateCmd);
             }
-            // 检验执行状态参数是否正确
-            if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
-                throw new AutoTestException("步骤状态错误");
-            }
-            StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
-            // 验证元素操作类型
-            if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
-                    stepInfoModel.getOperateMode() == null) {
-                throw new AutoTestException("请输入元素操作类型");
-            }
-            if (stepInfoModel.getOperateMode() != null &&
-                    OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
-                throw new AutoTestException("当前元素操作类型不被支持");
-            }
-            // 验证元素等待类型
-            if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
-                    stepInfoModel.getWaitMode() == null) {
-                throw new AutoTestException("请输入元素等待类型");
-            }
-            if (stepInfoModel.getWaitMode() != null &&
-                    WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
-                throw new AutoTestException("当前元素操作类型不被支持");
-            }
-            // 验证元素检验类型
-            if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
-                    stepInfoModel.getAssertMode() == null) {
-                throw new AutoTestException("请输入元素检验类型");
-            }
-            if (stepInfoModel.getAssertMode() != null &&
-                    AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
-                throw new AutoTestException("当前元素检验类型不被支持");
-            }
-        } else {
-            // 子场景判断
-            Scene sonScene = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
-            if (sonScene == null || sonScene.getIsDelete() == 1) {
-                throw new AutoTestException("子场景不存在");
-            }
-            List<SceneStepRel> sceneStepRels = sceneStepRepository.querySceneStepsBySceneId(stepUpdateCmd.getSonSceneId());
-            List<Integer> status = sceneStepRels.stream().map(sceneStepRel -> sceneStepRel.getStatus())
-                    .collect(Collectors.toList());
-            if (!status.contains(StepStatusEnum.OPEN.getType())) {
-                throw new AutoTestException("子场景所有步骤均未开启");
-            }
+//            else {
+//                checkStepIsSon(stepUpdateCmd);
+//            }
         }
     }
+
+    // 验证单独场景
+    private void checkStepSaveNoSon(StepUpdateCmd stepUpdateCmd) {
+        if (stepUpdateCmd.getStepId() > 0) {
+            throw new AutoTestException("不可保存已有步骤");
+        }
+        // 单独的步骤、非子场景
+        if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName().equals("")) {
+            throw new AutoTestException("步骤名称不能为空");
+        }
+        if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
+            throw new AutoTestException("步骤信息不能为空");
+        }
+        // 检验执行状态参数是否正确
+        if (stepUpdateCmd.getStatus() == null || StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+            throw new AutoTestException("步骤状态错误");
+        }
+        StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
+        // 验证元素操作类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
+                stepInfoModel.getOperateMode() == null) {
+            throw new AutoTestException("请输入元素操作类型");
+        }
+        if (stepInfoModel.getOperateMode() != null &&
+                OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        // 验证元素等待类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
+                stepInfoModel.getWaitMode() == null) {
+            throw new AutoTestException("请输入元素等待类型");
+        }
+        if (stepInfoModel.getWaitMode() != null &&
+                WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        // 验证元素检验类型
+        if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
+                stepInfoModel.getAssertMode() == null) {
+            throw new AutoTestException("请输入元素检验类型");
+        }
+        if (stepInfoModel.getAssertMode() != null &&
+                AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
+            throw new AutoTestException("当前元素检验类型不被支持");
+        }
+    }
+
+    private void checkStepUpdateNoSon(StepUpdateCmd stepUpdateCmd) {
+        if (stepUpdateCmd.getStepId() == null || stepUpdateCmd.getStepId() <= 0) {
+            throw new AutoTestException("步骤id错误");
+        }
+        // 检验执行状态参数是否正确
+        if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+            throw new AutoTestException("步骤状态错误");
+        }
+        StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
+        if (stepInfoModel.getOperateMode() != null &&
+                OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        if (stepInfoModel.getWaitMode() != null &&
+                WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
+            throw new AutoTestException("当前元素操作类型不被支持");
+        }
+        if (stepInfoModel.getAssertMode() != null &&
+                AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
+            throw new AutoTestException("当前元素检验类型不被支持");
+        }
+    }
+    // 验证单独场景为子场景
+    public SceneDetailDo checkStepIsSon(StepUpdateCmd stepUpdateCmd) {
+        SceneDetailDo sceneDetailDo = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
+        if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
+            throw new AutoTestException("子场景不存在");
+        }
+        List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(stepUpdateCmd.getSonSceneId());
+        List<Integer> status = sceneStepRelDos.stream().map(sceneStepRel -> sceneStepRel.getStatus())
+                .collect(Collectors.toList());
+        if (!status.contains(StepStatusEnum.OPEN.getType())) {
+            throw new AutoTestException("子场景所有步骤均未开启");
+        }
+        return sceneDetailDo;
+    }
+
+    // 验证场景创建参数是否正确
+//    public void checkStepCreate(StepUpdateCmd stepUpdateCmd) {
+//        if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName().equals("")) {
+//            throw new AutoTestException("步骤name不能为空");
+//        }
+//        if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
+//            // 单独的步骤、非子场景
+//            if (stepUpdateCmd.getStepInfo() == null || stepUpdateCmd.getStepInfo().equals("")) {
+//                throw new AutoTestException("步骤信息不能为空");
+//            }
+//            // 检验执行状态参数是否正确
+//            if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+//                throw new AutoTestException("步骤状态错误");
+//            }
+//            StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
+//            // 验证元素操作类型
+//            if (stepInfoModel.getOperateType() == OperateTypeEnum.OPERATE.getType() &&
+//                    stepInfoModel.getOperateMode() == null) {
+//                throw new AutoTestException("请输入元素操作类型");
+//            }
+//            if (stepInfoModel.getOperateMode() != null &&
+//                    OperateModeEnum.getByType(stepInfoModel.getOperateMode()) == null) {
+//                throw new AutoTestException("当前元素操作类型不被支持");
+//            }
+//            // 验证元素等待类型
+//            if (stepInfoModel.getOperateType() == OperateTypeEnum.WAIT.getType() &&
+//                    stepInfoModel.getWaitMode() == null) {
+//                throw new AutoTestException("请输入元素等待类型");
+//            }
+//            if (stepInfoModel.getWaitMode() != null &&
+//                    WaitModeEnum.getByType(stepInfoModel.getWaitMode()) == null) {
+//                throw new AutoTestException("当前元素操作类型不被支持");
+//            }
+//            // 验证元素检验类型
+//            if (stepInfoModel.getOperateType() == OperateTypeEnum.ASSERT.getType() &&
+//                    stepInfoModel.getAssertMode() == null) {
+//                throw new AutoTestException("请输入元素检验类型");
+//            }
+//            if (stepInfoModel.getAssertMode() != null &&
+//                    AssertModeEnum.getByType(stepInfoModel.getAssertMode()) == null) {
+//                throw new AutoTestException("当前元素检验类型不被支持");
+//            }
+//        } else {
+//            // 子场景判断
+//            SceneDetailDo sceneDetailDo = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
+//            if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
+//                throw new AutoTestException("子场景不存在");
+//            }
+//            List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(stepUpdateCmd.getSonSceneId());
+//            List<Integer> status = sceneStepRelDos.stream().map(sceneStepRel -> sceneStepRel.getStatus())
+//                    .collect(Collectors.toList());
+//            if (!status.contains(StepStatusEnum.OPEN.getType())) {
+//                throw new AutoTestException("子场景所有步骤均未开启");
+//            }
+//        }
+//    }
 
     // 检验当前步骤id是否关联了场景，或者当前步骤是否存在
     public void checkStepId(Long stepId) {
@@ -109,10 +207,26 @@ public class StepValidator {
         if (stepDetailRepository.queryStepById(stepId) == null) {
             throw new AutoTestException("步骤id不存在");
         }
-        // 查找该步骤关联的场景id
-        if (sceneStepRepository.queryByStepId(stepId) == null) {
-            throw new AutoTestException("当前步骤id未与任何场景绑定, 不支持删除");
+    }
+
+    public Boolean checkStepWithScene(List<Long> stepIds, Long sceneId) {
+        List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.queryByStepIds(stepIds);
+        if (sceneStepRelDos.size() != stepIds.size()) {
+            return false;
         }
+        sceneStepRelDos = sceneStepRelDos.stream().filter(sceneStepRelDo -> sceneStepRelDo.getSceneId() != sceneId)
+                .collect(Collectors.toList());
+        if (!sceneStepRelDos.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public Boolean checkStepStatus(StepStatusUpdateCmd stepStatusUpdateCmd) {
+        if (StepStatusEnum.getByType(stepStatusUpdateCmd.getStatus()) == null) {
+            throw new AutoTestException("步骤状态错误");
+        }
+        return true;
     }
 
 

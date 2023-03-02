@@ -2,26 +2,11 @@ package com.testframe.autotest.core.meta.convertor;
 
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.po.SceneDetail;
-import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SceneDetailConvertor {
-
-    public SceneDetail toPO(Scene scene) {
-        SceneDetail sceneDetail = new SceneDetail();
-        sceneDetail.setId(scene.getId());
-        sceneDetail.setSceneName(scene.getTitle());
-        sceneDetail.setSceneDesc(scene.getDesc());
-        sceneDetail.setType(scene.getType());
-        sceneDetail.setUrl(scene.getUrl());
-        sceneDetail.setWaitType(scene.getWaitType());
-        sceneDetail.setWaitTime(scene.getWaitTime());
-        sceneDetail.setIsDelete(scene.getIsDelete());
-        sceneDetail.setCreateBy(scene.getCreateBy());
-        return sceneDetail;
-    }
 
     public SceneDetail DoToPO(SceneDetailDo sceneDetailDo) {
         SceneDetail sceneDetail = new SceneDetail();
@@ -62,6 +47,19 @@ public class SceneDetailConvertor {
         sceneDetailDo.setWaitTime(sceneDetailDto.getWaitTime());
         sceneDetailDo.setCreateBy(sceneDetailDto.getCreateBy());
         return sceneDetailDo;
+    }
+
+    public SceneDetailDto DoToDto(SceneDetailDo sceneDetailDo) {
+        SceneDetailDto sceneDetailDto = new SceneDetailDto();
+        sceneDetailDto.setSceneId(sceneDetailDo.getSceneId());
+        sceneDetailDto.setSceneName(sceneDetailDo.getSceneName());
+        sceneDetailDto.setSceneDesc(sceneDetailDo.getSceneDesc());
+        sceneDetailDto.setType(sceneDetailDo.getType());
+        sceneDetailDto.setUrl(sceneDetailDo.getUrl());
+        sceneDetailDto.setWaitType(sceneDetailDo.getWaitType());
+        sceneDetailDto.setWaitTime(sceneDetailDo.getWaitTime());
+        sceneDetailDto.setCreateBy(sceneDetailDo.getCreateBy());
+        return sceneDetailDto;
     }
 
 }

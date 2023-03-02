@@ -7,4 +7,5 @@ public interface SceneExecuteService {
     public void execute(Long sceneId);
 
     public SeleniumRunEvent generateEvent(Long sceneId, Integer type);
+
 }

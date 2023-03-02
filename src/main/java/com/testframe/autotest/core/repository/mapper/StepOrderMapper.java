@@ -23,5 +23,7 @@ public interface StepOrderMapper {
 
     List<StepOrder> getStepOrderBySceneId(@Param("sceneId") Long sceneId);
 
+    List<StepOrder> getStepOrderBySceneIdAndType(@Param("sceneId") Long sceneId, @Param("type") Integer type);
+
     StepOrder getStepOrderByRecordId(@Param("recordId") Long sceneId);
 }

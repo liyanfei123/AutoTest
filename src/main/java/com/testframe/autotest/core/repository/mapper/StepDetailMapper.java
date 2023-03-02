@@ -22,4 +22,7 @@ public interface StepDetailMapper {
     int updateByPrimaryKey(StepDetail record);
 
     List<StepDetail> queryStepByIds(@Param("stepIds") List<Long> stepIds);
+
+    List<StepDetail> queryStepBySceneId(@Param("sceneIds") List<Long> sceneIds);
+
 }

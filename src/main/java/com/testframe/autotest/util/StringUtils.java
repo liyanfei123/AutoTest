@@ -18,12 +18,12 @@ public class StringUtils {
      * @return
      */
     public static List<Long> orderToList(String orderStr) {
+        List<Long> orderList = new ArrayList<>();
         orderStr = orderStr.substring(1, orderStr.length()-1).replaceAll(" ", "");
         if (orderStr.equals("")) {
-            return Collections.EMPTY_LIST;
+            return orderList;
         }
         String[] orders = orderStr.split(",");
-        List<Long> orderList = new ArrayList<>();
         for (String order : orders) {
             orderList.add(Long.parseLong(order));
         }
@@ -31,11 +31,11 @@ public class StringUtils {
     }
 
     public static List<Integer> strToList(String str) {
+        List<Integer> list = new ArrayList<>();
         if (str == null || str.equals("")) {
-            return Collections.EMPTY_LIST;
+            return list;
         }
         String[] chs = str.split(",");
-        List<Integer> list = new ArrayList<>();
         for (String ch : chs) {
             list.add(Integer.parseInt(ch));
         }

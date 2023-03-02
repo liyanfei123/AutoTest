@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PageQry {
 
-    private int offset = 1;
+    private int page = 1;
+    private long offset = 0;
     private int size = 10;
-    private Long lastId = -1L;
-    private Integer type;
+    private long lastId = -1L;
+    // 1为按时间倒序排，2为正序
+    private Integer orderType = 1;
 }

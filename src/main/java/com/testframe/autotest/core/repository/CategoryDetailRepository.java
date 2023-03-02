@@ -1,14 +1,10 @@
 package com.testframe.autotest.core.repository;
 
-import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.convertor.CategoryDetailConverter;
 import com.testframe.autotest.core.meta.po.CategoryDetail;
-import com.testframe.autotest.core.meta.po.SceneDetail;
 import com.testframe.autotest.core.repository.dao.CategoryDetailDao;
-import com.testframe.autotest.meta.bo.CategoryDetailBo;
-import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.query.CategoryQry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +38,16 @@ public class CategoryDetailRepository {
         CategoryDetail categoryDetail = categoryDetailConverter.DoToPo(categoryDetailDo);
         if (!categoryDetailDao.updateCategory(categoryDetail)) {
             throw new AutoTestException("类目更新失败");
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteCategory(Integer categoryId) {
+        CategoryDetail categoryDetail = categoryDetailDao.queryCategoryById(categoryId);
+        categoryDetail.setIsDelete(1);
+        if (!categoryDetailDao.updateCategory(categoryDetail)) {
+            throw new AutoTestException("类目删除失败");
         }
         return true;
     }

@@ -26,4 +26,8 @@ public class SceneDetailDto {
 
     private Long createBy;
 
+    private Integer categoryId;
+
+    private Integer stepNum;
+
 }

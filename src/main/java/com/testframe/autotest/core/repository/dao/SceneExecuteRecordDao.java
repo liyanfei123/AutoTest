@@ -1,8 +1,8 @@
 package com.testframe.autotest.core.repository.dao;
 
 import com.testframe.autotest.core.meta.po.SceneRecord;
-import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.mapper.SceneRecordMapper;
+import com.testframe.autotest.meta.query.RecordQry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,8 +29,8 @@ public class SceneExecuteRecordDao {
         return sceneRecordMapper.updateByPrimaryKeySelective(sceneRecord) > 0 ? true : false;
     }
 
-    public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, PageQry pageQry) {
-        List<SceneRecord> sceneRecords = sceneRecordMapper.getRecordBySceneId(sceneId, pageQry);
+    public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, RecordQry recordQry) {
+        List<SceneRecord> sceneRecords = sceneRecordMapper.getRecordBySceneId(sceneId, recordQry);
         if (CollectionUtils.isEmpty(sceneRecords)) {
             return Collections.EMPTY_LIST;
         }
@@ -40,6 +40,10 @@ public class SceneExecuteRecordDao {
     public SceneRecord getSceneRecordById(Long recordId) {
         SceneRecord sceneRecord = sceneRecordMapper.selectByPrimaryKey(recordId);
         return sceneRecord;
+    }
+
+    public Boolean delSceneRecord(Long recordId) {
+        return sceneRecordMapper.deleteByPrimaryKey(recordId) > 0 ? true : false;
     }
 
 }

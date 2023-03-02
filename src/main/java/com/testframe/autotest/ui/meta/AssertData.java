@@ -1,6 +1,5 @@
 package com.testframe.autotest.ui.meta;
 
-import com.testframe.autotest.meta.dto.StepUIInfo;
 import lombok.Data;
 
 /**

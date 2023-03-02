@@ -2,7 +2,6 @@ package com.testframe.autotest.core.meta.convertor;
 
 
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
-import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.po.CategoryDetail;
 import com.testframe.autotest.meta.dto.category.CategoryDto;
 import org.springframework.stereotype.Component;

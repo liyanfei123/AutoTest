@@ -1,32 +1,29 @@
 package com.testframe.autotest.core.meta.convertor;
 
 
+import com.testframe.autotest.core.meta.Do.StepDetailDo;
 import com.testframe.autotest.core.meta.po.StepDetail;
-import com.testframe.autotest.meta.bo.Step;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StepDetailConvertor {
 
-    public StepDetail toPo(Step step) {
+    public StepDetail DoToPo(StepDetailDo stepDetailDo) {
         StepDetail stepDetail = new StepDetail();
-        stepDetail.setId(step.getStepId());
-        stepDetail.setStepName(step.getStepName());
-        stepDetail.setSceneId(step.getSceneId());
-        stepDetail.setStepInfo(step.getStepInfo());
+        stepDetail.setId(stepDetailDo.getStepId());
+        stepDetail.setStepName(stepDetailDo.getStepName());
+        stepDetail.setSceneId(stepDetailDo.getSonSceneId());
+        stepDetail.setStepInfo(stepDetailDo.getStepInfo());
         return stepDetail;
     }
 
-    public Step PoToDo(StepDetail stepDetail) {
-        if (stepDetail == null) {
-            return null;
-        }
-        Step step = new Step();
-        step.setStepId(stepDetail.getId());
-        step.setStepName(stepDetail.getStepName());
-        step.setSceneId(stepDetail.getSceneId());
-        step.setStepInfo(stepDetail.getStepInfo());
-        return step;
+    public StepDetailDo PoToDo(StepDetail stepDetail) {
+        StepDetailDo stepDetailDo = new StepDetailDo();
+        stepDetailDo.setStepId(stepDetail.getId());
+        stepDetailDo.setStepName(stepDetail.getStepName());
+        stepDetailDo.setSonSceneId(stepDetail.getSceneId());
+        stepDetailDo.setStepInfo(stepDetail.getStepInfo());
+        return stepDetailDo;
     }
 
 }

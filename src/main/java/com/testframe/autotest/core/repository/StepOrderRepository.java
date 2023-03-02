@@ -2,11 +2,11 @@ package com.testframe.autotest.core.repository;
 
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.meta.convertor.SceneStepOrderConverter;
+import com.testframe.autotest.core.meta.Do.StepOrderDo;
+import com.testframe.autotest.core.meta.convertor.SceneStepConverter;
+import com.testframe.autotest.core.meta.convertor.StepOrderConverter;
 import com.testframe.autotest.core.meta.po.StepOrder;
 import com.testframe.autotest.core.repository.dao.StepOrderDao;
-import com.testframe.autotest.meta.bo.Scene;
-import com.testframe.autotest.meta.bo.SceneStepOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,51 +27,47 @@ public class StepOrderRepository {
     private StepOrderDao stepOrderDao;
 
     @Autowired
-    private SceneStepOrderConverter sceneStepOrderConverter;
+    private StepOrderConverter stepOrderConverter;
+
+    @Autowired
+    private SceneStepConverter sceneStepConverter;
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean saveSceneStepOrder(SceneStepOrder sceneStepOrder) {
-        StepOrder stepOrder = sceneStepOrderConverter.toPo(sceneStepOrder);
-        return stepOrderDao.saveStepOrder(stepOrder);
-    }
-
-
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean updateSceneStepOrder(SceneStepOrder sceneStepOrder) {
-        StepOrder stepOrder = sceneStepOrderConverter.toPo(sceneStepOrder);
+    public Boolean updateSceneStepOrder(StepOrderDo stepOrderDo) {
+        StepOrder stepOrder = stepOrderConverter.DoToPo(stepOrderDo);
         return stepOrderDao.updateStepOrder(stepOrder);
 
     }
 
-    public List<SceneStepOrder> queryStepOrderBySceneId(Long sceneId) {
+    public List<StepOrderDo> queryStepOrderBySceneId(Long sceneId) {
         List<StepOrder> stepOrders = stepOrderDao.getStepOrderBySceneId(sceneId);
-        List<SceneStepOrder> sceneStepOrders = stepOrders.stream().map(sceneStepOrderConverter::PoToDo)
+        List<StepOrderDo> stepOrderDos = stepOrders.stream().map(stepOrderConverter::PoToDo)
                 .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(sceneStepOrders)) {
+        if (CollectionUtils.isEmpty(stepOrderDos)) {
             return Collections.EMPTY_LIST;
         }
-        return sceneStepOrders;
+        return stepOrderDos;
     }
 
-    public SceneStepOrder queryBeforeStepRunOrder(Long sceneId) {
-        List<SceneStepOrder> sceneStepOrders = queryStepOrderBySceneId(sceneId);
-        if (sceneStepOrders.isEmpty()) {
+    public StepOrderDo queryBeforeStepRunOrder(Long sceneId) {
+        List<StepOrderDo> stepOrderDos = queryStepOrderBySceneId(sceneId);
+        if (stepOrderDos.isEmpty()) {
             return null;
         }
-        sceneStepOrders = sceneStepOrders.stream().filter(sceneStepOrder -> sceneStepOrder.getType().equals(
+        stepOrderDos = stepOrderDos.stream().filter(sceneStepOrder -> sceneStepOrder.getType().equals(
                 StepOrderEnum.BEFORE.getType()
         )).collect(Collectors.toList());
-        if (sceneStepOrders.size() > 1) {
+        if (stepOrderDos.size() > 1) {
             throw new AutoTestException("当前场景执行顺序存在脏数据");
         }
-        return sceneStepOrders.get(0);
+        return stepOrderDos.get(0);
     }
 
-    public HashMap<Long, SceneStepOrder> bacthQueryStepExeOrderByRecordIds(List<Long> recordIds) {
-        HashMap<Long, SceneStepOrder> stepExeOrderMap = new HashMap<>();
+    public HashMap<Long, StepOrderDo> batchQueryStepExeOrderByRecordIds(List<Long> recordIds) {
+        HashMap<Long, StepOrderDo> stepExeOrderMap = new HashMap<>();
         for (Long recordId : recordIds) {
             StepOrder stepOrder = stepOrderDao.queryStepOrderByRecordId(recordId);
-            stepExeOrderMap.put(recordId, sceneStepOrderConverter.PoToDo(stepOrder));
+            stepExeOrderMap.put(recordId, stepOrderConverter.PoToDo(stepOrder));
         }
         return stepExeOrderMap;
     }

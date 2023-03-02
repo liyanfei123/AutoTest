@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 public class SceneQryValidator {
 
    private void checkParam(SceneQry sceneQry) {
-       if (sceneQry.getSize() <= 0 || sceneQry.getSize() >= 30) {
-           sceneQry.setSize(10);
+       if (sceneQry.getPageQry().getSize() <= 0 || sceneQry.getPageQry().getSize() >= 30) {
+           sceneQry.getPageQry().setSize(10);
        }
        if (sceneQry.getStatus() == null || !SceneStatusEnum.getTypes().contains(sceneQry.getStatus())) {
            throw new AutoTestException("场景状态筛选错误");

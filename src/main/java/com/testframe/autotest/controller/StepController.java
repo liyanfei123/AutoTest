@@ -1,17 +1,19 @@
 package com.testframe.autotest.controller;
 
 
-import com.testframe.autotest.meta.command.StepUpdateCmd;
+import com.testframe.autotest.meta.command.StepOrderUpdateCmd;
+import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
-import com.testframe.autotest.service.SceneStepService;
-import com.testframe.autotest.service.impl.CopyServiceImpl;
-import com.testframe.autotest.service.impl.StepDetailImpl;
+import com.testframe.autotest.meta.command.UpdateStepsCmd;
+import com.testframe.autotest.service.StepService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,20 +23,29 @@ public class StepController {
     private static Logger logger = LoggerFactory.getLogger(StepController.class);
 
     @Autowired
-    private StepDetailImpl stepDetail;
+    private StepService stepService;
 
-    @Autowired
-    private SceneStepService sceneStepService;
 
-    @Autowired
-    private CopyServiceImpl stepCopyService;
-
+    // TODO: 2023/3/2 添加一个有前后id的添加步骤接口
     // 单场景步骤保存/更新
-    @PostMapping("/save")
-    public HttpResult<Boolean> stepSave(@RequestBody StepUpdateCmd stepUpdateCmd) {
+    @PostMapping("/add")
+    public HttpResult<List> stepSave(@RequestBody UpdateStepsCmd updateStepsCmd) {
         try {
-            Long stepId = stepDetail.saveStepDetail(stepUpdateCmd);
-            return HttpResult.ok(stepId);
+            if (updateStepsCmd.getSceneId() == null || updateStepsCmd.getStepUpdateCmds() == null) {
+                return HttpResult.error();
+            }
+            List<Long> stepIds = stepService.addStepDetail(updateStepsCmd);
+            return HttpResult.ok(stepIds);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/update")
+    public HttpResult<Boolean> stepUpdate(@RequestBody UpdateStepsCmd updateStepsCmd) {
+        try {
+            Boolean flag = stepService.updateStepDetail(updateStepsCmd);
+            return HttpResult.ok(flag);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
@@ -42,25 +53,26 @@ public class StepController {
 
     // 单步骤删除
     @GetMapping("/deleteStep")
-    public HttpResult<Boolean> deleteStep(@RequestParam(required = true) Long stepId) {
+    public HttpResult<Boolean> deleteStep(@RequestParam(required = true) Long sceneId,
+                                          @RequestParam(required = true) Long stepId) {
         if (stepId == null) {
             return HttpResult.error("请输入步骤id");
         }
         try {
-            sceneStepService.removeSceneStepRelWithOrder(stepId);
-            return HttpResult.ok("步骤删除成功");
+            return HttpResult.ok(stepService.removeStep(sceneId, stepId));
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
     }
 
     // 改变步骤状态
-    @GetMapping("/changeStatus")
-    public HttpResult<Boolean> changeStatus(@RequestParam(required = true) Long stepId,
-                                            @RequestParam(required = true) Long sceneId,
-                                            @RequestParam(required = true) int status) {
+    @PostMapping("/changeStatus")
+    public HttpResult<Boolean> changeStatus(@RequestBody StepStatusUpdateCmd stepStatusUpdateCmd) {
         try {
-            sceneStepService.changeStepStatus(stepId, sceneId, status);
+            if (stepStatusUpdateCmd.getSceneId() == null || stepStatusUpdateCmd.getStepId() == null) {
+                return HttpResult.error("请输入场景或步骤");
+            }
+            stepService.changeStepStatus(stepStatusUpdateCmd);
             return HttpResult.ok();
         } catch (Exception e) {
             return HttpResult.error(e.getMessage());
@@ -68,11 +80,28 @@ public class StepController {
     }
 
     @GetMapping("/copy")
-    public HttpResult<Long> copyStep(@RequestParam(required = false) Long sceneId,
+    public HttpResult<Long> copyStep(@RequestParam(required = true) Long sceneId,
                                      @RequestParam(required = true) Long stepId) {
         try {
-            Long newSceneId = stepCopyService.stepCopy(sceneId, stepId);
-            return HttpResult.ok(newSceneId);
+            if (sceneId == null || sceneId == 0) {
+                throw new AutoTestException("请输入场景id");
+            }
+            Long newStepId = stepService.stepCopy(sceneId, stepId);
+            return HttpResult.ok(newStepId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
+    // 调整步骤执行顺序
+    @PostMapping("/order")
+    public HttpResult<Boolean> changeOrder(@RequestBody StepOrderUpdateCmd stepOrderUpdateCmd) {
+        try {
+            if (stepOrderUpdateCmd.getSceneId() == null || stepOrderUpdateCmd.getSceneId() == 0L
+            || stepOrderUpdateCmd.getOrders() == null || stepOrderUpdateCmd.getOrders().isEmpty()) {
+                return HttpResult.ok("输入参数");
+            }
+            return HttpResult.ok(stepService.changeStepOrder(stepOrderUpdateCmd));
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

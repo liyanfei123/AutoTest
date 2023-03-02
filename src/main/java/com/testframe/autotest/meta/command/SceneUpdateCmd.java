@@ -15,8 +15,8 @@ public class SceneUpdateCmd {
     @NotNull
     private Long id;
 
-    // 测试类型 参考SceneTypeEnum
-    private Integer type;
+    // 测试类型 参考SceneTypeEnum 禁止修改
+//    private Integer type;
 
     // 测试场景标题
     @NotBlank(message = "测试场景名称不能为空")
@@ -33,8 +33,7 @@ public class SceneUpdateCmd {
     // 场景全局等待时间
     private Integer waitTime;
 
-    // 场景步骤详细信息
-    private List<StepUpdateCmd> stepUpdateCmds;
+    private Integer categoryId;
 
 
 }

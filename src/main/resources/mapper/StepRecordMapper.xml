@@ -12,7 +12,7 @@
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, recordId, stepId, reason, status, createTime
+    id, recordId, stepId, sceneRecordId, stepName, reason, status, createTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,

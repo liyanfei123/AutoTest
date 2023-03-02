@@ -1,7 +1,7 @@
 package com.testframe.autotest.core.repository.dao;
 
-import com.testframe.autotest.core.meta.po.CategoryDetail;
 import com.testframe.autotest.core.meta.po.CategoryScene;
+import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.mapper.CategorySceneMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,13 @@ public class CategorySceneDao {
     }
 
 
-    public List<CategoryScene> queryByCategoryId(Integer categoryId) {
-        return categorySceneMapper.selectByCategoryId(categoryId);
+    public List<CategoryScene> queryByCategoryId(Integer categoryId, PageQry pageQry) {
+        return categorySceneMapper.selectByCategoryId(categoryId, pageQry);
     }
 
+    public Long countByCategoryId(Long categoryId) {
+        return categorySceneMapper.countByCategoryId(categoryId);
+    }
     public CategoryScene queryBySceneId(Long sceneId) {
         return categorySceneMapper.selectBySceneId(sceneId);
     }

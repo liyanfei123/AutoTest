@@ -18,7 +18,9 @@ public interface SceneDetailMapper {
 
     SceneDetail selectByPrimaryKey(Long id);
 
-    SceneDetail selectByTitle(@Param("title") String title);
+    List<SceneDetail> selectByTitle(@Param("title") String title);
+
+    List<SceneDetail> listBySceneIds(@Param("sceneIds") List<Long> sceneIds);
 
     int updateByPrimaryKeySelective(SceneDetail record);
 

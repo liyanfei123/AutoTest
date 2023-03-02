@@ -1,8 +1,10 @@
 package com.testframe.autotest.meta.validator;
 
+import com.testframe.autotest.core.meta.Do.CategorySceneDo;
+import com.testframe.autotest.core.meta.Do.SceneDetailDo;
+import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.domain.category.CategoryDomain;
 import com.testframe.autotest.meta.bo.CategoryDetailBo;
-import com.testframe.autotest.meta.bo.Scene;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
@@ -12,6 +14,9 @@ import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 // 用于与场景相关的参数验证
@@ -23,13 +28,37 @@ public class SceneValidator {
     private SceneDetailRepository sceneDetailRepository;
 
     @Autowired
+    private CategorySceneRepository categorySceneRepository;
+
+    @Autowired
     private CategoryDomain categoryDomain;
 
     public void validateCreate(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
         try {
+            if (sceneCreateCmd.getType() == null) {
+                throw new AutoTestException("type不允许为空");
+            }
             checkSceneType(sceneCreateCmd);
-            checkSceneTitle(sceneCreateCmd);
-            checkSceneCategoryId(sceneCreateCmd);
+            if (sceneCreateCmd.getCategoryId() == null || sceneCreateCmd.getCategoryId() == 0) {
+                throw new AutoTestException("请输入正确的类目");
+            }
+            checkSceneCategoryId(sceneCreateCmd.getCategoryId());
+            if (sceneCreateCmd.getTitle() == null) {
+                throw new AutoTestException("title不允许为空");
+            }
+            checkSceneTitle(sceneCreateCmd.getTitle(), sceneCreateCmd.getCategoryId(), null);
+        } catch (AutoTestException e) {
+            throw new AutoTestException(e.getMessage());
+        }
+    }
+
+    public void validateUpdate(SceneUpdateCmd sceneUpdateCmd) throws AutoTestException {
+        try {
+            if (sceneUpdateCmd.getTitle() != null) {
+                checkSceneTitle(sceneUpdateCmd.getTitle(), sceneUpdateCmd.getCategoryId(), sceneUpdateCmd.getId());
+            }
+            checkSceneCategoryId(sceneUpdateCmd.getCategoryId());
+            checkWaitType(sceneUpdateCmd.getWaitType());
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         }
@@ -45,51 +74,39 @@ public class SceneValidator {
         }
     }
 
+    private void checkWaitType(Integer waitType) {
+        if (!WaitModeEnum.allTypes().contains(waitType)) {
+            throw new AutoTestException("等待类型错误");
+        }
+    }
     // 验证当前标题是否重复
-    private void checkSceneTitle(SceneCreateCmd createCmd) {
-        if (sceneDetailRepository.querySceneByTitle(createCmd.getTitle())) {
-            throw new AutoTestException("当前测试场景标题重复");
-        }
-    }
-
-    private void checkSceneTitle(SceneUpdateCmd sceneUpdateCmd) {
-        if (sceneDetailRepository.querySceneByTitle(sceneUpdateCmd.getTitle())) {
-            throw new AutoTestException("当前测试场景标题重复");
-        }
-    }
-
-    private void checkSceneCategoryId(SceneCreateCmd sceneCreateCmd) {
-        if (sceneCreateCmd.getCategoryId() != null) {
-            CategoryDetailBo categoryDetailBo = categoryDomain.getCategoryById(sceneCreateCmd.getCategoryId());
-            if (categoryDetailBo == null) {
-                throw new AutoTestException("当前类目id错误");
+    private void checkSceneTitle(String title, Integer categoryId, Long nowSceneId) {
+        List<SceneDetailDo> sceneDetailDos = sceneDetailRepository.querySceneByTitle(title);
+        List<Long> sceneIds = sceneDetailDos.stream().map(SceneDetailDo::getSceneId).collect(Collectors.toList());
+        for (Long sceneId : sceneIds) {
+            if (sceneId == nowSceneId) {
+                continue;
+            }
+            CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(sceneId);
+            if (categorySceneDo.getCategoryId() == categoryId) {
+                throw new AutoTestException("当前类目下测试场景标题重复");
             }
         }
     }
 
-    // 检验更新的场景
-    public void checkSceneUpdate(SceneUpdateCmd sceneUpdateCmd) {
-        checkSceneTitle(sceneUpdateCmd);
-        if (!WaitModeEnum.allTypes().contains(sceneUpdateCmd.getWaitType())) {
-            throw new AutoTestException("等待类型错误");
-        }
-        if (sceneUpdateCmd.getType() < 1 || sceneUpdateCmd.getType() > 2) {
-            throw new AutoTestException("测试场景类型错误");
-        }
-        if (sceneDetailRepository.querySceneById(sceneUpdateCmd.getId()) == null) {
-            throw new AutoTestException("当前场景不存在");
-        }
-        Scene scene = sceneDetailRepository.querySceneById(sceneUpdateCmd.getId());
-        if (scene.getType() != sceneUpdateCmd.getType()) {
-            throw new AutoTestException("不允许更新场景类型");
+
+    private void checkSceneCategoryId(Integer categoryId) {
+        CategoryDetailBo categoryDetailBo = categoryDomain.getCategoryById(categoryId);
+        if (categoryDetailBo == null) {
+            throw new AutoTestException("当前类目id错误");
         }
     }
 
-    public boolean sceneIsExist(Long sceneId) {
-        Scene scene = sceneDetailRepository.querySceneById(sceneId);
-        if (scene == null || scene.getIsDelete() == 1) {
-            return false;
+
+    public void sceneIsExist(Long sceneId) {
+        SceneDetailDo sceneDetailDo  = sceneDetailRepository.querySceneById(sceneId);
+        if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
+            throw new AutoTestException("当前场景id错误");
         }
-        return true;
     }
 }

@@ -82,15 +82,15 @@ public class KeyBoardAction extends BaseAction implements ActionI {
             if (element == null) {
                 return;
             }
-            log.info("[KeyBoardAction:input] start input value 1");
+//            log.info("[KeyBoardAction:input] start input value 1");
             element.clear();
-            log.info("[KeyBoardAction:input] start input value 2");
+//            log.info("[KeyBoardAction:input] start input value 2");
             element.click();
 
             // 方式1：直接使用element自带的sendKeys方法，但是输入时执行会较慢
 //            element.sendKeys(data.getValue());
 
-            // 方式2：直接使用复制粘贴功能
+            // 方式2：直接使用复制粘贴功能，速度较慢
             StringSelection stringSelection = new StringSelection(data.getValue());
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
             // TODO: 2022/11/25 区分mac和win的复制键
