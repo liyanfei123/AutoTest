@@ -1,5 +1,6 @@
 package com.testframe.autotest.domain.sceneStep.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.meta.Do.StepDetailDo;
 import com.testframe.autotest.core.repository.SceneStepRepository;
@@ -74,10 +75,9 @@ public class SceneStepDomainImpl implements SceneStepDomain {
         for (SceneStepRelDo sceneStepRelDo : sceneStepRelDos) {
             fatherSceneIds.add(sceneStepRelDo.getSceneId());
             List<Long> faSceneIds = this.sceneInOther(sceneStepRelDo.getSceneId()); // 判断当前父场景是否是其他场景的步骤（子场景）
-            if (faSceneIds.isEmpty()) {
-                return Collections.EMPTY_LIST;
-            } else {
-                fatherSceneIds.add(sceneStepRelDo.getSceneId());
+            log.info("[SceneStepDomainImpl:sceneInOther] get sceneId {}, father sceneIds {}",
+                    sceneStepRelDo.getSceneId(), faSceneIds);
+            if (!faSceneIds.isEmpty()) {
                 fatherSceneIds.addAll(faSceneIds);
             }
         }

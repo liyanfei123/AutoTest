@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
+import com.testframe.autotest.domain.sceneStep.SceneStepDomain;
 import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.enums.StepStatusEnum;
@@ -20,7 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 // 场景步骤检验
@@ -37,14 +40,16 @@ public class StepValidator {
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
 
+    @Autowired
+    private SceneStepDomain sceneStepDomain;
+
     public void checkStepSave(List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
             if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
                 checkStepSaveNoSon(stepUpdateCmd);
+            } else {
+                checkStepIsSon(stepUpdateCmd);
             }
-//            else {
-//                checkStepIsSon(stepUpdateCmd);
-//            }
         }
     }
 
@@ -53,9 +58,9 @@ public class StepValidator {
             if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
                 checkStepUpdateNoSon(stepUpdateCmd);
             }
-//            else {
-//                checkStepIsSon(stepUpdateCmd);
-//            }
+            else {
+                checkStepIsSon(stepUpdateCmd);
+            }
         }
     }
 
@@ -129,6 +134,8 @@ public class StepValidator {
     }
     // 验证单独场景为子场景
     public SceneDetailDo checkStepIsSon(StepUpdateCmd stepUpdateCmd) {
+        // 判断是否存在循环引用
+        checkRecycle(stepUpdateCmd.getSonSceneId());
         SceneDetailDo sceneDetailDo = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
         if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
             throw new AutoTestException("子场景不存在");
@@ -136,6 +143,9 @@ public class StepValidator {
         List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(stepUpdateCmd.getSonSceneId());
         List<Integer> status = sceneStepRelDos.stream().map(sceneStepRel -> sceneStepRel.getStatus())
                 .collect(Collectors.toList());
+        if (status.isEmpty()) { // 无步骤
+            return sceneDetailDo;
+        }
         if (!status.contains(StepStatusEnum.OPEN.getType())) {
             throw new AutoTestException("子场景所有步骤均未开启");
         }
@@ -229,7 +239,13 @@ public class StepValidator {
         return true;
     }
 
-
+    private void checkRecycle(Long sceneId) {
+        List<Long> sceneIds = new ArrayList<Long>(){{add(sceneId);}};
+        Map<Long, List<Long>> fatherSceneMap = sceneStepDomain.scenesInOther(sceneIds);
+        if (!fatherSceneMap.get(sceneId).isEmpty()) {
+            throw new AutoTestException("存在子场景循环引用");
+        }
+    }
 
 
 }

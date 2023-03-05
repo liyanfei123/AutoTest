@@ -73,15 +73,26 @@ public class StepServiceImpl implements StepService {
                 throw new AutoTestException("请输入正确的场景id");
             }
             Long sceneId = updateStepsCmd.getSceneId();
+            List<StepUpdateCmd> stepUpdateCmds = updateStepsCmd.getStepUpdateCmds();
+            List<StepUpdateCmd> reSelf = stepUpdateCmds.stream().filter(
+                    stepUpdateCmd -> stepUpdateCmd.getSonSceneId() == sceneId).collect(Collectors.toList());
+            if (!reSelf.isEmpty()) {
+                throw new AutoTestException("不可引用自己");
+            }
+
             // 将步骤进行划分
-            List<StepUpdateCmd> needUpdateSteps = updateStepsCmd.getStepUpdateCmds().stream().filter(
+            List<StepUpdateCmd> needUpdateSteps = stepUpdateCmds.stream().filter(
                     stepUpdateCmd -> stepUpdateCmd.getStepId() > 0).collect(Collectors.toList());
-            List<StepUpdateCmd> needSaveSteps = updateStepsCmd.getStepUpdateCmds().stream().filter(
-                    stepUpdateCmd -> stepUpdateCmd.getStepId() == 0 || stepUpdateCmd.getStepId() == null).collect(Collectors.toList());
+            List<StepUpdateCmd> needSaveSteps = stepUpdateCmds.stream().filter(
+                    stepUpdateCmd -> stepUpdateCmd.getStepId() == 0 || stepUpdateCmd.getStepId() == null)
+                    .collect(Collectors.toList());
 
             sceneValidator.sceneIsExist(sceneId);
             if (!needSaveSteps.isEmpty()) {
                 stepValidator.checkStepSave(needSaveSteps);
+            }
+            if (!needUpdateSteps.isEmpty()) {
+                stepValidator.checkStepUpdate(needUpdateSteps);
             }
             List<Long> nowStepIds = updateStepsCmd.getStepUpdateCmds().stream().map(StepUpdateCmd::getStepId)
                     .collect(Collectors.toList());
@@ -93,6 +104,7 @@ public class StepServiceImpl implements StepService {
                     throw new AutoTestException("步骤id错误");
                 }
             }
+
 
             StepsDto updateStepsDto = new StepsDto(); // 需要更新的步骤
             StepsDto saveStepsDto = new StepsDto(); // 需要新增的步骤
@@ -166,6 +178,11 @@ public class StepServiceImpl implements StepService {
             if (stepUpdateCmds == null || stepUpdateCmds.isEmpty()) {
                 return null;
             }
+            List<StepUpdateCmd> reSelf = stepUpdateCmds.stream().filter(
+                    stepUpdateCmd -> stepUpdateCmd.getSonSceneId() == sceneId).collect(Collectors.toList());
+            if (!reSelf.isEmpty()) {
+                throw new AutoTestException("不可引用自己");
+            }
             sceneValidator.sceneIsExist(sceneId);
             stepValidator.checkStepSave(stepUpdateCmds);
             StepsDto stepsDto = new StepsDto();
@@ -178,7 +195,6 @@ public class StepServiceImpl implements StepService {
                 stepDetailDto.setStepId(null);
                 stepDetailDto.setSonSceneId(stepUpdateCmd.getSonSceneId());
                 if (stepUpdateCmd.getSonSceneId() != null && stepUpdateCmd.getSonSceneId() > 0L) {
-                    // TODO: 2023/3/2 检验是否当前场景关联了自己
                     SceneDetailDo sceneDetailDo = stepValidator.checkStepIsSon(stepUpdateCmd);
                     if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName() == "") {
                         // 子场景的步骤名默认选用场景名

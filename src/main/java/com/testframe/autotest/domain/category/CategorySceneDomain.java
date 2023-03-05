@@ -3,8 +3,6 @@ package com.testframe.autotest.domain.category;
 import com.testframe.autotest.meta.bo.CategorySceneBo;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 
-import java.util.List;
-
 public interface CategorySceneDomain {
 
     Boolean sceneInCategory(Integer categoryId);
