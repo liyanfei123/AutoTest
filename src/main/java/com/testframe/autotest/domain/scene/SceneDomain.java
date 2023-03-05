@@ -17,4 +17,5 @@ public interface SceneDomain {
     Boolean deleteScene(Long sceneId);
 
     SceneSearchListDto searchScene(SceneQry sceneQry);
+
 }
