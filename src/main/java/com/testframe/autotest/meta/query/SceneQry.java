@@ -22,6 +22,7 @@ public class SceneQry  {
 
     private Integer status;
 
+    // 搜索的类目id
     private Integer categoryId;
 
     private PageQry pageQry;

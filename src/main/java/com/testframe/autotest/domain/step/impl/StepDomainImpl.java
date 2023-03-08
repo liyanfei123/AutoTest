@@ -93,10 +93,6 @@ public class StepDomainImpl implements StepDomain {
         }
     }
 
-    // todo 对未传入的步骤需要进行删除的操作 放到业务层去处理
-    // todo 执行顺序的处理放到业务层去调用，在业务层分为步骤保存和步骤执行顺序两个业务逻辑处理
-    // 业务层判断当前步骤id是否属于该场景
-    // 执行顺序 [1,-1,3,-1,2,-1,9,12] 将-1的位置轮流替换，即可得到正常的执行顺序
     @Override
     public Boolean updateSteps(StepsDto stepsDto) {
         if (stepsDto.getStepDetailDtos().isEmpty()) {

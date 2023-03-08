@@ -33,4 +33,7 @@ public interface SceneDetailMapper {
     List<SceneDetail> queryScenes(@Param("pageQry") PageQry pageQry);
 
     List<SceneDetail> queryScenesLikeTitle(@Param("sceneName") String sceneName, @Param("pageQry") PageQry pageQry);
+
+    List<SceneDetail> queryScenesLikeTitleInCategory(@Param("sceneName") String sceneName, @Param("categoryId") Integer categoryId,
+                                                     @Param("pageQry") PageQry pageQry);
 }

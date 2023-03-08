@@ -202,9 +202,22 @@
     select *
     from AUTO_TEST_SCENE_DETAIL
     where id > #{pageQry.lastId} and isDelete = 0 and sceneName like '%${sceneName}%'
-    order by id
+    order by createTime
       limit #{pageQry.offset}, #{pageQry.size}
     ]]></select>
+
+  <select id="queryScenesLikeTitleInCategory" resultMap="BaseResultMap"><![CDATA[
+    select
+    tableA.id, sceneName, sceneDesc, type, url, waitType, waitTime, tableA.isDelete, createBy,
+    tableA.createTime, tableA.updateTime
+    from AUTO_TEST_SCENE_DETAIL tableA
+    join AUTO_TEST_CATEGORY_SCENE tableB
+    on tableA.id = tableB.sceneId
+    where tableA.id > #{pageQry.lastId} and tableA.isDelete = 0
+    and categoryId = #{categoryId} and sceneName like '%${sceneName}%'
+    order by tableA.createTime
+    limit #{pageQry.offset}, #{pageQry.size}
+  ]]></select>
 
   <select id="countScenes" resultType="java.lang.Long">
     select count(*)

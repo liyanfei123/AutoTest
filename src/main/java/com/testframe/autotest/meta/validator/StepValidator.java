@@ -43,23 +43,23 @@ public class StepValidator {
     @Autowired
     private SceneStepDomain sceneStepDomain;
 
-    public void checkStepSave(List<StepUpdateCmd> stepUpdateCmds) {
+    public void checkStepSave(Long sceneId, List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
             if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
                 checkStepSaveNoSon(stepUpdateCmd);
             } else {
-                checkStepIsSon(stepUpdateCmd);
+                checkStepIsSon(sceneId, stepUpdateCmd);
             }
         }
     }
 
-    public void checkStepUpdate(List<StepUpdateCmd> stepUpdateCmds) {
+    public void checkStepUpdate(Long sceneId, List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {
             if (stepUpdateCmd.getSonSceneId() == 0 || stepUpdateCmd.getSonSceneId() == null) {
                 checkStepUpdateNoSon(stepUpdateCmd);
             }
             else {
-                checkStepIsSon(stepUpdateCmd);
+                checkStepIsSon(sceneId, stepUpdateCmd);
             }
         }
     }
@@ -133,9 +133,9 @@ public class StepValidator {
         }
     }
     // 验证单独场景为子场景
-    public SceneDetailDo checkStepIsSon(StepUpdateCmd stepUpdateCmd) {
+    public SceneDetailDo checkStepIsSon(Long fatherSceneId, StepUpdateCmd stepUpdateCmd) {
         // 判断是否存在循环引用
-        checkRecycle(stepUpdateCmd.getSonSceneId());
+        checkRecycle(fatherSceneId, stepUpdateCmd.getSonSceneId());
         SceneDetailDo sceneDetailDo = sceneDetailRepository.querySceneById(stepUpdateCmd.getSonSceneId());
         if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
             throw new AutoTestException("子场景不存在");
@@ -239,10 +239,11 @@ public class StepValidator {
         return true;
     }
 
-    private void checkRecycle(Long sceneId) {
-        List<Long> sceneIds = new ArrayList<Long>(){{add(sceneId);}};
+    private void checkRecycle(Long fatherSceneId, Long sonSceneId) {
+        List<Long> sceneIds = new ArrayList<Long>(){{add(sonSceneId);}};
         Map<Long, List<Long>> fatherSceneMap = sceneStepDomain.scenesInOther(sceneIds);
-        if (!fatherSceneMap.get(sceneId).isEmpty()) {
+        List<Long> fatherSceneIds = fatherSceneMap.get(sonSceneId);
+        if (fatherSceneIds.contains(fatherSceneId)) {
             throw new AutoTestException("存在子场景循环引用");
         }
     }

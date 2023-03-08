@@ -10,6 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SceneDetailDo {
 
+    public static final SceneDetailDo NULL;
+
+    static {
+        NULL = new SceneDetailDo();
+        NULL.setSceneId(-1L);
+    }
+
     private Long sceneId;
 
     private String sceneName;

@@ -121,4 +121,21 @@ public class SceneController {
         }
     }
 
+    /**
+     * 移动场景所在的目录
+     * @param sceneId
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/move")
+    public HttpResult<Object> move(@RequestParam(required = true) Long sceneId,
+                                   @RequestParam(required = true) Integer categoryId) {
+        try {
+            sceneExecuteService.execute(sceneId);
+            return HttpResult.ok(sceneId);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
 }

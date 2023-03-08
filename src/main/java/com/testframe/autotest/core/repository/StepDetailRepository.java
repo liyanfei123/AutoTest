@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// todo： 将所有涉及db操作的都统一放到一起，这样可以异常统一回归
+// 将所有涉及db操作的都统一放到一起，这样可以异常统一回归
 @Component
 @Slf4j
 public class StepDetailRepository {

@@ -89,15 +89,15 @@ public class StepServiceImpl implements StepService {
 
             sceneValidator.sceneIsExist(sceneId);
             if (!needSaveSteps.isEmpty()) {
-                stepValidator.checkStepSave(needSaveSteps);
+                stepValidator.checkStepSave(sceneId, needSaveSteps);
             }
             if (!needUpdateSteps.isEmpty()) {
-                stepValidator.checkStepUpdate(needUpdateSteps);
+                stepValidator.checkStepUpdate(sceneId, needUpdateSteps);
             }
             List<Long> nowStepIds = updateStepsCmd.getStepUpdateCmds().stream().map(StepUpdateCmd::getStepId)
                     .collect(Collectors.toList());
             if (!needUpdateSteps.isEmpty()) {
-                stepValidator.checkStepUpdate(needUpdateSteps);
+                stepValidator.checkStepUpdate(sceneId, needUpdateSteps);
                 List<Long> updateStepIds = needUpdateSteps.stream().map(stepUpdateCmd -> stepUpdateCmd.getStepId())
                         .collect(Collectors.toList());
                 if (!stepValidator.checkStepWithScene(updateStepIds, sceneId)) {
@@ -184,7 +184,7 @@ public class StepServiceImpl implements StepService {
                 throw new AutoTestException("不可引用自己");
             }
             sceneValidator.sceneIsExist(sceneId);
-            stepValidator.checkStepSave(stepUpdateCmds);
+            stepValidator.checkStepSave(sceneId, stepUpdateCmds);
             StepsDto stepsDto = new StepsDto();
             stepsDto.setSceneId(sceneId);
 
@@ -195,7 +195,7 @@ public class StepServiceImpl implements StepService {
                 stepDetailDto.setStepId(null);
                 stepDetailDto.setSonSceneId(stepUpdateCmd.getSonSceneId());
                 if (stepUpdateCmd.getSonSceneId() != null && stepUpdateCmd.getSonSceneId() > 0L) {
-                    SceneDetailDo sceneDetailDo = stepValidator.checkStepIsSon(stepUpdateCmd);
+                    SceneDetailDo sceneDetailDo = stepValidator.checkStepIsSon(sceneId, stepUpdateCmd);
                     if (stepUpdateCmd.getName() == null || stepUpdateCmd.getName() == "") {
                         // 子场景的步骤名默认选用场景名
                         stepUpdateCmd.setName(sceneDetailDo.getSceneName());

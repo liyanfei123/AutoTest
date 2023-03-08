@@ -107,11 +107,12 @@ public class SceneDomainImpl implements SceneDomain {
     @Override
     public SceneSearchListDto searchScene(SceneQry sceneQry) {
         SceneSearchListDto sceneSearchListDto = new SceneSearchListDto();
-        List<SceneDetailDto> sceneDetailDtos = new ArrayList<>();
+        List<SceneDetailDto> sceneDetailDtos;
         List<SceneDetailDo> sceneDetailDos = new ArrayList<>();
         // TODO: 2023/3/1 根据id搜索
-        if (sceneQry.getCategoryId() != null) {
-            // 根据类目搜索
+        // 搜索优先级
+        if ((sceneQry.getSceneName() == null || sceneQry.getSceneName() == "")
+                && sceneQry.getCategoryId() != null) { // 根据类目搜索，搜索当前目录下的所有场景
             List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(
                     sceneQry.getCategoryId(), sceneQry.getPageQry());
             if (categorySceneDos.isEmpty()) {
@@ -120,17 +121,15 @@ public class SceneDomainImpl implements SceneDomain {
             List<Long> sceneIds = categorySceneDos.stream().map(categorySceneDo -> categorySceneDo.getSceneId())
                     .collect(Collectors.toList());
             sceneDetailDos = sceneDetailRepository.batchQuerySceneByIds(sceneIds);
-        } else if (sceneQry.getSceneName() != null) {
-            // 根据名称搜索
-            // 全局搜索
+        } else if (sceneQry.getSceneName() != null) {  // 根据名称搜索
             sceneDetailDos = sceneDetailRepository.queryScenes(null,
-                    sceneQry.getSceneName(), sceneQry.getStatus(), sceneQry.getPageQry());
-            // todo:当前目录下搜索
+                    sceneQry.getSceneName(), sceneQry.getCategoryId(), sceneQry.getStatus(), sceneQry.getPageQry());
         }
 
         if (sceneDetailDos.isEmpty()) {
-            return null;
+            return sceneSearchListDto;
         }
+
         sceneDetailDtos = sceneDetailDos.stream().map(sceneDetailConvertor::DoToDto)
                 .collect(Collectors.toList());
         for (SceneDetailDto sceneDetailDto : sceneDetailDtos) {

@@ -1,6 +1,7 @@
 package com.testframe.autotest.core.repository;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.SceneDetailAo;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -43,6 +44,9 @@ public class SceneDetailRepository {
 
     @Autowired
     private CategorySceneDao categorySceneDao;
+
+    @Autowired
+    private SceneDetailAo sceneDetailAo;
 
     @Autowired
     private SceneDetailConvertor sceneDetailConvertor;
@@ -99,13 +103,23 @@ public class SceneDetailRepository {
         return true;
     }
 
-    public SceneDetailDo querySceneById(Long sceneId) {
+    public SceneDetailDo load(Long sceneId) {
         SceneDetail sceneDetail = sceneDao.querySceneById(sceneId);
         if (sceneDetail == null || sceneDetail.getIsDelete() == 1) {
             return null;
         } else {
             return sceneDetailConvertor.PoToDo(sceneDetail);
         }
+    }
+
+    public SceneDetailDo querySceneById(Long sceneId) {
+        SceneDetailDo sceneDetailDo;
+        sceneDetailDo = sceneDetailAo.getSceneDetail(sceneId);
+        if (sceneDetailDo == null) {
+            sceneDetailDo = load(sceneId);
+            sceneDetailAo.writeSceneDetail(sceneId, sceneDetailDo);
+        }
+        return sceneDetailDo;
     }
 
     public List<SceneDetailDo> batchQuerySceneByIds(List<Long> sceneIds) {
@@ -152,19 +166,26 @@ public class SceneDetailRepository {
      * @return
      */
     // TODO: 2023/2/27 添加场景状态查询，需要先查询最近执行状态的场景
-    public List<SceneDetailDo> queryScenes(Long sceneId, String sceneName, Integer status, PageQry pageQry) {
+    public List<SceneDetailDo> queryScenes(Long sceneId, String sceneName,
+                                           Integer categoryId, Integer status,
+                                           PageQry pageQry) {
         List<SceneDetailDo> scenes = new ArrayList<>();
+        List<SceneDetail> sceneDetailList;
         if (sceneId != null && sceneId != 0L) {
             // 根据场景id搜索
             SceneDetailDo sceneDetailDo = querySceneById(sceneId);
             scenes.add(sceneDetailDo);
         } else if (sceneName != null && !sceneName.trim().equals("")) {
             // 根据场景名称搜索
-            List<SceneDetail> sceneDetailList = sceneDao.querySceneLikeTitle(sceneName, pageQry);
+            if (categoryId != null && categoryId > 0) {
+                sceneDetailList = sceneDao.querySceneLikeTitleInCategory(sceneName, categoryId, pageQry);
+            } else {
+                sceneDetailList = sceneDao.querySceneLikeTitle(sceneName, pageQry);
+            }
             scenes = sceneDetailList.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
         } else {
-            // 全局无区别搜索
-            List<SceneDetail> sceneDetailList = sceneDao.queryScenes(pageQry);
+            // 全局无区别搜索列表
+            sceneDetailList = sceneDao.queryScenes(pageQry);
             scenes = sceneDetailList.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
         }
         return scenes;

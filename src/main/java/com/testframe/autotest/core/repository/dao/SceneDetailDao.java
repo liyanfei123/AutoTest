@@ -35,6 +35,16 @@ public class SceneDetailDao {
         return sceneDetailList;
     }
 
+    public List<SceneDetail> querySceneLikeTitleInCategory(String sceneName, Integer category,
+                                                           PageQry pageQry) {
+        List<SceneDetail> sceneDetailList = sceneDetailMapper.queryScenesLikeTitleInCategory(sceneName, category, pageQry);
+        if (CollectionUtils.isEmpty(sceneDetailList)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneDetailList;
+    }
+
+
     public Long saveScene(SceneDetail sceneDetail) {
         Long currentTime = System.currentTimeMillis();
         sceneDetail.setCreateTime(currentTime);
