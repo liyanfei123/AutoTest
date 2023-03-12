@@ -1,5 +1,6 @@
 package com.testframe.autotest.core.repository;
 
+import com.testframe.autotest.cache.ao.StepOrderCache;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
@@ -27,6 +28,9 @@ public class StepOrderRepository {
     private StepOrderDao stepOrderDao;
 
     @Autowired
+    private StepOrderCache stepOrderCache;
+
+    @Autowired
     private StepOrderConverter stepOrderConverter;
 
     @Autowired
@@ -35,11 +39,14 @@ public class StepOrderRepository {
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateSceneStepOrder(StepOrderDo stepOrderDo) {
         StepOrder stepOrder = stepOrderConverter.DoToPo(stepOrderDo);
-        return stepOrderDao.updateStepOrder(stepOrder);
-
+        if (!stepOrderDao.updateStepOrder(stepOrder)){
+            return false;
+        }
+        stepOrderCache.clearBeforeStepOrderCache(stepOrderDo.getSceneId());
+        return true;
     }
 
-    public List<StepOrderDo> queryStepOrderBySceneId(Long sceneId) {
+    private List<StepOrderDo> queryStepOrderBySceneId(Long sceneId) {
         List<StepOrder> stepOrders = stepOrderDao.getStepOrderBySceneId(sceneId);
         List<StepOrderDo> stepOrderDos = stepOrders.stream().map(stepOrderConverter::PoToDo)
                 .collect(Collectors.toList());
@@ -50,6 +57,10 @@ public class StepOrderRepository {
     }
 
     public StepOrderDo queryBeforeStepRunOrder(Long sceneId) {
+        StepOrderDo stepOrderDo = stepOrderCache.getBeforeStepOrder(sceneId);
+        if (stepOrderDo != null) {
+            return stepOrderDo;
+        }
         List<StepOrderDo> stepOrderDos = queryStepOrderBySceneId(sceneId);
         if (stepOrderDos.isEmpty()) {
             return null;
@@ -60,7 +71,9 @@ public class StepOrderRepository {
         if (stepOrderDos.size() > 1) {
             throw new AutoTestException("当前场景执行顺序存在脏数据");
         }
-        return stepOrderDos.get(0);
+        stepOrderDo = stepOrderDos.get(0);
+        stepOrderCache.updateBeforeStepOrder(sceneId, stepOrderDo);
+        return stepOrderDo;
     }
 
     public HashMap<Long, StepOrderDo> batchQueryStepExeOrderByRecordIds(List<Long> recordIds) {

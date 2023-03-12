@@ -1,5 +1,6 @@
 package com.testframe.autotest.core.repository;
 
+import com.testframe.autotest.cache.ao.SceneStepRelCache;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.meta.convertor.SceneStepConverter;
 import com.testframe.autotest.core.meta.convertor.StepOrderConverter;
@@ -29,6 +30,9 @@ public class SceneStepRepository {
     private StepOrderDao stepOrderDao;
 
     @Autowired
+    private SceneStepRelCache sceneStepRelCache;
+
+    @Autowired
     private SceneStepConverter sceneStepConverter;
 
     @Autowired
@@ -41,6 +45,7 @@ public class SceneStepRepository {
             for (SceneStep sceneStep : sceneSteps) {
                 sceneStepDao.updateSceneStep(sceneStep);
             }
+            sceneStepRelCache.clearSceneStepRels(sceneSteps.get(0).getSceneId());
             return true;
         } catch (Exception e) {
             log.error("[SceneStepRepository:batchUpdateSceneStep] update scene-steps error, reason ={}", e.getMessage());
@@ -54,6 +59,7 @@ public class SceneStepRepository {
         if (!sceneStepDao.updateSceneStep(sceneStep)) {
             return false;
         }
+        sceneStepRelCache.clearSceneStepRel(sceneStep.getSceneId(), sceneStep.getStepId());
         return true;
     }
 

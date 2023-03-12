@@ -135,7 +135,7 @@ public class StepServiceImpl implements StepService {
             log.info("updateStepsDto, saveStepsDto");
             if (saveStepDetailDtos.isEmpty() && !updateStepDetailDtos.isEmpty()) {
                 // 仅需更新
-                return stepDomain.updateSteps(updateStepsDto);
+                return stepDomain.updateSteps(sceneId, updateStepsDto);
             } else if (!saveStepDetailDtos.isEmpty() && !updateStepDetailDtos.isEmpty()) {
                 // 仅需新增
                 return !stepDomain.saveSteps(saveStepsDto).isEmpty();
@@ -181,7 +181,7 @@ public class StepServiceImpl implements StepService {
             List<StepUpdateCmd> reSelf = stepUpdateCmds.stream().filter(
                     stepUpdateCmd -> stepUpdateCmd.getSonSceneId() == sceneId).collect(Collectors.toList());
             if (!reSelf.isEmpty()) {
-                throw new AutoTestException("不可引用自己");
+                throw new AutoTestException("子场景不可引用自己");
             }
             sceneValidator.sceneIsExist(sceneId);
             stepValidator.checkStepSave(sceneId, stepUpdateCmds);

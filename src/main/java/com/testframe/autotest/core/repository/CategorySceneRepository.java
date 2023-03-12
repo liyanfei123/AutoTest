@@ -1,5 +1,7 @@
 package com.testframe.autotest.core.repository;
 
+import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -25,6 +27,9 @@ public class CategorySceneRepository {
     private CategorySceneDao categorySceneDao;
 
     @Autowired
+    private CategoryCache categoryCache;
+
+    @Autowired
     private CategorySceneConverter categorySceneConverter;
 
 
@@ -32,6 +37,8 @@ public class CategorySceneRepository {
     public Long saveCategoryScene(CategorySceneDo categoryDetailDo) {
         CategoryScene categoryScene = categorySceneConverter.DoToPo(categoryDetailDo);
         Long id = categorySceneDao.saveCategoryScene(categoryScene);
+        categoryDetailDo.setId(id);
+        categoryCache.updateSceneToCategory(categoryDetailDo.getCategoryId(), categoryDetailDo);
         return id;
     }
 
@@ -41,6 +48,7 @@ public class CategorySceneRepository {
         if (!categorySceneDao.updateCategoryScene(categoryScene)) {
             throw new AutoTestException("类目场景关联更新失败");
         }
+        categoryCache.updateSceneToCategory(categoryDetailDo.getCategoryId(), categoryDetailDo);
         return true;
     }
 
@@ -53,12 +61,25 @@ public class CategorySceneRepository {
     }
 
     public List<CategorySceneDo> queryByCategoryId(Integer categoryId, PageQry pageQry) {
-        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
-        if (categoryScenes.isEmpty()) {
-            return Collections.EMPTY_LIST;
+        Long start = pageQry.getOffset();
+        Long end = pageQry.getOffset() + pageQry.getSize();
+        if (pageQry.getSize() == -1) {
+            end = -1L;
         }
-        List<CategorySceneDo> categorySceneDos = categoryScenes.stream().map(categorySceneConverter::PoToDo)
-                .collect(Collectors.toList());
+        List<CategorySceneDo> categorySceneDos = categoryCache.getSceneInCategory(categoryId, start, end);
+        log.info("[CategorySceneRepository:queryByCategoryId] get scene from cache, in category {}, result = {}",
+                categoryId, categorySceneDos);
+        if (categorySceneDos == null || categorySceneDos.isEmpty()) {
+            List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
+            if (categoryScenes.isEmpty()) {
+                return Collections.EMPTY_LIST;
+            }
+            categorySceneDos = categoryScenes.stream().map(categorySceneConverter::PoToDo)
+                    .collect(Collectors.toList());
+            log.info("[CategorySceneRepository:queryByCategoryId] get scene from db, in category {}, result = {}",
+                    categoryId, categorySceneDos);
+            categoryCache.updateSceneInCategorys(categoryId, categorySceneDos);
+        }
         return categorySceneDos;
     }
 
@@ -68,6 +89,7 @@ public class CategorySceneRepository {
             return null;
         }
         CategorySceneDo categorySceneDo = categorySceneConverter.PoToDo(categoryScene);
+        categoryCache.updateSceneToCategory(categorySceneDo.getCategoryId(), categorySceneDo);
         return categorySceneDo;
     }
 }

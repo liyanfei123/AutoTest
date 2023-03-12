@@ -9,6 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StepDetailDo {
 
+    public static final StepDetailDo NULL;
+
+    static {
+        NULL = new StepDetailDo();
+    }
+
     private Long stepId;
 
     private String stepName;

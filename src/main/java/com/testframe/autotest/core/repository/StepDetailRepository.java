@@ -1,14 +1,15 @@
 package com.testframe.autotest.core.repository;
 
+import com.testframe.autotest.cache.ao.SceneStepRelCache;
+import com.testframe.autotest.cache.ao.StepDetailCache;
+import com.testframe.autotest.cache.ao.StepOrderCache;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
-import com.testframe.autotest.core.meta.Do.StepDetailDo;
-import com.testframe.autotest.core.meta.Do.StepDo;
-import com.testframe.autotest.core.meta.Do.StepOrderDo;
+import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.SceneStepConverter;
 import com.testframe.autotest.core.meta.convertor.StepDetailConvertor;
 import com.testframe.autotest.core.meta.convertor.StepOrderConverter;
+import com.testframe.autotest.core.meta.po.SceneDetail;
 import com.testframe.autotest.core.meta.po.SceneStep;
 import com.testframe.autotest.core.meta.po.StepDetail;
 import com.testframe.autotest.core.meta.po.StepOrder;
@@ -41,6 +42,15 @@ public class StepDetailRepository {
     private StepOrderDao stepOrderDao;
 
     @Autowired
+    private StepDetailCache stepDetailCache;
+
+    @Autowired
+    private StepOrderCache stepOrderCache;
+
+    @Autowired
+    private SceneStepRelCache sceneStepRelCache;
+
+    @Autowired
     private StepDetailConvertor stepDetailConvertor;
 
     @Autowired
@@ -50,6 +60,7 @@ public class StepDetailRepository {
     private StepOrderConverter stepOrderConverter;
 
     // 单步骤添加
+    @Deprecated
     @Transactional(rollbackFor = Exception.class)
     public Long saveStep(StepDo stepDo, StepOrderDo stepOrderDo) {
         try {
@@ -97,15 +108,19 @@ public class StepDetailRepository {
         if (!stepOrderDao.updateStepOrder(originStepOrder)) {
             throw new AutoTestException("步骤执行顺序添加失败");
         }
+
+        sceneStepRelCache.clearSceneStepRels(sceneId);
+        stepOrderCache.clearBeforeStepOrderCache(sceneId);
         return stepOrderList;
     }
 
 
     // 单步骤更新
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean updateStep(StepDo stepDo, StepOrderDo stepOrderDo) {
-        return this.updateSingleStep(stepDo);
-    }
+//    @Deprecated
+//    @Transactional(rollbackFor = Exception.class)
+//    public Boolean updateStep(StepDo stepDo, StepOrderDo stepOrderDo) {
+//        return this.updateSingleStep(stepDo);
+//    }
 
     @Transactional(rollbackFor = Exception.class)
     public Boolean batchUpdateAndSave(Long sceneId, List<StepDo> saveStepDos, List<StepDo> updateStepDos, List<Long> nowStepOrder) {
@@ -142,6 +157,8 @@ public class StepDetailRepository {
             if (!stepOrderDao.updateStepOrder(stepOrder)) {
                 throw new AutoTestException("步骤执行顺序更新失败");
             }
+            sceneStepRelCache.clearSceneStepRels(sceneId);
+            stepOrderCache.clearBeforeStepOrderCache(sceneId);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -151,11 +168,13 @@ public class StepDetailRepository {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Boolean batchUpdateStep(List<StepDo> stepDos) {
+    public Boolean batchUpdateStep(Long sceneId, List<StepDo> stepDos) {
         try {
             for (StepDo stepDo: stepDos) {
                 this.updateSingleStep(stepDo);
             }
+            sceneStepRelCache.clearSceneStepRels(sceneId);
+            stepOrderCache.clearBeforeStepOrderCache(sceneId);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +182,6 @@ public class StepDetailRepository {
             return false;
         }
     }
-
 
     public StepDetailDo queryStepById(Long stepId) {
         StepDetail stepDetail = stepDetailDao.queryByStepId(stepId);
@@ -207,6 +225,10 @@ public class StepDetailRepository {
         if (!stepOrderDao.updateStepOrder(stepOrder)) {
             throw new AutoTestException("删除步骤失败");
         }
+
+        stepDetailCache.clearStepDetailCaches(removeStepIds);
+        sceneStepRelCache.clearSceneStepRels(sceneId);
+        stepOrderCache.clearBeforeStepOrderCache(sceneId);
         return true;
     }
 
@@ -219,6 +241,8 @@ public class StepDetailRepository {
         if (!stepOrderDao.updateStepOrder(stepOrder)) {
             throw new AutoTestException("步骤执行顺序更新失败");
         }
+        sceneStepRelCache.clearSceneStepRels(stepDo.getSceneStepRelDo().getSceneId());
+        stepOrderCache.clearBeforeStepOrderCache(stepDo.getSceneStepRelDo().getSceneId());
         return stepId;
     }
 
@@ -237,6 +261,7 @@ public class StepDetailRepository {
         if (!sceneStepDao.saveSceneStep(sceneStep)) {
             throw new AutoTestException("步骤-场景关联关系保存失败");
         };
+        stepDetailCache.clearStepDetailCache(stepDo.getStepDetailDo().getStepId());
         return stepId;
     }
 
@@ -257,6 +282,7 @@ public class StepDetailRepository {
                 throw new AutoTestException("步骤-场景关联关系更新失败");
             };
         }
+        stepDetailCache.clearStepDetailCache(stepDo.getStepDetailDo().getStepId());
         return true;
     }
 

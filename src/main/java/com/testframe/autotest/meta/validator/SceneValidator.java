@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.validator;
 
+import com.testframe.autotest.cache.ao.SceneDetailCache;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
@@ -10,6 +11,7 @@ import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.enums.SceneTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class SceneValidator {
 
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
+
+    @Autowired
+    private SceneDetailCache sceneDetailCache;
 
     @Autowired
     private CategorySceneRepository categorySceneRepository;
@@ -104,6 +109,10 @@ public class SceneValidator {
 
 
     public void sceneIsExist(Long sceneId) {
+        SceneDetailDto sceneDetailDto = sceneDetailCache.getSceneDetail(sceneId);
+        if (sceneDetailDto != null) {
+            return;
+        }
         SceneDetailDo sceneDetailDo  = sceneDetailRepository.querySceneById(sceneId);
         if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
             throw new AutoTestException("当前场景id错误");

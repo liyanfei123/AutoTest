@@ -97,14 +97,14 @@ public class SceneListImpl implements SceneListService {
                     -> recordDomain.listSceneSimpleExeRecord(sceneIds, recordQry));
 
             return CompletableFuture.allOf(sceneExeRecordsFuture).thenApply(e -> {
-                HashMap<Long, SceneSimpleExecuteDto> sceneExeRecords = sceneExeRecordsFuture.join();
+                HashMap<Long, SceneSimpleExecuteDto> sceneSimpleExeRecords = sceneExeRecordsFuture.join();
                 // 组装相关Vo
                 List<SceneSimpleInfo> sceneSimpleInfoDtos = sceneDetailDtos.stream().map(sceneDetailDto -> {
                     SceneSimpleInfo sceneSimpleInfo = new SceneSimpleInfo();
                     sceneSimpleInfo.setSceneId(sceneDetailDto.getSceneId());
                     sceneSimpleInfo.setSceneName(sceneDetailDto.getSceneName());
                     sceneSimpleInfo.setStepNum(sceneDetailDto.getStepNum());
-                    SceneSimpleExecuteDto sceneSimpleExecuteDto = sceneExeRecords.get(sceneDetailDto.getSceneId());
+                    SceneSimpleExecuteDto sceneSimpleExecuteDto = sceneSimpleExeRecords.get(sceneDetailDto.getSceneId());
                     this.buildSceneRunStatus(sceneSimpleInfo, sceneSimpleExecuteDto);
                     return sceneSimpleInfo;
                 }).collect(Collectors.toList());

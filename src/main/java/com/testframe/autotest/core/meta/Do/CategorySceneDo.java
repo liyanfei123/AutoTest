@@ -15,5 +15,7 @@ public class CategorySceneDo {
 
     private Long sceneId;
 
+    private Long createTime;
+
     private Integer isDelete;
 }

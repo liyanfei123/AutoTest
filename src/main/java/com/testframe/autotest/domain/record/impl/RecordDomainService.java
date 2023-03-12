@@ -1,6 +1,7 @@
 package com.testframe.autotest.domain.record.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.SceneRecordCache;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
 import com.testframe.autotest.core.meta.Do.StepExecuteRecordDo;
@@ -33,6 +34,9 @@ public class RecordDomainService implements RecordDomain {
     private StepExecuteRecordRepository stepExecuteRecordRepository;
 
     @Autowired
+    private SceneRecordCache sceneRecordCache;
+
+    @Autowired
     private SceneExecuteRecordConverter sceneExecuteRecordConverter;
 
     @Autowired
@@ -45,14 +49,21 @@ public class RecordDomainService implements RecordDomain {
             return null;
         }
         for (Long sceneId : sceneIds) {
-            List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
-            if (sceneExecuteRecordDos.isEmpty()) {
-                sceneExecuteDtoMap.put(sceneId, null);
-            } else {
-                sceneExecuteDtoMap.put(sceneId, SceneSimpleExecuteDto.DoToDto(sceneExecuteRecordDos.get(0)));
+            SceneSimpleExecuteDto sceneSimpleExecuteDto = sceneRecordCache.getSceneRecExe(sceneId);
+            if (sceneSimpleExecuteDto == null) {
+                // 回刷缓存
+                sceneSimpleExecuteDto = new SceneSimpleExecuteDto();
+                log.info("[SceneListInterImpl:listSceneSimpleExeRecord] load db, sceneId = {}, result = {}",
+                        JSON.toJSONString(sceneIds), JSON.toJSONString(sceneExecuteDtoMap));
+                List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
+                if (!sceneExecuteRecordDos.isEmpty()) {
+                    sceneSimpleExecuteDto = SceneSimpleExecuteDto.DoToDto(sceneExecuteRecordDos.get(0));
+                    sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
+                }
             }
+            sceneExecuteDtoMap.put(sceneId, sceneSimpleExecuteDto);
         }
-        log.info("[SceneListInterImpl:batchGetSceneExeRecord] sceneIds = {}, result = {}",
+        log.info("[SceneListInterImpl:listSceneSimpleExeRecord] sceneIds = {}, result = {}",
                 JSON.toJSONString(sceneIds), JSON.toJSONString(sceneExecuteDtoMap));
         return sceneExecuteDtoMap;
     }

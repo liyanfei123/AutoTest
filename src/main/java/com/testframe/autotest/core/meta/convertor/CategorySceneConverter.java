@@ -24,6 +24,7 @@ public class CategorySceneConverter {
         categorySceneDo.setCategoryId(categoryScene.getCategoryId());
         categorySceneDo.setSceneId(categoryScene.getSceneId());
         categorySceneDo.setIsDelete(categoryScene.getIsDelete());
+        categorySceneDo.setCreateTime(categoryScene.getCreateTime());
         return categorySceneDo;
     }
 

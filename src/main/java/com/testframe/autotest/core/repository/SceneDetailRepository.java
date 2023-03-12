@@ -1,7 +1,10 @@
 package com.testframe.autotest.core.repository;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.cache.ao.SceneDetailAo;
+import com.testframe.autotest.cache.ao.CategoryCache;
+import com.testframe.autotest.cache.ao.SceneDetailCache;
+import com.testframe.autotest.cache.ao.SceneStepRelCache;
+import com.testframe.autotest.cache.ao.StepOrderCache;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -46,7 +49,16 @@ public class SceneDetailRepository {
     private CategorySceneDao categorySceneDao;
 
     @Autowired
-    private SceneDetailAo sceneDetailAo;
+    private SceneDetailCache sceneDetailCache;
+
+    @Autowired
+    private StepOrderCache stepOrderCache;
+
+    @Autowired
+    private SceneStepRelCache sceneStepRelCache;
+
+    @Autowired
+    private CategoryCache categoryCache;
 
     @Autowired
     private SceneDetailConvertor sceneDetailConvertor;
@@ -81,29 +93,35 @@ public class SceneDetailRepository {
         if (!stepOrderDao.saveStepOrder(stepOrder)) {
             throw new AutoTestException("步骤执行顺序添加失败");
         }
+        countScene(sceneId, null);
         return sceneId;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public boolean updateScene(SceneDo sceneDo) {
         // 更新场景
+        Long sceneId = sceneDo.getSceneDetailDo().getSceneId();
         SceneDetail sceneDetail = sceneDetailConvertor.DoToPO(sceneDo.getSceneDetailDo());
         log.info("[SceneDetailRepository:update] update scene, {}", JSON.toJSONString(sceneDetail));
         if (!sceneDao.updateScene(sceneDetail)) {
             throw new AutoTestException("场景更新失败");
         }
+        // 删除缓存
+        sceneDetailCache.clearSceneDetailCache(sceneId);
         // 更新类目
         if (sceneDo.getCategorySceneDo() != null) {
             CategorySceneDo categorySceneDo = sceneDo.getCategorySceneDo();
+            Integer categoryId = categorySceneDo.getCategoryId();
             CategoryScene categoryScene = categorySceneConverter.DoToPo(categorySceneDo);
             if (!categorySceneDao.updateCategoryScene(categoryScene)) {
                 throw new AutoTestException("新增场景关联类目保存失败");
             }
+            categoryCache.delSceneInCategory(categoryId, sceneId);
         }
         return true;
     }
 
-    public SceneDetailDo load(Long sceneId) {
+    public SceneDetailDo querySceneById(Long sceneId) {
         SceneDetail sceneDetail = sceneDao.querySceneById(sceneId);
         if (sceneDetail == null || sceneDetail.getIsDelete() == 1) {
             return null;
@@ -112,23 +130,12 @@ public class SceneDetailRepository {
         }
     }
 
-    public SceneDetailDo querySceneById(Long sceneId) {
-        SceneDetailDo sceneDetailDo;
-        sceneDetailDo = sceneDetailAo.getSceneDetail(sceneId);
-        if (sceneDetailDo == null) {
-            sceneDetailDo = load(sceneId);
-            sceneDetailAo.writeSceneDetail(sceneId, sceneDetailDo);
-        }
-        return sceneDetailDo;
-    }
-
     public List<SceneDetailDo> batchQuerySceneByIds(List<Long> sceneIds) {
-        List<SceneDetail> sceneDetails = sceneDao.batchQuerySceneByIds(sceneIds);
-        if (sceneDetails.isEmpty()) {
-            return Collections.EMPTY_LIST;
+        List<SceneDetailDo> sceneDetailDos = new ArrayList<>();
+        for (Long sceneId : sceneIds) {
+            SceneDetailDo sceneDetailDo = querySceneById(sceneId);
+            sceneDetailDos.add(sceneDetailDo);
         }
-        List<SceneDetailDo> sceneDetailDos = sceneDetails.stream().map(sceneDetailConvertor::PoToDo)
-                .collect(Collectors.toList());
         return sceneDetailDos;
     }
 
@@ -156,6 +163,17 @@ public class SceneDetailRepository {
             stepOrder.setOrderList(Collections.EMPTY_LIST.toString());
             stepOrderDao.updateStepOrder(stepOrder);
         }
+
+        // 目录关联关系删除
+        CategoryScene categoryScene = categorySceneDao.queryBySceneId(sceneId);
+        categoryScene.setIsDelete(1);
+        categorySceneDao.updateCategoryScene(categoryScene);
+
+        sceneDetailCache.clearSceneDetailCache(sceneId);
+        sceneDetailCache.decrCount(1);
+        sceneStepRelCache.clearSceneStepRels(sceneId);
+        stepOrderCache.clearBeforeStepOrderCache(sceneId);
+        categoryCache.delSceneInCategory(categoryScene.getCategoryId(), sceneId);
         return true;
     }
 
@@ -191,8 +209,16 @@ public class SceneDetailRepository {
         return scenes;
     }
 
-    public Long countScene(Long sceneId, String sceneName) {
-        return sceneDao.countScenes(sceneId, sceneName);
+    // 添加缓存计数
+    private void countScene(Long sceneId, String sceneName) {
+        Long count = sceneDetailCache.getSceneCount();
+        if (count == null) {
+            count = sceneDao.countScenes(sceneId, sceneName);
+            sceneDetailCache.incrCount(count);
+        } else {
+            sceneDetailCache.incrCount(1);
+        }
     }
+
 
 }

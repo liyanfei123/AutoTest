@@ -131,7 +131,7 @@ public class SceneController {
     public HttpResult<Object> move(@RequestParam(required = true) Long sceneId,
                                    @RequestParam(required = true) Integer categoryId) {
         try {
-            sceneExecuteService.execute(sceneId);
+            // TODO: 2023/3/12  移动场景所在的目录
             return HttpResult.ok(sceneId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());

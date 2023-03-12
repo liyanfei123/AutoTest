@@ -14,7 +14,7 @@ public interface StepDomain {
 
     public List<StepDetailDto> listStepInfo(Long sceneId);
 
-    public Boolean updateSteps(StepsDto stepsDto);
+    public Boolean updateSteps(Long sceneId, StepsDto stepsDto);
 
     // 批量保存步骤
     // 保存的步骤都只可添加到最后
@@ -27,8 +27,5 @@ public interface StepDomain {
     public Boolean updateAndSaveSteps(StepSaveAndUpdateDto stepSaveAndUpdateDto);
 
     public Boolean needUpdate(Long stepId, StepDetailDto stepDetailDto);
-
-
-
 
 }

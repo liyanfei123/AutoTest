@@ -1,10 +1,12 @@
 package com.testframe.autotest.domain.step.impl;
 
 
+import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.SceneStepRelCache;
+import com.testframe.autotest.cache.ao.StepDetailCache;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.StepDetailConvertor;
-import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
@@ -18,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,8 +42,19 @@ public class StepDomainImpl implements StepDomain {
     @Autowired
     private StepDetailConvertor stepDetailConvertor;
 
+    @Autowired
+    private SceneStepRelCache sceneStepRelCache;
+
+    @Autowired
+    private StepDetailCache stepDetailCache;
+
     private StepDetailDto stepInfo(Long stepId) {
-        StepDetailDto stepDetailDto = new StepDetailDto();
+        StepDetailDto stepDetailDto = stepDetailCache.getStepDetail(stepId);
+        if (stepDetailDto != null) {
+            return stepDetailDto;
+        }
+        stepDetailDto = new StepDetailDto();
+        // 更新缓存
         StepDetailDo stepDetailDo = stepDetailRepository.queryStepById(stepId);
         if (stepDetailDo == null) {
             return null;
@@ -57,23 +67,39 @@ public class StepDomainImpl implements StepDomain {
         stepDetailDto.setStepStatus(sceneStepRelDo.getStatus());
         stepDetailDto.setType(sceneStepRelDo.getType());
         stepDetailDto.setStepUIInfo(stepDetailDo.getStepInfo());
+        stepDetailCache.updateStepDetail(stepId, stepDetailDto);
         return stepDetailDto;
     }
 
     @Override
     public List<StepDetailDto> listStepInfo(Long sceneId) {
         try {
-            List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(sceneId);
-            if (sceneStepRelDos.isEmpty()) { // 当前场景下无步骤
-                return Collections.EMPTY_LIST;
-            }
-            List<Long> stepIds = sceneStepRelDos.stream().map(sceneStepRelDo -> sceneStepRelDo.getStepId())
-                    .collect(Collectors.toList());
             List<StepDetailDto> stepDetailDtos = new ArrayList<>();
-            for (Long stepId : stepIds) {
-                StepDetailDto stepDetailDto = this.stepInfo(stepId);
-                stepDetailDtos.add(stepDetailDto);
+            HashMap<Long, StepDetailDto> stepDetailDtoMap = sceneStepRelCache.getSceneStepRels(sceneId);
+            if (stepDetailDtoMap != null
+                    && !stepDetailDtoMap.values().isEmpty()) { // 避免缓存出现空的情况
+                stepDetailDtos = new ArrayList<StepDetailDto>(stepDetailDtoMap.values());
+                log.info("[StepDomainImpl:listStepInfo] get cache info {}", JSON.toJSONString(stepDetailDtos));
+            } else {
+                // 无缓存
+                List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(sceneId);
+                if (sceneStepRelDos.isEmpty()) { // 当前场景下无步骤
+                    return Collections.EMPTY_LIST;
+                }
+                List<Long> stepIds = sceneStepRelDos.stream().map(sceneStepRelDo -> sceneStepRelDo.getStepId())
+                        .collect(Collectors.toList());
+                for (Long stepId : stepIds) {
+                    StepDetailDto stepDetailDto = this.stepInfo(stepId);
+                    stepDetailDtos.add(stepDetailDto);
+                }
+                // 回刷缓存
+                HashMap<Long, StepDetailDto> stepDetailDtoMapFormDb = new HashMap<Long, StepDetailDto>();
+                stepDetailDtos.stream().forEach(stepDetailDto ->
+                        stepDetailDtoMapFormDb.put(stepDetailDto.getStepId(), stepDetailDto));
+                log.info("[StepDomainImpl:listStepInfo] refresh cache info {}", JSON.toJSONString(stepDetailDtoMapFormDb));
+                sceneStepRelCache.updateSceneStepRels(sceneId, stepDetailDtoMapFormDb);
             }
+
             StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             if (stepOrderDo == null) {
                 return Collections.EMPTY_LIST;
@@ -94,14 +120,14 @@ public class StepDomainImpl implements StepDomain {
     }
 
     @Override
-    public Boolean updateSteps(StepsDto stepsDto) {
+    public Boolean updateSteps(Long sceneId, StepsDto stepsDto) {
         if (stepsDto.getStepDetailDtos().isEmpty()) {
             return true;
         }
         try {
             List<StepDetailDto> stepDetailDtos = stepsDto.getStepDetailDtos();
             List<StepDo> stepDos = this.buildDetailUpdate(stepDetailDtos);
-            if (!stepDetailRepository.batchUpdateStep(stepDos)) {
+            if (!stepDetailRepository.batchUpdateStep(sceneId, stepDos)) {
                 throw new AutoTestException("步骤更新失败");
             }
         } catch (Exception e) {
@@ -152,11 +178,6 @@ public class StepDomainImpl implements StepDomain {
     // 需要删除的步骤
     @Override
     public Boolean deleteSteps(Long sceneId, List<Long> stepIds) {
-        // 查询原来的步骤执行顺序
-//        StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
-//        if (stepOrderDo == null) {
-//            throw new AutoTestException("当前场景下无步骤可删除");
-//        }
         List<SceneStepRelDo> sceneStepRelDos = new ArrayList<>();
         for (Long stepId : stepIds) {
             SceneStepRelDo sceneStepRelDo = sceneStepRepository.queryByStepId(stepId);
