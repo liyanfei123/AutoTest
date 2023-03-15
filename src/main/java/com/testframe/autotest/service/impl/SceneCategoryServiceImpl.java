@@ -1,5 +1,6 @@
 package com.testframe.autotest.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.domain.category.CategoryDomain;
@@ -24,6 +25,8 @@ public class SceneCategoryServiceImpl implements SceneCategoryService {
 
     @Override
     public Integer updateSceneCategory(SceneCategoryCmd sceneCategoryCmd) {
+        log.info("[SceneCategoryServiceImpl:updateSceneCategory] update category-scene, sceneCategoryCmd = {}",
+                JSON.toJSONString(sceneCategoryCmd));
         if (sceneCategoryCmd.getCategoryName() != null
                 && sceneCategoryCmd.getCategoryName().length() > autoTestConfig.getCategoryNameLength()) {
             throw new AutoTestException("类目名称超过上限");

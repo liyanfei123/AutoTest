@@ -1,20 +1,14 @@
 package com.testframe.autotest.cache.ao;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.cache.key.SceneStepRelCacheKeys;
-import com.testframe.autotest.cache.key.StepDetailCacheKeys;
 import com.testframe.autotest.cache.key.StepOrderCacheKeys;
-import com.testframe.autotest.core.meta.Do.StepDetailDo;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
-import com.testframe.autotest.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 // 步骤执行顺序缓存
 @Slf4j
@@ -59,6 +53,5 @@ public class StepOrderCache {
         }
     }
 
-    // 删除指定位置的元素
 
 }

@@ -23,6 +23,7 @@ import org.greenrobot.eventbus.EventBus;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.handler.event.SeleniumRunEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
@@ -66,6 +67,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     public void execute(Long sceneId) {
         try {
             SeleniumRunEvent seleniumRunEvent = generateEvent(sceneId, SceneExecuteEnum.SINGLE.getType());
+            log.info("[SceneExecuteServiceImpl:execute] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
             eventBus.post(seleniumRunEvent);
         } catch (Exception e) {
             log.error("[SceneExecuteServiceImpl:execute] execute scene {} error, reason = {}", sceneId, e);
@@ -88,7 +90,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
 
             // 过滤掉执行状态关闭的步骤
-            List<StepDetailDto> openSteps = stepDetailDtos.stream().filter(stepDetailDto -> stepDetailDto.getStepStatus() == StepStatusEnum.OPEN.getType())
+            List<StepDetailDto> openSteps = stepDetailDtos.stream().filter(stepDetailDto ->
+                            stepDetailDto.getStepStatus() == StepStatusEnum.OPEN.getType())
                     .collect(Collectors.toList());
             if (openSteps == null || openSteps.isEmpty()) {
                 throw new AutoTestException("当前场景无可执行的步骤");
@@ -112,6 +115,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             }
 
             Long recordId = recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, null);
+            log.info("[SceneExecuteServiceImpl:generateEvent] generate scene recordId, recordId = {}", recordId);
             if (recordId == 0) {
                 throw new AutoTestException("场景执行失败");
             }
@@ -162,6 +166,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     private SeleniumRunEvent buildRunEvent(SceneDetailDto sceneDetailDto, List<StepDetailDto> stepDetailDtos,
                                            Long recordId, List<Long> stepOrderList) {
         SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
+        log.info("[SceneExecuteServiceImpl:buildRunEvent] start build run event, scene = {}",
+                JSON.toJSONString(sceneDetailDto));
         try {
             SceneRunInfo sceneRunInfo = SceneRunInfo.build(sceneDetailDto, stepOrderList);
             seleniumRunEvent.setSceneRunInfo(sceneRunInfo);
@@ -193,9 +199,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                 stepExes.add(stepExe);
             }
             seleniumRunEvent.setStepExes(stepExes);
+            log.info("[SceneExecuteServiceImpl:buildRunEvent] build run event end");
             return seleniumRunEvent;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[SceneExecuteServiceImpl:buildRunEvent] has error, reason = {}", e);
             throw new AutoTestException("事件初始化过程失败");
         }
     }

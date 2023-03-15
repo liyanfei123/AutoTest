@@ -1,5 +1,6 @@
 package com.testframe.autotest.domain.stepOrder.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
 import com.testframe.autotest.core.repository.StepOrderRepository;
@@ -25,6 +26,8 @@ public class StepOrderDomainImpl implements StepOrderDomain {
         if (stepOrderDo == null) {
             return true;
         }
+        log.info("[StepOrderDomainImpl:changeOrder] old order = {}, new order = {}",
+                JSON.toJSONString(stepOrderDo.getOrderList()), JSON.toJSONString(newStepOrder));
         stepOrderDo.setOrderList(newStepOrder);
         return stepOrderRepository.updateSceneStepOrder(stepOrderDo);
     }

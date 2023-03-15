@@ -1,5 +1,6 @@
 package com.testframe.autotest.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -58,6 +59,7 @@ public class SceneListImpl implements SceneListService {
 
     @Override
     public SceneListVO queryScenes(SceneQry sceneQry) {
+        log.info("[SceneListImpl:queryScenes] queryScenes param = {}", JSON.toJSONString(sceneQry));
         try {
             PageQry pageQry = sceneQry.getPageQry();
             pageQry.setSize(pageQry.getSize()+1); // 多找一个
@@ -79,6 +81,7 @@ public class SceneListImpl implements SceneListService {
             List<Long> sceneIds = sceneDetailDtos.stream().map(sceneDetailDto -> sceneDetailDto.getSceneId())
                     .collect(Collectors.toList());
             if (sceneIds.size() == pageQry.getSize()) { // 多找了一个出来
+                log.info("[SceneListImpl:queryScenes] queryScenes find more");
                 sceneListVO.setHasNext(true);
                 sceneListVO.setLastId(sceneIds.get(sceneIds.size()-2));
                 sceneDetailDtos.remove(pageQry.getSize()-1);
@@ -127,8 +130,5 @@ public class SceneListImpl implements SceneListService {
             sceneSimpleInfo.setExecuteTime(sceneSimpleExecuteDto.getExecuteTime());
         }
     }
-
-
-
 
 }

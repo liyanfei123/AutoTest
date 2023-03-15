@@ -44,6 +44,7 @@ public class RecordDomainService implements RecordDomain {
 
     @Override
     public HashMap<Long, SceneSimpleExecuteDto> listSceneSimpleExeRecord(List<Long> sceneIds, RecordQry recordQry) {
+        log.info("[SceneListInterImpl:listSceneSimpleExeRecord] sceneIds = {}, recordQry = {}", sceneIds, JSON.toJSONString(recordQry));
         HashMap<Long, SceneSimpleExecuteDto> sceneExecuteDtoMap = new HashMap<>();
         if (sceneIds.isEmpty()) {
             return null;
@@ -70,6 +71,7 @@ public class RecordDomainService implements RecordDomain {
 
     @Override
     public List<SceneRecordBo> sceneExeRecord(Long sceneId, RecordQry recordQry) {
+        log.info("[SceneListInterImpl:getStepExeInRecord] sceneId = {}, recordQry = {}", sceneId, JSON.toJSONString(recordQry));
         List<SceneRecordBo> sceneRecordBos = new ArrayList<>();
         List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
         if (sceneExecuteRecordDos.isEmpty()) {
@@ -87,6 +89,7 @@ public class RecordDomainService implements RecordDomain {
                 sceneRecordBos.add(sceneRecordBo);
             }
         }
+        log.info("[SceneListInterImpl:getStepExeInRecord] scene exe reocrds = {}", JSON.toJSONString(sceneRecordBos));
         return sceneRecordBos;
     }
 
@@ -98,6 +101,7 @@ public class RecordDomainService implements RecordDomain {
      * @return
      */
     private List<StepRecordBo> getStepExeInRecord(Long recordId, List<Long> stepOrderList) {
+        log.info("[SceneListInterImpl:getStepExeInRecord] recordId = {}, stepOrderList = {}", recordId, stepOrderList);
         List<StepExecuteRecordDo> stepExecuteRecordDos = stepExecuteRecordRepository.queryStepExecuteRecordByRecordId(recordId);
         if (stepExecuteRecordDos.isEmpty()) {
             return Collections.EMPTY_LIST;
@@ -113,6 +117,8 @@ public class RecordDomainService implements RecordDomain {
         });
         List<StepRecordBo> stepRecordBos = new ArrayList<>();
         for (StepExecuteRecordDto stepExecuteRecordDto : stepExecuteRecordDtos) {
+            log.info("[SceneListInterImpl:getStepExeInRecord] build step exe record, stepId = {}",
+                    stepExecuteRecordDto.getStepId());
             StepRecordBo stepRecordBo = new StepRecordBo();
             if (stepExecuteRecordDto.getSceneRecordId() > 0) {
                 // 当前步骤为子场景
@@ -141,6 +147,7 @@ public class RecordDomainService implements RecordDomain {
             }
             stepRecordBos.add(stepRecordBo);
         }
+        log.info("[SceneListInterImpl:getStepExeInRecord] stepRecordBos size = {}", stepRecordBos.size());
         return stepRecordBos;
     }
 
@@ -171,6 +178,8 @@ public class RecordDomainService implements RecordDomain {
                 SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordConverter.DtoToDo(sceneExecuteRecordDto);
                 sceneExecuteRecordDo.setRecordId(null);
                 Long recordId = sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecordDo);
+                log.info("[RecordDomainService:updateSceneExeRecord] add scene exe record, record = {}, recordId = {}",
+                        JSON.toJSONString(sceneExecuteRecordDo), recordId);
                 return recordId;
            } else {
                 // 更新
@@ -183,13 +192,15 @@ public class RecordDomainService implements RecordDomain {
                     stepExecuteRecordDos.forEach(stepExecuteRecordDo -> stepExecuteRecordDo.setRecordId(recordId));
                 }
                 Boolean flag = sceneExecuteRecordRepository.updateSceneExecuteRecord(sceneExecuteRecordDo, stepExecuteRecordDos);
+                log.info("[RecordDomainService:updateSceneExeRecord] update scene exe record, scene record = {}, step record = {}, res = {}",
+                        JSON.toJSONString(sceneExecuteRecordDo), JSON.toJSONString(stepExecuteRecordDos), flag);
                 if (!flag) {
                     return 0L;
                 }
                 return sceneExecuteRecordDo.getRecordId();
            }
         } catch (Exception e) {
-            log.error("");
+            log.error("[RecordDomainService:updateSceneExeRecord] error, reason = {}", e);
             e.printStackTrace();
             return 0L;
         }

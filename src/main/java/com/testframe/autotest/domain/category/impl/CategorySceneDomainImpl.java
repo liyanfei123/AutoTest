@@ -1,5 +1,6 @@
 package com.testframe.autotest.domain.category.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -47,19 +48,26 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
             return !categorySceneDos.isEmpty();
         }
         for (CategoryDetailDo categoryDetailDo : categoryDetailDos) {
-            return sceneInCategory(categoryDetailDo.getCategoryId());
+            Boolean res = sceneInCategory(categoryDetailDo.getCategoryId());
+            log.info("[CategorySceneDomainImpl:sceneInCategory] category have valid scene, categoryId = {}, res = {}",
+                    categoryDetailDo.getCategoryId(), res);
+            return res;
         }
         return false;
     }
 
     @Override
     public Boolean updateCategoryScene(CategorySceneDto categorySceneDto) {
+        log.info("[CategorySceneDomainImpl:updateCategoryScene] param = {}",
+                JSON.toJSONString(categorySceneDto));
         try {
             CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(categorySceneDto.getSceneId());
             if (categorySceneDo == null) {
                 // 新增
                 categorySceneDo = categorySceneConverter.DtoToDo(categorySceneDto);
                 categorySceneDo.setIsDelete(0);
+                log.info("[CategorySceneDomainImpl:updateCategoryScene] add category-scene, category-scene = {}",
+                        JSON.toJSONString(categorySceneDo));
                 categorySceneRepository.saveCategoryScene(categorySceneDo);
             } else {
                 // 更新
@@ -68,10 +76,12 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
                     return true;
                 }
                 categorySceneDo = categorySceneConverter.DtoToDo(categorySceneDo, categorySceneDto);
+                log.info("[CategorySceneDomainImpl:updateCategoryScene] update category-scene, category-scene = {}",
+                        JSON.toJSONString(categorySceneDo));
                 categorySceneRepository.updateCategoryScene(categorySceneDo);
             }
         } catch (Exception e) {
-            log.error("");
+            log.error("[CategorySceneDomainImpl:updateCategoryScene] update category-scene error, reason = {}", e);
             return false;
         }
         return true;
@@ -79,6 +89,8 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
 
     @Override
     public Boolean deleteCategoryScene(CategorySceneDto categorySceneDto) {
+        log.info("[CategorySceneDomainImpl:deleteCategoryScene] param = {}",
+                JSON.toJSONString(categorySceneDto));
         try {
             CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(categorySceneDto.getSceneId());
             if (categorySceneDo == null) {
@@ -87,7 +99,7 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
             categorySceneDo.setIsDelete(0);
             categorySceneRepository.updateCategoryScene(categorySceneDo);
         } catch (Exception e) {
-            log.error("");
+            log.error("[CategorySceneDomainImpl:deleteCategoryScene] delete category-scene error, reason = {}", e);
             return false;
         }
         return true;

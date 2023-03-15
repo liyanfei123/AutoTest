@@ -51,6 +51,8 @@ public class StepDomainImpl implements StepDomain {
     private StepDetailDto stepInfo(Long stepId) {
         StepDetailDto stepDetailDto = stepDetailCache.getStepDetail(stepId);
         if (stepDetailDto != null) {
+            log.info("[StepDomainImpl:stepInfo] stepInfo load from cache, stepId = {}, stepInfo = {}",
+                    stepId, JSON.toJSONString(stepDetailDto));
             return stepDetailDto;
         }
         stepDetailDto = new StepDetailDto();
@@ -68,11 +70,13 @@ public class StepDomainImpl implements StepDomain {
         stepDetailDto.setType(sceneStepRelDo.getType());
         stepDetailDto.setStepUIInfo(stepDetailDo.getStepInfo());
         stepDetailCache.updateStepDetail(stepId, stepDetailDto);
+        log.info("[StepDomainImpl:stepInfo] stepId = {}, stepInfo = {}", stepId, JSON.toJSONString(stepDetailDto));
         return stepDetailDto;
     }
 
     @Override
     public List<StepDetailDto> listStepInfo(Long sceneId) {
+        log.info("[StepDomainImpl:listStepInfo] param = {}", sceneId);
         try {
             List<StepDetailDto> stepDetailDtos = new ArrayList<>();
             HashMap<Long, StepDetailDto> stepDetailDtoMap = sceneStepRelCache.getSceneStepRels(sceneId);
@@ -114,7 +118,7 @@ public class StepDomainImpl implements StepDomain {
             });
             return stepDetailDtos;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepDomainImpl:listStepInfo] has error, reason = {}", e);
             return Collections.EMPTY_LIST;
         }
     }
@@ -130,8 +134,10 @@ public class StepDomainImpl implements StepDomain {
             if (!stepDetailRepository.batchUpdateStep(sceneId, stepDos)) {
                 throw new AutoTestException("步骤更新失败");
             }
+            log.info("[StepDomainImpl:updateSteps] update step success");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepDomainImpl:updateSteps] has error, reason = {}", e);
+            return false;
         }
         return true;
     }
@@ -168,6 +174,7 @@ public class StepDomainImpl implements StepDomain {
             List<StepDetailDto> stepDetailDtos = stepsDto.getStepDetailDtos();
             List<StepDo> stepDos = this.buildDetailSave(stepDetailDtos);
             List<Long> stepIds = stepDetailRepository.batchSaveStep(stepDos);
+            log.info("[StepDomainImpl:saveSteps] saved stepIds = {}", JSON.toJSONString(stepIds));
             return stepIds;
         } catch (Exception e) {
             e.printStackTrace();

@@ -132,12 +132,15 @@ public class StepServiceImpl implements StepService {
             }
             updateStepsDto.setStepDetailDtos(updateStepDetailDtos);
             saveStepsDto.setStepDetailDtos(saveStepDetailDtos);
-            log.info("updateStepsDto, saveStepsDto");
             if (saveStepDetailDtos.isEmpty() && !updateStepDetailDtos.isEmpty()) {
                 // 仅需更新
+                log.info("[StepServiceImpl:updateStepDetail] only need update step info, updateStepsDto = {}",
+                        JSON.toJSONString(updateStepsDto));
                 return stepDomain.updateSteps(sceneId, updateStepsDto);
             } else if (!saveStepDetailDtos.isEmpty() && !updateStepDetailDtos.isEmpty()) {
                 // 仅需新增
+                log.info("[StepServiceImpl:updateStepDetail] only need add step info, saveStepsDto = {}",
+                        JSON.toJSONString(saveStepsDto));
                 return !stepDomain.saveSteps(saveStepsDto).isEmpty();
             } else {
                 StepSaveAndUpdateDto stepSaveAndUpdateDto = new StepSaveAndUpdateDto();
@@ -145,16 +148,19 @@ public class StepServiceImpl implements StepService {
                 stepSaveAndUpdateDto.setSaveStepDetailDtos(saveStepDetailDtos);
                 stepSaveAndUpdateDto.setUpdateStepDetailDtos(updateStepDetailDtos);
                 stepSaveAndUpdateDto.setNowStepOrder(nowStepIds);
+                log.info("[StepServiceImpl:updateStepDetail] need add and update step info, stepSaveAndUpdateDto = {}",
+                        JSON.toJSONString(stepSaveAndUpdateDto));
                 return stepDomain.updateAndSaveSteps(stepSaveAndUpdateDto);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepServiceImpl:updateStepDetail] update step info error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         }
     }
 
     @Override
     public Boolean removeStep(Long sceneId, Long stepId) {
+        log.info("[StepServiceImpl:removeStep] remove stepId {} in scene {}", stepId, sceneId);
         if (sceneId == null || stepId == null || sceneId == 0 || stepId == 0) {
             throw new AutoTestException("请输入正确的值");
         }
@@ -164,7 +170,7 @@ public class StepServiceImpl implements StepService {
             List<Long> stepIds = new ArrayList<>(Arrays.asList(stepId));
             return stepDomain.deleteSteps(sceneId, stepIds);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepServiceImpl:removeStep] remove stepId error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         }
     }
@@ -212,15 +218,17 @@ public class StepServiceImpl implements StepService {
             }
             stepsDto.setStepDetailDtos(stepDetailDtos);
             List<Long> stepIds = stepDomain.saveSteps(stepsDto);
+            log.info("[StepServiceImpl:addStepDetail] add step success, stepIds = {}", JSON.toJSONString(stepIds));
             return stepIds;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepServiceImpl:addStepDetail] add step error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         }
     }
 
     @Override
     public Long stepCopy(Long sceneId, Long stepId) {
+        log.info("[StepServiceImpl:stepCopy] copy step, stepId = {}", JSON.toJSONString(stepId));
         // 判断当前场景下的步骤数
         List<Long> orderList = stepOrderDomain.stepOrderList(sceneId, StepOrderEnum.BEFORE.getType());
         if (orderList.isEmpty()) {
@@ -231,9 +239,11 @@ public class StepServiceImpl implements StepService {
         }
         if (!autoTestConfig.getCopySwitch()) {
             // 被复制到最后面
+            log.info("[StepServiceImpl:stepCopy] copy step end, stepId = {}", JSON.toJSONString(stepId));
             orderList.add(-1L);
         } else {
             // 紧贴着复制步骤
+            log.info("[StepServiceImpl:stepCopy] copy step after, stepId = {}", JSON.toJSONString(stepId));
             orderList.add(orderList.indexOf(stepId)+1, -1L);
         }
         return stepDomain.copyStep(sceneId, stepId, orderList);
@@ -241,6 +251,8 @@ public class StepServiceImpl implements StepService {
 
     @Override
     public Boolean changeStepOrder(StepOrderUpdateCmd stepOrderUpdateCmd) {
+        log.info("[StepServiceImpl:changeStepOrder] change step order, stepOrderUpdateCmd = {}",
+                JSON.toJSONString(stepOrderUpdateCmd));
         sceneValidator.sceneIsExist(stepOrderUpdateCmd.getSceneId());
         // 判断是否传入错误的步骤id
         List<Long> oldStepOrder = stepOrderDomain.stepOrderList(stepOrderUpdateCmd.getSceneId(),
@@ -248,11 +260,13 @@ public class StepServiceImpl implements StepService {
         List<Long> newStepOrder = stepOrderUpdateCmd.getOrders();
         HashSet<Long> orderSet = new HashSet<>(newStepOrder);
         if (oldStepOrder.size() != newStepOrder.size() || orderSet.size() != oldStepOrder.size()) {
+            log.warn("[StepServiceImpl:changeStepOrder] input less stepId");
             throw new AutoTestException("请检查输入的步骤id");
         }
         List<Long> noStepIds = newStepOrder.stream().filter(stepId -> !oldStepOrder.contains(stepId))
                 .collect(Collectors.toList()); // 输入的非法步骤id
         if (!noStepIds.isEmpty()) {
+            log.warn("[StepServiceImpl:changeStepOrder] input illegal stepId, stepIds = {}", JSON.toJSONString(noStepIds));
             throw new AutoTestException("请检查输入的步骤id");
         }
         if (oldStepOrder.toString().equals(newStepOrder.toString())) {
@@ -263,6 +277,8 @@ public class StepServiceImpl implements StepService {
 
     @Override
     public Boolean changeStepStatus(StepStatusUpdateCmd stepStatusUpdateCmd) {
+        log.info("[StepServiceImpl:changeStepStatus] change step status, stepStatusUpdateCmd = {}",
+                JSON.toJSONString(stepStatusUpdateCmd));
         if (stepStatusUpdateCmd.getType() == null || stepStatusUpdateCmd.getType() > 2) {
             stepStatusUpdateCmd.setType(1);
         }
@@ -277,6 +293,8 @@ public class StepServiceImpl implements StepService {
                 // 修改单个步骤状态
                 SceneStepRelDo sceneStepRelDo = sceneStepRepository.queryByStepIdAndSceneId(
                         stepStatusUpdateCmd.getStepId(), stepStatusUpdateCmd.getSceneId());
+                log.info("[StepServiceImpl:changeStepStatus] change one step status, old status = {}, new status = {}",
+                        sceneStepRelDo.getStatus(), stepStatusUpdateCmd.getStatus());
                 if (sceneStepRelDo == null) {
                     throw new AutoTestException("当前步骤不存在");
                 }
@@ -295,13 +313,15 @@ public class StepServiceImpl implements StepService {
                 if (allStatus.isEmpty()) {
                     return true;
                 }
+                log.info("[StepServiceImpl:changeStepStatus] change all step status, new status = {}",
+                        stepStatusUpdateCmd.getStatus());
                 sceneStepRelDos.forEach(sceneStepRelDo -> {
                             sceneStepRelDo.setStatus(stepStatusUpdateCmd.getStatus());
                         });
                 sceneStepRepository.batchUpdateSceneStep(sceneStepRelDos);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[StepServiceImpl:changeStepStatus] change step status error, reason = {}", e);
             throw new AutoTestException("更新步骤状态错误");
         }
         return true;
@@ -314,14 +334,6 @@ public class StepServiceImpl implements StepService {
         stepUpdateCmd.setName(sceneDetailDo.getSceneName());
         stepUpdateCmd.setStepInfo(sceneDetailDo.getSceneDesc());
     }
-
-    // TODO: 2023/3/1 增加场景嵌套关系判断
-    // 子场景之间不可相互嵌套
-    // 比如 场景1 已经关联了 场景2 作为子步骤，场景3 又关联了 场景1 作为子步骤，此时场景2是不可再关联场景3的
-    // 可能会涉及多层嵌套
-    // 或者直接步骤间最大允许嵌套两层
-
-    // 查询场景2作为子场景的所有的父场景，判断当前父场景所关联的所有场景，不可再次关联
 
 
 }

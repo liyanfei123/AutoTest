@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * Description:
- *
+ * 用于测试检查当前枚举类型是否有误
  * @date:2022/11/19 17:48
  * @author: lyf
  */

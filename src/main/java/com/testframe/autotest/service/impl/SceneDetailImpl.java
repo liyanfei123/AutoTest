@@ -131,7 +131,7 @@ public class SceneDetailImpl implements SceneDetailService {
 
     @Override
     public Long sceneCopy(Long sceneId) {
-        log.info("");
+        log.info("[SceneDetailImpl:sceneCopy] copy scene, sceneId = {}", sceneId);
         try {
             // 复制场景详情
             SceneDetailDto sceneDetailDto = sceneDomain.getSceneById(sceneId);
@@ -142,9 +142,11 @@ public class SceneDetailImpl implements SceneDetailService {
             sceneDetailDto.setCreateBy(123456L);
             String sceneSuffix = RandomUtil.randomCode(8);
             sceneDetailDto.setSceneName(sceneDetailDto.getSceneName() + sceneSuffix);
+            log.info("[SceneDetailImpl:sceneCopy] copy scene, copy scene = {}", JSON.toJSONString(sceneDetailDto));
             Long newSceneId = sceneDomain.updateScene(sceneDetailDto);
 
             // 复制场景下的所有步骤
+            log.info("[SceneDetailImpl:sceneCopy] start copy scene's steps");
             List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
             if (stepDetailDtos.isEmpty()) {
                 return newSceneId;
@@ -161,7 +163,7 @@ public class SceneDetailImpl implements SceneDetailService {
             return newSceneId;
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("xx");
+            log.info("[SceneDetailImpl:sceneCopy] copy scene has error, reason = {}", e);
             throw new AutoTestException("场景复制失败");
         }
     }

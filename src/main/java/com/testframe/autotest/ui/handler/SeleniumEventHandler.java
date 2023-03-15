@@ -1,6 +1,7 @@
 package com.testframe.autotest.ui.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.SceneRecordCache;
 import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.exception.SeleniumRunException;
@@ -109,6 +110,9 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     private SceneExecuteRecordRepository sceneExecuteRecordRepository;
 
     @Autowired
+    private SceneRecordCache sceneRecordCache;
+
+    @Autowired
     private SceneExecuteRecordConverter sceneExecuteRecordConverter;
 
     private void chromeInit() {
@@ -182,9 +186,11 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                 driver.quit();
             }
         }
+
         try {
             // 全部执行完成，保存场景/步骤执行信息
             saveRunResult(seleniumRunEvent, stepExecuteRecordMap, sceneFailReason);
+            sceneRecordCache.clearSceneRecExeCache(seleniumRunEvent.getSceneRunInfo().getSceneId());
         } catch (Exception e) {
             throw new AutoTestException("场景执行结果保存更新失败");
         }

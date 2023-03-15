@@ -1,5 +1,6 @@
 package com.testframe.autotest.domain.category.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
@@ -52,6 +53,7 @@ public class CategoryDomainImpl implements CategoryDomain {
     }
 
     private List<CategoryDetailBo> categoryIn(Integer categoryId) {
+        log.info("[CategoryDomainImpl:categoryIn] param = {}", JSON.toJSONString(categoryId));
         List<CategoryDetailBo> categoryDetailBos = new ArrayList<>();
         // 查询当前类目下的子类目
         CategoryQry categoryQry = new CategoryQry(null, null, categoryId, null);
@@ -71,9 +73,9 @@ public class CategoryDomainImpl implements CategoryDomain {
     }
 
 
-
     @Override
     public Integer updateCategory(CategoryDto categoryDto) {
+        log.info("[CategoryDomainImpl:updateCategory] param = {}", JSON.toJSONString(categoryDto));
         try {
             if (categoryDto.getCategoryId() > 0) {
                 // 更新
@@ -81,6 +83,8 @@ public class CategoryDomainImpl implements CategoryDomain {
                 List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
                 CategoryDetailDo updateCategoryDetailDo = categoryDetailDos.get(0);
                 updateCategoryDetailDo = categoryDetailConverter.DtoToDo(updateCategoryDetailDo, categoryDto);
+                log.info("[CategoryDomainImpl:updateCategory] update category, category = {}",
+                        JSON.toJSONString(updateCategoryDetailDo));
                 categoryDetailRepository.updateCategory(updateCategoryDetailDo);
             } else {
                 // 新增
@@ -88,11 +92,12 @@ public class CategoryDomainImpl implements CategoryDomain {
                 newCategoryDetailDo.setType(categoryDto.getRelatedCategoryId() > 0 ? CategoryTypeEnum.MULTI.getType() :
                         CategoryTypeEnum.PRIMARY.getType());
                 newCategoryDetailDo.setIsDelete(0);
+                log.info("[CategoryDomainImpl:updateCategory] add category, category = {}",
+                        JSON.toJSONString(newCategoryDetailDo));
                 return categoryDetailRepository.saveCategory(newCategoryDetailDo);
             }
         } catch (Exception e) {
-            log.error("");
-            e.printStackTrace();
+            log.error("[CategoryDomainImpl:updateCategory] error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         }
         return 0;
@@ -110,6 +115,8 @@ public class CategoryDomainImpl implements CategoryDomain {
             throw new AutoTestException("当前目录下有关联的场景，不允许删除");
         }
         categoryDetailDo.setIsDelete(1);
+        log.info("[CategoryDomainImpl:deleteCategory] delete category, category = {}",
+                JSON.toJSONString(categoryDetailDo));
         categoryDetailRepository.deleteCategory(categoryId);
         return true;
     }
@@ -124,6 +131,8 @@ public class CategoryDomainImpl implements CategoryDomain {
         categoryDetailBo.setCategoryId(categoryDetailDo.getCategoryId());
         categoryDetailBo.setCategoryName(categoryDetailDo.getCategoryName());
         categoryDetailBo.setCategories(null);
+        log.info("[CategoryDomainImpl:getCategoryById] get category, categoryId = {}, category = {}",
+                categoryId, JSON.toJSONString(categoryDetailDo));
         return categoryDetailBo;
     }
 

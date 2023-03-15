@@ -1,7 +1,6 @@
 package com.testframe.autotest.cache.ao;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.cache.key.CategoryCacheKeys;
 import com.testframe.autotest.cache.key.SceneStepRelCacheKeys;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import lombok.extern.slf4j.Slf4j;
