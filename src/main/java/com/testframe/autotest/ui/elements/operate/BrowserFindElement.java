@@ -22,20 +22,19 @@ import java.util.List;
 
 /**
  * Description:
- *
+ * 浏览器查找元素
  * @date:2022/10/24 21:07
  * @author: lyf
  */
-// TODO: 2022/11/15 添加一个浏览器选择工厂，用于选择 
 @Slf4j
 @Component
-public class ChromeFindElement {
+public class BrowserFindElement {
 
     private WebDriver driver;
 
-    public ChromeFindElement() {}
+    public BrowserFindElement() {}
 
-    public ChromeFindElement(WebDriver webDriver) {
+    public BrowserFindElement(WebDriver webDriver) {
         this.driver = webDriver;
     }
 

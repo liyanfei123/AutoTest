@@ -2,6 +2,7 @@ package com.testframe.autotest.domain.record.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.SceneRecordCache;
+import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
 import com.testframe.autotest.core.meta.Do.StepExecuteRecordDo;
@@ -41,6 +42,16 @@ public class RecordDomainService implements RecordDomain {
 
     @Autowired
     private StepExecuteRecordConverter stepExecuteRecordConverter;
+
+    public SceneSimpleExecuteDto recentlySceneSimpleRecord(Long sceneId, Integer type) {
+        RecordQry recordQry = new RecordQry();
+        recordQry.setPage(1);
+        recordQry.setSize(1);
+        recordQry.setType(type);
+        List sceneIds = new ArrayList(){{add(sceneId);}};
+        HashMap<Long, SceneSimpleExecuteDto> map = listSceneSimpleExeRecord(sceneIds, recordQry);
+        return map.get(sceneId);
+    }
 
     @Override
     public HashMap<Long, SceneSimpleExecuteDto> listSceneSimpleExeRecord(List<Long> sceneIds, RecordQry recordQry) {

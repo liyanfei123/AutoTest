@@ -1,11 +1,13 @@
 package com.testframe.autotest.meta.validator;
 
+import com.testframe.autotest.cache.meta.co.CategoryDetailCo;
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.repository.CategoryDetailRepository;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
+import com.testframe.autotest.domain.category.CategoryDomain;
 import com.testframe.autotest.meta.command.SceneCategoryCmd;
 import com.testframe.autotest.meta.query.CategoryQry;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -28,15 +32,20 @@ public class CategoryValidator {
     @Autowired
     private CategorySceneRepository categorySceneRepository;
 
-    public void checkCategoryCreate(SceneCategoryCmd sceneCategoryCmd) {
-        checkRelatedCategoryId(sceneCategoryCmd);
-        checkCategoryName(sceneCategoryCmd);
-    }
+    @Autowired
+    private CategoryDomain categoryDomain;
 
     public void checkCategoryUpdate(SceneCategoryCmd sceneCategoryCmd) {
-        checkCategoryId(sceneCategoryCmd);
-        checkRelatedCategoryId(sceneCategoryCmd);
-        checkCategoryName(sceneCategoryCmd);
+        if (sceneCategoryCmd.getCategoryId() > 0) {
+            checkCategoryId(sceneCategoryCmd);
+            checkRelatedCategoryId(sceneCategoryCmd);
+            checkCategoryName(sceneCategoryCmd);
+        } else {
+            if (sceneCategoryCmd.getRelatedCategoryId() > 0) {
+                checkRelatedCategoryId(sceneCategoryCmd);
+            }
+            checkCategoryName(sceneCategoryCmd);
+        }
     }
 
     public void checkCategoryId(SceneCategoryCmd sceneCategoryCmd) {
@@ -58,34 +67,29 @@ public class CategoryValidator {
             throw new AutoTestException("类目名称超过上限");
         }
         if (sceneCategoryCmd.getCategoryName() != null) {
-            CategoryQry categoryQry = new CategoryQry(null, sceneCategoryCmd.getCategoryName(), null, null);
-            List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.
-                    queryCategory(categoryQry);
-            if (categoryDetailDos.isEmpty()) {
+            List<CategoryDetailCo> categoryDetailCos = new ArrayList<>();
+            if (sceneCategoryCmd.getRelatedCategoryId() != null && sceneCategoryCmd.getRelatedCategoryId() > 0) {
+                // 新增多级类目
+                categoryDetailCos = categoryDomain.querySonCategories(sceneCategoryCmd.getRelatedCategoryId());
+            } else {
+                // 新增顶级类目
+                categoryDetailCos = categoryDomain.querySonCategories(null);
+            }
+            categoryDetailCos.stream().filter(categoryDetailCo -> !(categoryDetailCo.getCategoryId()
+                    ==sceneCategoryCmd.getCategoryId())).collect(Collectors.toList()); // 过滤掉更新的当前类目
+            if (categoryDetailCos.isEmpty()) {
                 return;
             }
-            for (CategoryDetailDo categoryDetailDo : categoryDetailDos) {
-                if (categoryDetailDo.getCategoryId() == sceneCategoryCmd.getCategoryId() &&
-                    categoryDetailDo.getRelateCategoryId() != sceneCategoryCmd.getRelatedCategoryId()) {
-                    // 更新已有目录
-                    throw new AutoTestException("存在同名类目");
-                }
-                if (!(sceneCategoryCmd.getCategoryId() > 0) && !(sceneCategoryCmd.getRelatedCategoryId() > 0)
-                        && categoryDetailDo.getType() == CategoryTypeEnum.PRIMARY.getType()) {
-                    // 新增一级目录
-                    throw new AutoTestException("存在同名一级类目");
-                }
-                if (!(sceneCategoryCmd.getCategoryId() > 0)
-                        && sceneCategoryCmd.getRelatedCategoryId() == categoryDetailDo.getRelateCategoryId()) {
-                    // 新增多级目录
-                    throw new AutoTestException("存在同名子类目");
-                }
+            List<String> categoryNames = categoryDetailCos.stream().map(CategoryDetailCo::getCategoryName)
+                    .collect(Collectors.toList());
+            if (categoryNames.contains(sceneCategoryCmd.getCategoryName())) {
+                throw new AutoTestException("存在同名类目,请修改名称");
             }
         }
     }
 
     public void checkRelatedCategoryId(SceneCategoryCmd sceneCategoryCmd) {
-        CategoryQry categoryQry = new CategoryQry(null, null, sceneCategoryCmd.getRelatedCategoryId(), null);
+        CategoryQry categoryQry = new CategoryQry(sceneCategoryCmd.getRelatedCategoryId(), null, null, null);
         List<CategoryDetailDo> relatedCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
         if (relatedCategoryDetailDos.isEmpty()) {
             throw new AutoTestException("当前关联类目id错误");

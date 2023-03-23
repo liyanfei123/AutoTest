@@ -5,11 +5,13 @@ import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.query.SceneQry;
+import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.vo.SceneDetailVo;
 import com.testframe.autotest.meta.vo.SceneListVO;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.service.SceneListService;
+import com.testframe.autotest.ui.enums.BrowserEnum;
 import com.testframe.autotest.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -112,9 +114,13 @@ public class SceneController {
     // 执行场景
     // 没有步骤的场景不允许执行
     @GetMapping("/execute")
-    public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId) {
+    public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId,
+                                           @RequestParam(required = false) Integer browserType) {
         try {
-            sceneExecuteService.execute(sceneId);
+            if (browserType == null) {
+                browserType = BrowserEnum.CHROME.getType();
+            }
+            sceneExecuteService.execute(sceneId, browserType);
             return HttpResult.ok(sceneId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
@@ -132,6 +138,8 @@ public class SceneController {
                                    @RequestParam(required = true) Integer categoryId) {
         try {
             // TODO: 2023/3/12  移动场景所在的目录
+            // 从缓存拿值判断当前类目id是否错误
+//            SceneValidator.sceneIsExist
             return HttpResult.ok(sceneId);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());

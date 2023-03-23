@@ -46,7 +46,7 @@ public class SceneStepRelCache {
         try {
             String key = SceneStepRelCacheKeys.genStepInScene(sceneId);
             if (stepDetailDto != null) {
-                stringRedisTemplate.opsForHash().put(key, stepId, JSON.toJSONString(stepDetailDto));
+                stringRedisTemplate.opsForHash().put(key, stepId.toString(), JSON.toJSONString(stepDetailDto));
                 stringRedisTemplate.expire(key, SceneStepRelCacheKeys.EXPIRATION_TIME_STEP_SCENE, TimeUnit.MILLISECONDS);
             }
         } catch (Exception ex) {

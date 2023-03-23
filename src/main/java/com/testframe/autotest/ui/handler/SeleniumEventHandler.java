@@ -11,6 +11,7 @@ import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
+import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
 import com.testframe.autotest.meta.dto.record.StepExecuteRecordDto;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.elements.ByFactory;
@@ -20,11 +21,12 @@ import com.testframe.autotest.ui.elements.module.check.AssertFactory;
 import com.testframe.autotest.ui.elements.module.check.base.AssertI;
 import com.testframe.autotest.ui.elements.module.wait.WaitFactory;
 import com.testframe.autotest.ui.elements.module.wait.base.WaitI;
+import com.testframe.autotest.ui.elements.operate.BrowserFindElement;
+import com.testframe.autotest.ui.enums.BrowserEnum;
 import com.testframe.autotest.ui.enums.check.AssertEnum;
 import com.testframe.autotest.ui.enums.check.AssertModeEnum;
 import com.testframe.autotest.ui.enums.wait.WaitModeEnum;
 import com.testframe.autotest.ui.meta.AssertData;
-import com.testframe.autotest.ui.elements.operate.ChromeFindElement;
 import com.testframe.autotest.ui.enums.OperateTypeEnum;
 import com.testframe.autotest.ui.enums.operate.OperateEnum;
 import com.testframe.autotest.ui.enums.operate.OperateModeEnum;
@@ -62,7 +64,7 @@ import java.util.stream.Collectors;
 public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
     @Autowired
-    private ChromeFindElement chromeFindElement;
+    private BrowserFindElement browserFindElement;
 
     @Autowired
     private SceneExecuteService sceneExecuteService;
@@ -115,15 +117,22 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     @Autowired
     private SceneExecuteRecordConverter sceneExecuteRecordConverter;
 
-    private void chromeInit() {
-        log.info("[SeleniumEventHandler:chromeInit] start init chrome");
-        // TODO: 2022/11/19 可让用户自行选择浏览器
-        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
-        // 优化加载策略
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.setPageLoadStrategy(PageLoadStrategy.NONE);
-        driver = new ChromeDriver(chromeOptions);
-        chromeFindElement.setDriver(driver);
+    private void browserInit(Integer browserType) {
+        log.info("[SeleniumEventHandler:browserInit] start init chrome");
+        switch (BrowserEnum.getByType(browserType)) {
+            case CHROME:
+                log.info("[SeleniumEventHandler:browserInit] init chrome: chrome");
+                System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+                // 优化加载策略
+                ChromeOptions chromeOptions = new ChromeOptions();
+                chromeOptions.setPageLoadStrategy(PageLoadStrategy.NONE);
+                driver = new ChromeDriver(chromeOptions);
+                break;
+            case FIREF0X:
+                log.info("[SeleniumEventHandler:browserInit] init chrome: firefox");
+                break;
+        }
+        browserFindElement.setDriver(driver);
         log.info("[SeleniumEventHandler:chromeInit] init chrome over");
     }
 
@@ -153,6 +162,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         } else if (type == SceneExecuteEnum.BELOW.getType()){
             log.info("[SeleniumEventHandler:executeEvent] start execute son scene event");
         }
+        Long sceneId = seleniumRunEvent.getSceneRunInfo().getSceneId();
         Long recordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId(); // 主场景执行id
         Map<Long, StepExecuteRecordDto> stepExecuteRecordMap = new HashMap<>(); // 步骤执行信息保存
         List<StepExe> stepExes = seleniumRunEvent.getStepExes();  // 需要执行的步骤信息
@@ -166,16 +176,42 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             stepExecuteRecordMap.put(stepExe.getStepId(), stepExecuteRecord);
         });
         String sceneFailReason = "";  // 场景失败原因
+        SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordRepository.getSceneExeRecordById(recordId);
+        SceneExecuteRecordDto sceneExecuteRecordDto = sceneExecuteRecordConverter.DoToDto(sceneExecuteRecordDo);
+        sceneExecuteRecordDto.setExecuteTime(System.currentTimeMillis());
+
+        // 初始化
         try {
             if (type == SceneExecuteEnum.SINGLE.getType()) {
                 // 作为父场景执行时初始化
-                chromeInit();
+                browserInit(seleniumRunEvent.getBrowserType());
                 // 默认打开当前场景中的url
                 log.info("[SeleniumEventHandler:eventHandler] open url : {}", seleniumRunEvent.getSceneRunInfo().getUrl());
                 driver.get(seleniumRunEvent.getSceneRunInfo().getUrl());
                 log.info("[SeleniumEventHandler:eventHandler] open url over");
-                chromeFindElement.init(seleniumRunEvent.getWaitInfo()); // 配置全局等待方式 子场景执行共用父场景的配置
+                browserFindElement.init(seleniumRunEvent.getWaitInfo()); // 配置全局等待方式 子场景执行共用父场景的配置
             }
+            sceneExecuteRecordDto.setStatus(SceneStatusEnum.ING.getType());
+            recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, null);
+            // 更新缓存
+            SceneSimpleExecuteDto sceneSimpleExecuteDto = new SceneSimpleExecuteDto();
+            sceneSimpleExecuteDto.setExecuteTime(sceneExecuteRecordDto.getExecuteTime());
+            sceneSimpleExecuteDto.setStatus(SceneStatusEnum.ING.getType());
+            sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
+        } catch (Exception e) {
+            sceneExecuteRecordDto.setStatus(SceneStatusEnum.INTFAIL.getType());
+            sceneExecuteRecordDto.setExtInfo(e.getMessage());
+            recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, null);
+            // 更新缓存
+            SceneSimpleExecuteDto sceneSimpleExecuteDto = new SceneSimpleExecuteDto();
+            sceneSimpleExecuteDto.setExecuteTime(sceneExecuteRecordDto.getExecuteTime());
+            sceneSimpleExecuteDto.setStatus(SceneStatusEnum.INTFAIL.getType());
+            sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
+            throw new SeleniumRunException("初始化失败");
+        }
+
+        // 执行步骤
+        try {
             sceneFailReason = executeStepSet(stepExes, stepExecuteRecordMap, sceneFailReason);
         } catch (Exception e) {
             // 场景未成功开启的其他失败原因
@@ -190,7 +226,6 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         try {
             // 全部执行完成，保存场景/步骤执行信息
             saveRunResult(seleniumRunEvent, stepExecuteRecordMap, sceneFailReason);
-            sceneRecordCache.clearSceneRecExeCache(seleniumRunEvent.getSceneRunInfo().getSceneId());
         } catch (Exception e) {
             throw new AutoTestException("场景执行结果保存更新失败");
         }
@@ -412,7 +447,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     private WebElement findElements(StepExe stepExe) {
         try {
             LocatorInfo locatorInfo = stepExe.getLocatorInfo();
-            WebElement webElement = chromeFindElement.findElementByType(locatorInfo);
+            WebElement webElement = browserFindElement.findElementByType(locatorInfo);
             return webElement;
         } catch (SeleniumRunException e) {
             log.info("[SeleniumEventHandler:findElements] find element fail, reason = {}",  e.getMessage());
@@ -434,6 +469,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     private void saveRunResult(SeleniumRunEvent seleniumRunEvent, Map<Long, StepExecuteRecordDto> stepExecuteRecordMap,
                                String sceneFailReason) {
         try {
+            Long sceneId = seleniumRunEvent.getSceneRunInfo().getSceneId();
             List<Long> runOrderList = seleniumRunEvent.getSceneRunInfo().getRunOrderList();
             List<StepExecuteRecordDto> stepExecuteRecords = new ArrayList<StepExecuteRecordDto>(stepExecuteRecordMap.values());
             // 不改变步骤编排顺序
@@ -449,32 +485,39 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
             SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordRepository.getSceneExeRecordById(seleniumRunEvent.getSceneRunRecordInfo().getRecordId());
             SceneExecuteRecordDto sceneExecuteRecordDto = sceneExecuteRecordConverter.DoToDto(sceneExecuteRecordDo);
+            Integer sceneExeStatus = sceneExecuteRecordDto.getStatus();
+            String sceneExtInfo = null;
             log.info("[SeleniumEventHandler:saveRunResult] all step run result, {}", JSON.toJSONString(stepRunStatus));
             if (stepRunStatusSet.size() == 1 && stepRunStatusSet.contains(StepRunResultEnum.NORUN.getType())) {
                 // 未执行任何步骤，无需保存步骤，只需更新场景执行信息
                 stepExecuteRecords = null;
-                sceneExecuteRecordDto.setStatus(SceneStatusEnum.FAIL.getType());
-                sceneExecuteRecordDto.setExtInfo("场景执行失败，原因：" + sceneFailReason);
+                sceneExeStatus = SceneStatusEnum.FAIL.getType();
+                sceneExtInfo = "场景执行失败，原因：" + sceneFailReason;
             } else {
                 if (stepRunStatusSet.contains(StepRunResultEnum.RUN.getType())) {
                     // 未执行任何步骤，无需保存步骤，只需更新场景执行信息
                     stepExecuteRecords = null;
-                    sceneExecuteRecordDto.setStatus(SceneStatusEnum.ING.getType());
-                    sceneExecuteRecordDto.setExtInfo(null);
+                    sceneExeStatus = SceneStatusEnum.ING.getType();
                 } else if (stepRunStatusSet.contains(StepRunResultEnum.NORUN.getType()) // 执行了部分步骤，但未全部执行完，需同时更新
                                 || stepRunStatusSet.contains(StepRunResultEnum.FAIL.getType())) { // 执行结果包含失败的，需同时更新
-                    sceneExecuteRecordDto.setStatus(SceneStatusEnum.FAIL.getType());
-                    sceneExecuteRecordDto.setExtInfo(sceneFailReason);
+                    sceneExeStatus = SceneStatusEnum.FAIL.getType();
+                    sceneExtInfo = "场景执行失败，原因：" + sceneFailReason;
                 } else if (stepRunStatusSet.contains(StepRunResultEnum.SUCCESS.getType())  // 全部执行成功
                                 || stepRunStatusSet.contains(StepRunResultEnum.STOP.getType())) { // 包含暂停的
-                    sceneExecuteRecordDto.setStatus(SceneStatusEnum.SUCCESS.getType());
-                    sceneExecuteRecordDto.setExtInfo(null);
+                    sceneExeStatus = SceneStatusEnum.SUCCESS.getType();
                 }
             }
+            sceneExecuteRecordDto.setStatus(sceneExeStatus);
+            sceneExecuteRecordDto.setExtInfo(sceneExtInfo);
             Long recordId = recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, stepExecuteRecords);
             if (recordId == 0) {
                 throw new AutoTestException("场景执行信息保存失败");
             }
+            // 更新缓存
+            SceneSimpleExecuteDto sceneSimpleExecuteDto = new SceneSimpleExecuteDto();
+            sceneSimpleExecuteDto.setExecuteTime(sceneExecuteRecordDto.getExecuteTime());
+            sceneSimpleExecuteDto.setStatus(sceneExeStatus);
+            sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
         } catch (Exception e) {
             log.error("[SeleniumEventHandler:saveRunResult] save run result error, reason = {}", e);
             throw new AutoTestException("场景执行信息保存失败");

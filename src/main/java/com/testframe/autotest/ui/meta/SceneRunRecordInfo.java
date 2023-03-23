@@ -14,7 +14,7 @@ public class SceneRunRecordInfo {
     // 场景执行记录id
     private Long recordId;
 
-    // 场景执行时间(初次保存时间creatTime)
+    // 场景执行时间(初次保存时间createTime)
     private Long sceneExecuteTime;
 
 }

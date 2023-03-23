@@ -1,16 +1,15 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.testframe.autotest.core.enums.SceneExecuteEnum;
-import com.testframe.autotest.core.enums.SceneStatusEnum;
-import com.testframe.autotest.core.enums.StepStatusEnum;
-import com.testframe.autotest.core.enums.StepTypeEnum;
+import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
 import com.testframe.autotest.domain.scene.SceneDomain;
 import com.testframe.autotest.domain.step.StepDomain;
+import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
+import com.testframe.autotest.meta.query.RecordQry;
 import com.testframe.autotest.ui.meta.StepUIInfo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
@@ -64,9 +63,13 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 //        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
 //    }
 
-    public void execute(Long sceneId) {
+    public void execute(Long sceneId, Integer browserType) {
         try {
+            if (SceneTypeEnum.getByType(browserType) == null) {
+                throw new AutoTestException("浏览器选择错误");
+            }
             SeleniumRunEvent seleniumRunEvent = generateEvent(sceneId, SceneExecuteEnum.SINGLE.getType());
+            seleniumRunEvent.setBrowserType(browserType);
             log.info("[SceneExecuteServiceImpl:execute] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
             eventBus.post(seleniumRunEvent);
         } catch (Exception e) {
@@ -87,8 +90,19 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             if (sceneDetailDto == null) {
                 throw new AutoTestException("请输入正确的场景id");
             }
-            List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
+            // 判断当前是否有正常进行中的场景
+            RecordQry recordQry = new RecordQry();
+            recordQry.setPage(1);
+            recordQry.setSize(1);
+            recordQry.setType(SceneExecuteEnum.SINGLE.getType());
+            List sceneIds = new ArrayList(){{add(sceneId);}};
+            HashMap<Long, SceneSimpleExecuteDto> recordMap = recordDomain.listSceneSimpleExeRecord(sceneIds, recordQry);
+            SceneSimpleExecuteDto sceneSimpleExecuteDto = recordMap.get(sceneId);
+            if (sceneSimpleExecuteDto.getStatus() == SceneStatusEnum.ING.getType()) {
+                throw new AutoTestException("当前场景正在执行中，勿重复执行");
+            }
 
+            List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
             // 过滤掉执行状态关闭的步骤
             List<StepDetailDto> openSteps = stepDetailDtos.stream().filter(stepDetailDto ->
                             stepDetailDto.getStepStatus() == StepStatusEnum.OPEN.getType())
@@ -100,9 +114,6 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             // 生成执行记录
             StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             List<Long> stepOrderList = stepOrderDo.getOrderList();
-//            List<Long> stepSceneIds = steps.stream().filter(stepInfoDto ->
-//                    stepInfoDto.getSceneId() != 0 || stepInfoDto.getSceneId() != null).map(StepInfoDto::getSceneId)
-//                    .collect(Collectors.toList()); // 当前场景下涉及的子场景id
             SceneExecuteRecordDto sceneExecuteRecordDto = this.buildInit(sceneDetailDto);
             sceneExecuteRecordDto.setStatus(SceneStatusEnum.INT.getType());
             sceneExecuteRecordDto.setType(type);

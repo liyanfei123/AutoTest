@@ -1,6 +1,8 @@
 package com.testframe.autotest.domain.category.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.ao.CategoryCache;
+import com.testframe.autotest.cache.meta.co.CategoryDetailCo;
 import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
@@ -16,9 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -36,17 +37,18 @@ public class CategoryDomainImpl implements CategoryDomain {
     @Autowired
     private CategorySceneDomain categorySceneDomain;
 
+    @Autowired
+    private CategoryCache categoryCache;
+
     @Override
     public List<CategoryDetailBo> listCategory() {
         List<CategoryDetailBo> categoryDetailBos = new ArrayList<>();
-        // 查询所有一级类目
-        CategoryQry categoryQry = new CategoryQry(null, null, null, CategoryTypeEnum.PRIMARY.getType());
-        List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-        for (CategoryDetailDo categoryDetailDo : categoryDetailDos) {
+        List<CategoryDetailCo> categoryDetailCos = this.querySonCategories(null);
+        for (CategoryDetailCo categoryDetailCo: categoryDetailCos) {
             CategoryDetailBo categoryDetailBo = new CategoryDetailBo();
-            categoryDetailBo.setCategoryId(categoryDetailDo.getCategoryId());
-            categoryDetailBo.setCategoryName(categoryDetailDo.getCategoryName());
-            categoryDetailBo.setCategories(categoryIn(categoryDetailDo.getCategoryId()));
+            categoryDetailBo.setCategoryId(categoryDetailCo.getCategoryId());
+            categoryDetailBo.setCategoryName(categoryDetailCo.getCategoryName());
+            categoryDetailBo.setCategories(categoryIn(categoryDetailCo.getCategoryId()));
             categoryDetailBos.add(categoryDetailBo);
         }
         return categoryDetailBos;
@@ -55,23 +57,75 @@ public class CategoryDomainImpl implements CategoryDomain {
     private List<CategoryDetailBo> categoryIn(Integer categoryId) {
         log.info("[CategoryDomainImpl:categoryIn] param = {}", JSON.toJSONString(categoryId));
         List<CategoryDetailBo> categoryDetailBos = new ArrayList<>();
-        // 查询当前类目下的子类目
-        CategoryQry categoryQry = new CategoryQry(null, null, categoryId, null);
-        List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-        if (categoryDetailDos.isEmpty()) {
+        List<CategoryDetailCo> categoryDetailCos = this.querySonCategories(categoryId);
+        if (categoryDetailCos.isEmpty()) {
             // 无子目录
             return Collections.EMPTY_LIST;
         }
-        for (CategoryDetailDo categoryDetailDo : categoryDetailDos) {
+        for (CategoryDetailCo categoryDetailCo : categoryDetailCos) {
             CategoryDetailBo categoryDetailBo = new CategoryDetailBo();
-            categoryDetailBo.setCategoryId(categoryDetailDo.getCategoryId());
-            categoryDetailBo.setCategoryName(categoryDetailDo.getCategoryName());
-            categoryDetailBo.setCategories(categoryIn(categoryDetailDo.getCategoryId()));
+            categoryDetailBo.setCategoryId(categoryDetailCo.getCategoryId());
+            categoryDetailBo.setCategoryName(categoryDetailCo.getCategoryName());
+            categoryDetailBo.setCategories(categoryIn(categoryDetailCo.getCategoryId()));
             categoryDetailBos.add(categoryDetailBo);
         }
         return categoryDetailBos;
     }
 
+    @Override
+    public List<CategoryDetailCo> querySonCategories(Integer categoryId) {
+        Collection<CategoryDetailCo> categoryDetailCos = new ArrayList<>();
+        if (categoryId != null && categoryId > 0) {
+            // 多级类目下的子类目
+            // 查询所有一级类目 先查缓存，若缓存不存在，则读取db进行刷新
+            HashMap<Integer, CategoryDetailCo> categoryDetailCoMap = categoryCache.getLevelCategory(categoryId);
+            if (categoryDetailCoMap != null) {
+                categoryDetailCos = categoryDetailCoMap.values();
+            }
+            if (categoryDetailCoMap == null || categoryDetailCos.isEmpty()) {
+                // 查询当前类目下的子类目
+                CategoryQry categoryQry = new CategoryQry(null, null, categoryId, null);
+                List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
+                if (categoryDetailDos.isEmpty()) {
+                    return Collections.EMPTY_LIST;
+                }
+                categoryDetailCos = categoryDetailDos.stream().map(categoryDetailConverter::DoToCo).collect(Collectors.toList());
+                try {
+                    categoryCache.batchUpdateLevelCategory(categoryId, categoryDetailCos);
+                } catch (Exception e) {
+                    // 更新缓存异常，将key删除
+                    log.error("[CategoryDomainImpl:querySonCategories] refresh level category fail, reason = {}", e);
+                    categoryCache.clearLevelCategory(categoryId, null);
+                }
+            }
+        } else {
+            // 顶级类目
+            // 查询所有一级类目 先查缓存，若缓存不存在，则读取db进行刷新
+            HashMap<Integer, CategoryDetailCo> categoryDetailCoMap = categoryCache.getFirstCategory();
+            if (categoryDetailCoMap != null) {
+                categoryDetailCos = categoryDetailCoMap.values();
+            }
+            if (categoryDetailCoMap == null || categoryDetailCos.isEmpty()) {
+                CategoryQry categoryQry = new CategoryQry(null, null, null, CategoryTypeEnum.PRIMARY.getType());
+                List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
+                categoryDetailCos = categoryDetailDos.stream().map(categoryDetailConverter::DoToCo).collect(Collectors.toList());
+                if (categoryDetailDos.isEmpty()) {
+                    return Collections.EMPTY_LIST;
+                }
+                try {
+                    categoryCache.batchUpdateFirstCategory(categoryDetailCos);
+                } catch (Exception e) {
+                    // 更新缓存异常，将key删除
+                    log.error("[CategoryDomainImpl:querySonCategories] refresh top category fail, reason = {}", e);
+                    categoryCache.clearFirstCategory(null);
+                }
+            }
+        }
+        // 根据创建时间从小到大排序
+        categoryDetailCos.stream().sorted(Comparator.comparing(CategoryDetailCo::getCreateTime)).collect(Collectors.toList());
+//        categoryDetailCos.stream().sorted((o1, o2) -> o1.getCreateTime().compareTo(o2.getCreateTime())).collect(Collectors.toList());
+        return categoryDetailCos.stream().collect(Collectors.toList());
+    }
 
     @Override
     public Integer updateCategory(CategoryDto categoryDto) {
@@ -109,6 +163,10 @@ public class CategoryDomainImpl implements CategoryDomain {
         CategoryDetailDo categoryDetailDo = getCategory(categoryId);
         if (categoryDetailDo == null) {
             throw new AutoTestException("当前目录不存在");
+        }
+        List<CategoryDetailCo> categoryDetailCos = this.querySonCategories(categoryId);
+        if (!categoryDetailCos.isEmpty()) {
+            throw new AutoTestException("当前目录下有子目录，不允许删除");
         }
         Boolean sceneExist = categorySceneDomain.sceneInCategory(categoryId);
         if (sceneExist) {

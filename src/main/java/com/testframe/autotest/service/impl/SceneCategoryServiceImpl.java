@@ -7,6 +7,7 @@ import com.testframe.autotest.domain.category.CategoryDomain;
 import com.testframe.autotest.domain.category.CategorySceneDomain;
 import com.testframe.autotest.meta.command.SceneCategoryCmd;
 import com.testframe.autotest.meta.dto.category.CategoryDto;
+import com.testframe.autotest.meta.validator.CategoryValidator;
 import com.testframe.autotest.service.SceneCategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class SceneCategoryServiceImpl implements SceneCategoryService {
     @Autowired
     private CategoryDomain categoryDomain;
 
+    @Autowired
+    private CategoryValidator categoryValidator;
+
     @Override
     public Integer updateSceneCategory(SceneCategoryCmd sceneCategoryCmd) {
         log.info("[SceneCategoryServiceImpl:updateSceneCategory] update category-scene, sceneCategoryCmd = {}",
@@ -35,6 +39,7 @@ public class SceneCategoryServiceImpl implements SceneCategoryService {
                 && sceneCategoryCmd.getCategoryId() == sceneCategoryCmd.getRelatedCategoryId()) {
             throw new AutoTestException("类目id不可与自己绑定");
         }
+        categoryValidator.checkCategoryUpdate(sceneCategoryCmd);
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setCategoryId(sceneCategoryCmd.getCategoryId());
         categoryDto.setCategoryName(sceneCategoryCmd.getCategoryName());
