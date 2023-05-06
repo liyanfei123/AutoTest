@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SceneQry  {
 
+    private Long sceneId;
+
     private String sceneName;
 
     private Integer status;

@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.testframe.autotest.core.meta.po.SceneDetail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,6 +87,7 @@ public class SceneDetailRepository {
         if (categorySceneDao.saveCategoryScene(categoryScene) == 0L) {
             throw new AutoTestException("新增场景关联类目保存失败");
         }
+        categoryCache.updateSceneInCategorys(categoryScene.getCategoryId(), Arrays.asList(sceneDo.getCategorySceneDo()));
         // 初始化步骤执行顺序
         List<Long> orderList = new ArrayList<>();
         StepOrder stepOrder = new StepOrder(null, sceneId, 0L, orderList.toString(),
@@ -111,12 +113,13 @@ public class SceneDetailRepository {
         // 更新类目
         if (sceneDo.getCategorySceneDo() != null) {
             CategorySceneDo categorySceneDo = sceneDo.getCategorySceneDo();
-            Integer categoryId = categorySceneDo.getCategoryId();
+            Integer newCategoryId = categorySceneDo.getCategoryId();
             CategoryScene categoryScene = categorySceneConverter.DoToPo(categorySceneDo);
             if (!categorySceneDao.updateCategoryScene(categoryScene)) {
                 throw new AutoTestException("新增场景关联类目保存失败");
             }
-            categoryCache.delSceneInCategory(categoryId, sceneId);
+            categoryCache.clearSceneInCategory(sceneDo.getOldCategoryId(), Arrays.asList(sceneId));
+            categoryCache.updateSceneInCategorys(newCategoryId, Arrays.asList(categorySceneDo));
         }
         return true;
     }
@@ -173,7 +176,7 @@ public class SceneDetailRepository {
         sceneDetailCache.decrCount(1);
         sceneStepRelCache.clearSceneStepRels(sceneId);
         stepOrderCache.clearBeforeStepOrderCache(sceneId);
-        categoryCache.delSceneInCategory(categoryScene.getCategoryId(), sceneId);
+        categoryCache.clearSceneInCategory(categoryScene.getCategoryId(), Arrays.asList(sceneId));
         return true;
     }
 

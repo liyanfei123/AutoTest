@@ -25,8 +25,6 @@ public class StepController {
     @Autowired
     private StepService stepService;
 
-
-    // TODO: 2023/3/2 添加一个有前后id的添加步骤接口
     // 单场景步骤保存/更新
     @PostMapping("/add")
     public HttpResult<List> stepSave(@RequestBody UpdateStepsCmd updateStepsCmd) {
@@ -93,7 +91,7 @@ public class StepController {
         }
     }
 
-    // 调整步骤执行顺序
+    // 调整步骤执行顺序，批量调整
     @PostMapping("/order")
     public HttpResult<Boolean> changeOrder(@RequestBody StepOrderUpdateCmd stepOrderUpdateCmd) {
         try {
@@ -101,9 +99,27 @@ public class StepController {
             || stepOrderUpdateCmd.getOrders() == null || stepOrderUpdateCmd.getOrders().isEmpty()) {
                 return HttpResult.ok("输入参数");
             }
-            return HttpResult.ok(stepService.changeStepOrder(stepOrderUpdateCmd));
+            return HttpResult.ok(stepService.changeStepOrderList(stepOrderUpdateCmd));
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
     }
+
+    // 调整步骤顺序，单个调整
+    @GetMapping("/change")
+    public HttpResult<Boolean> changeOrder(
+            @RequestParam(required = true) Long sceneId,
+            @RequestParam(required = true, defaultValue = "0") Long beforeStepId,
+            @RequestParam(required = true) Long stepId,
+            @RequestParam(required = true, defaultValue = "0") Long afterStepId) {
+        try {
+            if (sceneId == null || sceneId <= 0L || stepId == null || stepId <= 0L) {
+                return HttpResult.ok("输入参数非法");
+            }
+            return HttpResult.ok(stepService.changeStepOrder(sceneId, beforeStepId, stepId, afterStepId));
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
 }

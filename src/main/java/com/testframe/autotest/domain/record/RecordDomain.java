@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface RecordDomain {
 
-    // 批量获取场景执行顺序
-    HashMap<Long, SceneSimpleExecuteDto> listSceneSimpleExeRecord(List<Long> sceneIds, RecordQry recordQry);
+    // 批量获取场景最近一个执行情况
+    HashMap<Long, SceneSimpleExecuteDto> listRecSceneSimpleExeRecord(List<Long> sceneIds);
 
     List<SceneRecordBo> sceneExeRecord(Long sceneId, RecordQry recordQry);
     HashMap<Long, List<SceneRecordBo>> listSceneExeRecord(List<Long> sceneIds, RecordQry recordQry);

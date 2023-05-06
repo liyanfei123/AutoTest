@@ -18,7 +18,9 @@ public interface StepService {
     Long stepCopy(Long sceneId, Long stepId);
 
     // 改变步骤执行顺序
-    Boolean changeStepOrder(StepOrderUpdateCmd stepOrderUpdateCmd);
+    Boolean changeStepOrderList(StepOrderUpdateCmd stepOrderUpdateCmd);
+
+    Boolean changeStepOrder(Long sceneId, Long beforeStepId, Long stepId, Long afterStepId);
 
     Boolean changeStepStatus(StepStatusUpdateCmd stepStatusUpdateCmd);
 

@@ -17,7 +17,7 @@ public class ByFactory {
     public static By createBy(Integer locatorType, String locatorExpress) {
         By by = null;
         if (locatorType == null || locatorExpress == null) {
-            return by;
+            return null;
         }
         switch (LocatorTypeEnum.getByType(locatorType)) {
             case ById:

@@ -1,6 +1,7 @@
 package com.testframe.autotest.meta.validator;
 
 import com.testframe.autotest.cache.meta.co.CategoryDetailCo;
+import com.testframe.autotest.cache.service.CategoryCacheService;
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -33,6 +34,9 @@ public class CategoryValidator {
     private CategorySceneRepository categorySceneRepository;
 
     @Autowired
+    private CategoryCacheService categoryCacheService;
+
+    @Autowired
     private CategoryDomain categoryDomain;
 
     public void checkCategoryUpdate(SceneCategoryCmd sceneCategoryCmd) {
@@ -49,16 +53,17 @@ public class CategoryValidator {
     }
 
     public void checkCategoryId(SceneCategoryCmd sceneCategoryCmd) {
-        CategoryQry categoryQry = new CategoryQry(sceneCategoryCmd.getCategoryId(), null, null, null);
-        List<CategoryDetailDo> existCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-        if (existCategoryDetailDos.size() == 0) {
+        CategoryDetailCo categoryDetailCo = categoryCacheService.getCategoryInfo(sceneCategoryCmd.getCategoryId());
+        if (categoryDetailCo == null) {
             throw new AutoTestException("当前类目id错误");
         }
-        CategoryDetailDo updateCategoryDetailDo = existCategoryDetailDos.get(0);
-        if (updateCategoryDetailDo.getIsDelete() == 1) {
-            throw new AutoTestException("已删除场景不支持更新");
-        }
+    }
 
+    public void checkCategoryId(Integer categoryId) {
+        CategoryDetailCo categoryDetailCo = categoryCacheService.getCategoryInfo(categoryId);
+        if (categoryDetailCo == null) {
+            throw new AutoTestException("当前类目id错误");
+        }
     }
 
     public void checkCategoryName(SceneCategoryCmd sceneCategoryCmd) {

@@ -34,14 +34,14 @@
     limit #{pageQry.offset}, #{pageQry.size}
   </select>
 
-    <select id="selectBySceneId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
-      select 'false' as QUERYID,
-      <include refid="Base_Column_List" />
-      from AUTO_TEST_CATEGORY_SCENE
-      where sceneId = #{sceneId,jdbcType=BIGINT} AND isDelete = 0
-    </select>
+  <select id="selectBySceneId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_CATEGORY_SCENE
+    where sceneId = #{sceneId,jdbcType=BIGINT} AND isDelete = 0
+  </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_CATEGORY_SCENE
     where id = #{id,jdbcType=BIGINT}
   </delete>
@@ -50,9 +50,9 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_CATEGORY_SCENE (categoryId, sceneId, isDelete,
-      createTime, updateTime)
+    createTime, updateTime)
     values (#{categoryId,jdbcType=INTEGER}, #{sceneId,jdbcType=BIGINT}, #{isDelete,jdbcType=INTEGER},
-      #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
+    #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -118,10 +118,10 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
     update AUTO_TEST_CATEGORY_SCENE
     set categoryId = #{categoryId,jdbcType=INTEGER},
-      sceneId = #{sceneId,jdbcType=BIGINT},
-      isDelete = #{isDelete,jdbcType=INTEGER},
-      createTime = #{createTime,jdbcType=BIGINT},
-      updateTime = #{updateTime,jdbcType=BIGINT}
+    sceneId = #{sceneId,jdbcType=BIGINT},
+    isDelete = #{isDelete,jdbcType=INTEGER},
+    createTime = #{createTime,jdbcType=BIGINT},
+    updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 

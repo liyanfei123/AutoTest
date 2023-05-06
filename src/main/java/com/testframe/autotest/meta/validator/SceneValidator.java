@@ -1,6 +1,7 @@
 package com.testframe.autotest.meta.validator;
 
 import com.testframe.autotest.cache.ao.SceneDetailCache;
+import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,7 @@ public class SceneValidator {
     private SceneDetailRepository sceneDetailRepository;
 
     @Autowired
-    private SceneDetailCache sceneDetailCache;
+    private SceneCacheService sceneCacheService;
 
     @Autowired
     private CategorySceneRepository categorySceneRepository;
@@ -85,13 +87,14 @@ public class SceneValidator {
         }
     }
     // 验证当前标题是否重复
-    private void checkSceneTitle(String title, Integer categoryId, Long nowSceneId) {
+    public void checkSceneTitle(String title, Integer categoryId, Long nowSceneId) {
         List<SceneDetailDo> sceneDetailDos = sceneDetailRepository.querySceneByTitle(title);
         List<Long> sceneIds = sceneDetailDos.stream().map(SceneDetailDo::getSceneId).collect(Collectors.toList());
         for (Long sceneId : sceneIds) {
             if (sceneId == nowSceneId) {
                 continue;
             }
+            // 判断同名标题是否在一个类目下
             CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(sceneId);
             if (categorySceneDo.getCategoryId() == categoryId) {
                 throw new AutoTestException("当前类目下测试场景标题重复");
@@ -108,14 +111,23 @@ public class SceneValidator {
     }
 
 
-    public void sceneIsExist(Long sceneId) {
-        SceneDetailDto sceneDetailDto = sceneDetailCache.getSceneDetail(sceneId);
-        if (sceneDetailDto != null) {
-            return;
-        }
-        SceneDetailDo sceneDetailDo  = sceneDetailRepository.querySceneById(sceneId);
-        if (sceneDetailDo == null || sceneDetailDo.getIsDelete() == 1) {
+    public SceneDetailDto sceneIsExist(Long sceneId) {
+        SceneDetailDto sceneDetailDto = sceneCacheService.getSceneDetailFromCache(sceneId);
+        if (sceneDetailDto == null) {
             throw new AutoTestException("当前场景id错误");
         }
+        return sceneDetailDto;
+    }
+
+    public List<SceneDetailDto> sceneIsExistInCategoryId(List<Long> sceneIds, Integer categoryId) {
+        List<SceneDetailDto> sceneDetailDtos = new ArrayList<>();
+        for (Long sceneId : sceneIds) {
+            SceneDetailDto sceneDetailDto = this.sceneIsExist(sceneId);
+            if (sceneDetailDto.getCategoryId() != categoryId) {
+                throw new AutoTestException("当前场景不属于该类目");
+            }
+            sceneDetailDtos.add(sceneDetailDto);
+        }
+        return sceneDetailDtos;
     }
 }

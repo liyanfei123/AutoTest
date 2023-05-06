@@ -1,12 +1,9 @@
 package com.testframe.autotest.core.repository;
 
-import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.convertor.CategorySceneConverter;
-import com.testframe.autotest.core.meta.po.CategoryDetail;
 import com.testframe.autotest.core.meta.po.CategoryScene;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.dao.CategorySceneDao;
@@ -15,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,17 +34,38 @@ public class CategorySceneRepository {
         CategoryScene categoryScene = categorySceneConverter.DoToPo(categoryDetailDo);
         Long id = categorySceneDao.saveCategoryScene(categoryScene);
         categoryDetailDo.setId(id);
-        categoryCache.updateSceneToCategory(categoryDetailDo.getCategoryId(), categoryDetailDo);
+        List<CategorySceneDo> categorySceneDos = Arrays.asList(categoryDetailDo);
+        categoryCache.updateSceneInCategorys(categoryDetailDo.getCategoryId(), categorySceneDos);
         return id;
     }
 
+
+    /**
+     * key 原目录id
+     * value 更新后的绑定关系
+     * @param categoryDetailDoMap
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateCategoryScene(CategorySceneDo categoryDetailDo) {
-        CategoryScene categoryScene = categorySceneConverter.DoToPo(categoryDetailDo);
-        if (!categorySceneDao.updateCategoryScene(categoryScene)) {
-            throw new AutoTestException("类目场景关联更新失败");
+    public Boolean batchUpdateCategoryScene(Map<Integer, List<CategorySceneDo>> categoryDetailDoMap) {
+        for (Integer categoryId : categoryDetailDoMap.keySet()) {
+            List<CategorySceneDo> categorySceneDos = categoryDetailDoMap.get(categoryId);
+            List<CategoryScene> categoryScenes = categorySceneDos.stream().map(categorySceneConverter::DoToPo)
+                    .collect(Collectors.toList());
+            List<Long> sceneIds = new ArrayList<>();
+            Integer newCategoryId = null;
+            for (CategoryScene categoryScene : categoryScenes) {
+                if (!categorySceneDao.updateCategoryScene(categoryScene)) {
+                    throw new AutoTestException("类目场景关联更新失败");
+                }
+                newCategoryId = categoryScene.getCategoryId();
+                sceneIds.add(categoryScene.getSceneId());
+            }
+            // 删除原类目下的场景缓存
+            categoryCache.clearSceneInCategory(categoryId, sceneIds);
+            // 更新新类目下的场景缓存
+            categoryCache.updateSceneInCategorys(newCategoryId, categorySceneDos);
         }
-        categoryCache.updateSceneToCategory(categoryDetailDo.getCategoryId(), categoryDetailDo);
         return true;
     }
 
@@ -60,26 +77,13 @@ public class CategorySceneRepository {
         return count;
     }
 
-    public List<CategorySceneDo> queryByCategoryId(Integer categoryId, PageQry pageQry) {
-        Long start = pageQry.getOffset();
-        Long end = pageQry.getOffset() + pageQry.getSize();
-        if (pageQry.getSize() == -1) {
-            end = -1L;
+    public List<CategorySceneDo> querySceneByCategoryId(Integer categoryId, PageQry pageQry) {
+        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
+        if (categoryScenes.isEmpty()) {
+            return Collections.EMPTY_LIST;
         }
-        List<CategorySceneDo> categorySceneDos = categoryCache.getSceneInCategory(categoryId, start, end);
-        log.info("[CategorySceneRepository:queryByCategoryId] get scene from cache, in category {}, result = {}",
-                categoryId, categorySceneDos);
-        if (categorySceneDos == null || categorySceneDos.isEmpty()) {
-            List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
-            if (categoryScenes.isEmpty()) {
-                return Collections.EMPTY_LIST;
-            }
-            categorySceneDos = categoryScenes.stream().map(categorySceneConverter::PoToDo)
-                    .collect(Collectors.toList());
-            log.info("[CategorySceneRepository:queryByCategoryId] get scene from db, in category {}, result = {}",
-                    categoryId, categorySceneDos);
-            categoryCache.updateSceneInCategorys(categoryId, categorySceneDos);
-        }
+        List<CategorySceneDo> categorySceneDos = categoryScenes.stream().map(categorySceneConverter::PoToDo)
+                .collect(Collectors.toList());
         return categorySceneDos;
     }
 
@@ -89,7 +93,8 @@ public class CategorySceneRepository {
             return null;
         }
         CategorySceneDo categorySceneDo = categorySceneConverter.PoToDo(categoryScene);
-        categoryCache.updateSceneToCategory(categorySceneDo.getCategoryId(), categorySceneDo);
+        List<CategorySceneDo> categorySceneDos = Arrays.asList(categorySceneDo);
+        categoryCache.updateSceneInCategorys(categorySceneDo.getCategoryId(), categorySceneDos);
         return categorySceneDo;
     }
 }

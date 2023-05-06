@@ -1,6 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
@@ -58,6 +59,9 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     @Autowired
     private RecordDomain recordDomain;
 
+    @Autowired
+    private SceneCacheService sceneCacheService;
+
 //    public void execute() {
 //        log.info("开始发送消息");
 //        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
@@ -86,26 +90,22 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
      */
     public SeleniumRunEvent generateEvent(Long sceneId, Integer type) {
         try {
-            SceneDetailDto sceneDetailDto = sceneDomain.getSceneById(sceneId);
+            SceneDetailDto sceneDetailDto = sceneCacheService.getSceneDetailFromCache(sceneId);
             if (sceneDetailDto == null) {
                 throw new AutoTestException("请输入正确的场景id");
             }
             // 判断当前是否有正常进行中的场景
-            RecordQry recordQry = new RecordQry();
-            recordQry.setPage(1);
-            recordQry.setSize(1);
-            recordQry.setType(SceneExecuteEnum.SINGLE.getType());
             List sceneIds = new ArrayList(){{add(sceneId);}};
-            HashMap<Long, SceneSimpleExecuteDto> recordMap = recordDomain.listSceneSimpleExeRecord(sceneIds, recordQry);
+            HashMap<Long, SceneSimpleExecuteDto> recordMap = recordDomain.listRecSceneSimpleExeRecord(sceneIds);
             SceneSimpleExecuteDto sceneSimpleExecuteDto = recordMap.get(sceneId);
-            if (sceneSimpleExecuteDto.getStatus() == SceneStatusEnum.ING.getType()) {
+            if (sceneSimpleExecuteDto != null && sceneSimpleExecuteDto.getStatus() == SceneStatusEnum.ING.getType()) {
                 throw new AutoTestException("当前场景正在执行中，勿重复执行");
             }
 
             List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
             // 过滤掉执行状态关闭的步骤
             List<StepDetailDto> openSteps = stepDetailDtos.stream().filter(stepDetailDto ->
-                            stepDetailDto.getStepStatus() == StepStatusEnum.OPEN.getType())
+                            stepDetailDto.getStepStatus() == OpenStatusEnum.OPEN.getType())
                     .collect(Collectors.toList());
             if (openSteps == null || openSteps.isEmpty()) {
                 throw new AutoTestException("当前场景无可执行的步骤");

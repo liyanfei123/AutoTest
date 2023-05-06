@@ -2,6 +2,18 @@ package com.testframe.autotest.cache.key;
 
 public class CategoryCacheKeys {
 
+
+    /**
+     * String 类目信息
+     * @param categoryId
+     * @return
+     */
+    public static String genCategoryInfoKey(Integer categoryId) {
+        return String.format("category_%s", categoryId);
+    }
+
+    public static final long EXPIRATION_TIME_CATEGORY_INFO = -1;
+
     /**
      * Hash 所有一级类目
      * key: 子类目id

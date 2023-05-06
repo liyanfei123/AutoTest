@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/autotest/scene")
@@ -129,18 +131,18 @@ public class SceneController {
 
     /**
      * 移动场景所在的目录
-     * @param sceneId
-     * @param categoryId
+     * @param sceneIds
+     * @param oldCategoryId
+     * @param newCategoryId
      * @return
      */
     @GetMapping("/move")
-    public HttpResult<Object> move(@RequestParam(required = true) Long sceneId,
-                                   @RequestParam(required = true) Integer categoryId) {
+    public HttpResult<Object> move(@RequestParam(required = true) List<Long> sceneIds,
+                                   @RequestParam(required = true) Integer oldCategoryId,
+                                   @RequestParam(required = true) Integer newCategoryId) {
         try {
-            // TODO: 2023/3/12  移动场景所在的目录
-            // 从缓存拿值判断当前类目id是否错误
-//            SceneValidator.sceneIsExist
-            return HttpResult.ok(sceneId);
+            List<Long> repeatSceneIds = sceneDetailService.moveScene(sceneIds, oldCategoryId, newCategoryId);
+            return HttpResult.ok(repeatSceneIds);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

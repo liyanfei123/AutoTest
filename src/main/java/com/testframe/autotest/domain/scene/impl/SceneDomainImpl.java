@@ -3,6 +3,8 @@ package com.testframe.autotest.domain.scene.impl;
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.cache.ao.SceneDetailCache;
+import com.testframe.autotest.cache.service.CategoryCacheService;
+import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
@@ -12,6 +14,7 @@ import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.domain.scene.SceneDomain;
+import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.scene.SceneSearchListDto;
 import com.testframe.autotest.meta.query.SceneQry;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +53,12 @@ public class SceneDomainImpl implements SceneDomain {
     @Autowired
     private SceneDetailCache sceneDetailCache;
 
+    @Autowired
+    private SceneCacheService sceneCacheService;
+
+    @Autowired
+    private CategoryCacheService categoryCacheService;
+
 
     @Override
     public Long updateScene(SceneDetailDto sceneDetailDto) {
@@ -66,6 +76,7 @@ public class SceneDomainImpl implements SceneDomain {
                     if (existCategorySceneDo != null &&
                             existCategorySceneDo.getCategoryId() != sceneDetailDto.getCategoryId()) {
                         // 需要更新类目
+                        sceneDo.setOldCategoryId(existCategorySceneDo.getCategoryId());
                         existCategorySceneDo.setCategoryId(sceneDetailDto.getCategoryId());
                     } else {
                         existCategorySceneDo = null;
@@ -92,37 +103,12 @@ public class SceneDomainImpl implements SceneDomain {
         }
     }
 
-    @Override
-    public SceneDetailDto getSceneById(Long sceneId) {
-        log.info("[SceneDomainImpl:getSceneById] param = {}", sceneId);
-        // 读取缓存
-        SceneDetailDto sceneDetailDto = sceneDetailCache.getSceneDetail(sceneId);
-        if (sceneDetailDto != null) {
-            return sceneDetailDto;
-        }
-        // 读取db
-        sceneDetailDto = new SceneDetailDto();
-        SceneDetailDo sceneDetailDo = sceneDetailRepository.querySceneById(sceneId);
-        if (sceneDetailDo == null) {
-            return null;
-        }
-        sceneDetailDto = sceneDetailConvertor.DoToDto(sceneDetailDo);
-        List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(sceneId);
-        sceneDetailDto.setStepNum(sceneStepRelDos.size());
-        // 获取场景关联类目
-        CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(sceneId);
-        sceneDetailDto.setCategoryId(categorySceneDo.getCategoryId());
-        log.info("[SceneDomainImpl:getSceneById] get scene, scene = {}", JSON.toJSONString(sceneDetailDto));
-        // 更新缓存
-        sceneDetailCache.updateSceneDetail(sceneId, sceneDetailDto);
-        return sceneDetailDto;
-    }
 
     private List<SceneDetailDto> batchQuerySceneByIds(List<Long> sceneIds) {
         log.info("[SceneDomainImpl:batchQuerySceneByIds] param = {}", JSON.toJSONString(sceneIds));
         List<SceneDetailDto> sceneDetailDtos = new ArrayList<>();
         for (Long sceneId : sceneIds) {
-            SceneDetailDto sceneDetailDto = this.getSceneById(sceneId);
+            SceneDetailDto sceneDetailDto = sceneCacheService.getSceneDetailFromCache(sceneId);
             sceneDetailDtos.add(sceneDetailDto);
         }
         log.info("[SceneDomainImpl:batchQuerySceneByIds] sceneIds = {}, result = {}",
@@ -132,7 +118,7 @@ public class SceneDomainImpl implements SceneDomain {
 
     @Override
     public Boolean deleteScene(Long sceneId) {
-        if (this.getSceneById(sceneId) == null) {
+        if (sceneCacheService.getSceneDetailFromCache(sceneId) == null) {
             return true;
         }
         return sceneDetailRepository.deleteScene(sceneId);
@@ -148,11 +134,14 @@ public class SceneDomainImpl implements SceneDomain {
         List<SceneDetailDo> sceneDetailDos = new ArrayList<>();
         // TODO: 2023/3/1 根据id搜索
         // 搜索优先级
+        if (sceneQry.getSceneId() > 1L) {
+            sceneIds = Arrays.asList(sceneQry.getSceneId());
+        }
         if ((sceneQry.getSceneName() == null || sceneQry.getSceneName() == "")
                 && sceneQry.getCategoryId() != null) { // 根据类目搜索，搜索当前目录下的所有场景
-            List<CategorySceneDo> categorySceneDos = categorySceneRepository.queryByCategoryId(
+            List<CategorySceneDto> categorySceneDtos = categoryCacheService.sceneCategoryRelFromCache(
                     sceneQry.getCategoryId(), sceneQry.getPageQry());
-            sceneIds = categorySceneDos.stream().map(categorySceneDo -> categorySceneDo.getSceneId())
+            sceneIds = categorySceneDtos.stream().map(categorySceneDto -> categorySceneDto.getSceneId())
                     .collect(Collectors.toList());
             log.info("[SceneDomainImpl:searchScene] by categoryId = {}, sceneIds = {}", sceneQry.getCategoryId(), sceneIds);
         } else if (sceneQry.getSceneName() != null) {  // 根据名称搜索

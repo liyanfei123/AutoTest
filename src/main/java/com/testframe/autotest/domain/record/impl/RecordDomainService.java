@@ -2,6 +2,7 @@ package com.testframe.autotest.domain.record.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.SceneRecordCache;
+import com.testframe.autotest.cache.service.RecordCacheService;
 import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
@@ -38,43 +39,22 @@ public class RecordDomainService implements RecordDomain {
     private SceneRecordCache sceneRecordCache;
 
     @Autowired
+    private RecordCacheService recordCacheService;
+
+    @Autowired
     private SceneExecuteRecordConverter sceneExecuteRecordConverter;
 
     @Autowired
     private StepExecuteRecordConverter stepExecuteRecordConverter;
 
-    public SceneSimpleExecuteDto recentlySceneSimpleRecord(Long sceneId, Integer type) {
-        RecordQry recordQry = new RecordQry();
-        recordQry.setPage(1);
-        recordQry.setSize(1);
-        recordQry.setType(type);
-        List sceneIds = new ArrayList(){{add(sceneId);}};
-        HashMap<Long, SceneSimpleExecuteDto> map = listSceneSimpleExeRecord(sceneIds, recordQry);
-        return map.get(sceneId);
-    }
-
     @Override
-    public HashMap<Long, SceneSimpleExecuteDto> listSceneSimpleExeRecord(List<Long> sceneIds, RecordQry recordQry) {
-        log.info("[SceneListInterImpl:listSceneSimpleExeRecord] sceneIds = {}, recordQry = {}", sceneIds, JSON.toJSONString(recordQry));
+    public HashMap<Long, SceneSimpleExecuteDto> listRecSceneSimpleExeRecord(List<Long> sceneIds) {
+        log.info("[SceneListInterImpl:listSceneSimpleExeRecord] sceneIds = {}", sceneIds);
         HashMap<Long, SceneSimpleExecuteDto> sceneExecuteDtoMap = new HashMap<>();
         if (sceneIds.isEmpty()) {
             return null;
         }
-        for (Long sceneId : sceneIds) {
-            SceneSimpleExecuteDto sceneSimpleExecuteDto = sceneRecordCache.getSceneRecExe(sceneId);
-            if (sceneSimpleExecuteDto == null) {
-                // 回刷缓存
-                sceneSimpleExecuteDto = new SceneSimpleExecuteDto();
-                log.info("[SceneListInterImpl:listSceneSimpleExeRecord] load db, sceneId = {}, result = {}",
-                        JSON.toJSONString(sceneIds), JSON.toJSONString(sceneExecuteDtoMap));
-                List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
-                if (!sceneExecuteRecordDos.isEmpty()) {
-                    sceneSimpleExecuteDto = SceneSimpleExecuteDto.DoToDto(sceneExecuteRecordDos.get(0));
-                    sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
-                }
-            }
-            sceneExecuteDtoMap.put(sceneId, sceneSimpleExecuteDto);
-        }
+        sceneExecuteDtoMap = recordCacheService.RecSceneSimpleExeRecFromCache(sceneIds);
         log.info("[SceneListInterImpl:listSceneSimpleExeRecord] sceneIds = {}, result = {}",
                 JSON.toJSONString(sceneIds), JSON.toJSONString(sceneExecuteDtoMap));
         return sceneExecuteDtoMap;

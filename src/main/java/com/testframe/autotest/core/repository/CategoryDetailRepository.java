@@ -61,6 +61,7 @@ public class CategoryDetailRepository {
         categoryDetailCo.setCategoryId(categoryDetailDo.getCategoryId());
         categoryDetailCo.setCategoryName(categoryDetailDo.getCategoryName());
         categoryDetailCo.setCreateTime(categoryDetail.getCreateTime());
+        categoryCache.updateCategoryInfo(categoryDetailCo.getCategoryId(), categoryDetailCo);
         if (categoryDetailDo.getRelateCategoryId() > 0) {
             // 多级类目
             categoryCache.updateLevelCategory(categoryDetailDo.getRelateCategoryId(), categoryDetailCo);
@@ -79,6 +80,7 @@ public class CategoryDetailRepository {
             throw new AutoTestException("类目删除失败");
         }
         // 更新缓存
+        categoryCache.clearCategoryInfo(categoryId);
         if (categoryDetail.getRelateCategoryId() > 0) {
             // 多级类目
             categoryCache.clearLevelCategory(categoryDetail.getRelateCategoryId(), categoryId);

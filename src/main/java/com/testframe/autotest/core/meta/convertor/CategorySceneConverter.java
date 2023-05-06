@@ -18,6 +18,13 @@ public class CategorySceneConverter {
         return categoryScene;
     }
 
+    public CategorySceneDto DoToDto(CategorySceneDo categorySceneDo) {
+        CategorySceneDto categorySceneDto = new CategorySceneDto();
+        categorySceneDto.setCategoryId(categorySceneDo.getCategoryId());
+        categorySceneDto.setSceneId(categorySceneDo.getSceneId());
+        return categorySceneDto;
+    }
+
     public CategorySceneDo PoToDo(CategoryScene categoryScene) {
         CategorySceneDo categorySceneDo = new CategorySceneDo();
         categorySceneDo.setId(categoryScene.getId());

@@ -12,8 +12,6 @@ public interface SceneDomain {
 
     public Long updateScene(SceneDetailDto sceneDetailDto);
 
-    SceneDetailDto getSceneById(Long sceneId);
-
     Boolean deleteScene(Long sceneId);
 
     SceneSearchListDto searchScene(SceneQry sceneQry);

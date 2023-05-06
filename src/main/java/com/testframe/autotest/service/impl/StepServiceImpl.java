@@ -2,8 +2,8 @@ package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.config.AutoTestConfig;
+import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.enums.StepOrderEnum;
-import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
@@ -104,7 +104,6 @@ public class StepServiceImpl implements StepService {
                     throw new AutoTestException("步骤id错误");
                 }
             }
-
 
             StepsDto updateStepsDto = new StepsDto(); // 需要更新的步骤
             StepsDto saveStepsDto = new StepsDto(); // 需要新增的步骤
@@ -250,7 +249,7 @@ public class StepServiceImpl implements StepService {
     }
 
     @Override
-    public Boolean changeStepOrder(StepOrderUpdateCmd stepOrderUpdateCmd) {
+    public Boolean changeStepOrderList(StepOrderUpdateCmd stepOrderUpdateCmd) {
         log.info("[StepServiceImpl:changeStepOrder] change step order, stepOrderUpdateCmd = {}",
                 JSON.toJSONString(stepOrderUpdateCmd));
         sceneValidator.sceneIsExist(stepOrderUpdateCmd.getSceneId());
@@ -276,6 +275,47 @@ public class StepServiceImpl implements StepService {
     }
 
     @Override
+    public Boolean changeStepOrder(Long sceneId, Long beforeStepId, Long stepId, Long afterStepId) {
+        log.info("[StepServiceImpl:changeStepOrder] change step order in sceneId = {}, stepId = {}, before = {}, after = {}",
+                sceneId, beforeStepId, stepId, afterStepId);
+        sceneValidator.sceneIsExist(sceneId);
+        // 判断是否传入错误的步骤id
+        List<Long> stepOrder = stepOrderDomain.stepOrderList(sceneId, StepOrderEnum.BEFORE.getType());
+        log.info("[StepServiceImpl:changeStepOrder] origin step order = {}", JSON.toJSONString(stepOrder));
+        HashSet<Long> oldStepIdSet = new HashSet<>(stepOrder);
+        HashSet<Long> paramStepIdSet = new HashSet<>();
+        paramStepIdSet.add(stepId);
+        if (beforeStepId > 0L) {
+            paramStepIdSet.add(beforeStepId);
+        }
+        if (afterStepId > 0L) {
+            paramStepIdSet.add(afterStepId);
+        }
+        paramStepIdSet.removeAll(oldStepIdSet); // 取差集
+        if (!paramStepIdSet.isEmpty()) {
+            throw new AutoTestException("请输入正确的步骤");
+        }
+        stepOrder.remove(stepId);
+        if (beforeStepId != 0 && afterStepId != 0) {
+            int diff = stepOrder.indexOf(afterStepId) - stepOrder.indexOf(beforeStepId);
+            if (diff != 1 && diff != 0) {
+                throw new AutoTestException("请输入正确的前后步骤");
+            }
+        }
+        if (beforeStepId == 0L) {
+            // 被放置到第一个
+            stepOrder.add(0, stepId);
+        } else if (afterStepId == 0L) {
+            // 被放置到最后一个
+            stepOrder.add(stepId);
+        } else {
+            stepOrder.add(stepOrder.indexOf(beforeStepId)+1, stepId);
+        }
+        log.info("[StepServiceImpl:changeStepOrder] new step order = {}", JSON.toJSONString(stepOrder));
+        return stepOrderDomain.changeOrder(sceneId, stepOrder);
+    }
+
+    @Override
     public Boolean changeStepStatus(StepStatusUpdateCmd stepStatusUpdateCmd) {
         log.info("[StepServiceImpl:changeStepStatus] change step status, stepStatusUpdateCmd = {}",
                 JSON.toJSONString(stepStatusUpdateCmd));
@@ -283,7 +323,7 @@ public class StepServiceImpl implements StepService {
             stepStatusUpdateCmd.setType(1);
         }
         if (stepStatusUpdateCmd.getStatus() == null) {
-            stepStatusUpdateCmd.setStatus(StepStatusEnum.OPEN.getType());
+            stepStatusUpdateCmd.setStatus(OpenStatusEnum.OPEN.getType());
         }
         stepValidator.checkStepStatus(stepStatusUpdateCmd);
         try {

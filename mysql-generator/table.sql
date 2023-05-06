@@ -79,6 +79,30 @@ CREATE TABLE AUTO_TEST_STEP_EXECUTE_RECORD(
   PRIMARY KEY (id)
 ) COMMENT = '步骤执行记录表 ';
 
+CREATE TABLE AUTO_TEST_SET(
+  id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
+  setName VARCHAR(1024) NOT NULL DEFAULT ''  COMMENT '集合名称' ,
+  status INT NULL DEFAULT 0  COMMENT '集合状态 0:未开启 1:开启' ,
+  isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '执行集表 ';
+
+
+CREATE TABLE AUTO_TEST_SCENE_SET_REL(
+  id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
+  setId BIGINT NOT NULL DEFAULT 0  COMMENT '集合id' ,
+  stepId INT NULL DEFAULT 0  COMMENT '步骤id' ,
+  sceneId INT NULL DEFAULT 0  COMMENT '场景id' ,
+  sort INT NULL DEFAULT 0 COMMENT '排序' ,
+  type INT NULL DEFAULT 0 COMMENT '是否删除 0:场景,1:单步骤' ,
+  isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
+  status INT NULL DEFAULT 0  COMMENT '执行状态 0:未开启 1:开启' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '执行集关联场景表 ';
 
 alter table AUTO_TEST_STEP_EXECUTE_RECORD add column `stepName` VARCHAR(1024) NOT NULL DEFAULT ''  COMMENT '步骤名称' after `stepId`;
 -- 步骤执行记录表中需增加步骤名称，用于返回执行结果记录

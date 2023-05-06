@@ -4,6 +4,7 @@ package com.testframe.autotest.domain.step.impl;
 import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.SceneStepRelCache;
 import com.testframe.autotest.cache.ao.StepDetailCache;
+import com.testframe.autotest.cache.service.StepCacheService;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.StepDetailConvertor;
@@ -48,62 +49,17 @@ public class StepDomainImpl implements StepDomain {
     @Autowired
     private StepDetailCache stepDetailCache;
 
-    private StepDetailDto stepInfo(Long stepId) {
-        StepDetailDto stepDetailDto = stepDetailCache.getStepDetail(stepId);
-        if (stepDetailDto != null) {
-            log.info("[StepDomainImpl:stepInfo] stepInfo load from cache, stepId = {}, stepInfo = {}",
-                    stepId, JSON.toJSONString(stepDetailDto));
-            return stepDetailDto;
-        }
-        stepDetailDto = new StepDetailDto();
-        // 更新缓存
-        StepDetailDo stepDetailDo = stepDetailRepository.queryStepById(stepId);
-        if (stepDetailDo == null) {
-            return null;
-        }
-        SceneStepRelDo sceneStepRelDo = sceneStepRepository.queryByStepId(stepId);
-        stepDetailDto.setSceneId(sceneStepRelDo.getSceneId());
-        stepDetailDto.setStepId(stepId);
-        stepDetailDto.setSonSceneId(stepDetailDo.getSonSceneId());
-        stepDetailDto.setStepName(stepDetailDo.getStepName());
-        stepDetailDto.setStepStatus(sceneStepRelDo.getStatus());
-        stepDetailDto.setType(sceneStepRelDo.getType());
-        stepDetailDto.setStepUIInfo(stepDetailDo.getStepInfo());
-        stepDetailCache.updateStepDetail(stepId, stepDetailDto);
-        log.info("[StepDomainImpl:stepInfo] stepId = {}, stepInfo = {}", stepId, JSON.toJSONString(stepDetailDto));
-        return stepDetailDto;
-    }
+    @Autowired
+    private StepCacheService stepCacheService;
 
     @Override
     public List<StepDetailDto> listStepInfo(Long sceneId) {
         log.info("[StepDomainImpl:listStepInfo] param = {}", sceneId);
         try {
-            List<StepDetailDto> stepDetailDtos = new ArrayList<>();
-            HashMap<Long, StepDetailDto> stepDetailDtoMap = sceneStepRelCache.getSceneStepRels(sceneId);
-            if (stepDetailDtoMap != null
-                    && !stepDetailDtoMap.values().isEmpty()) { // 避免缓存出现空的情况
-                stepDetailDtos = new ArrayList<StepDetailDto>(stepDetailDtoMap.values());
-                log.info("[StepDomainImpl:listStepInfo] get cache info {}", JSON.toJSONString(stepDetailDtos));
-            } else {
-                // 无缓存
-                List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(sceneId);
-                if (sceneStepRelDos.isEmpty()) { // 当前场景下无步骤
-                    return Collections.EMPTY_LIST;
-                }
-                List<Long> stepIds = sceneStepRelDos.stream().map(sceneStepRelDo -> sceneStepRelDo.getStepId())
-                        .collect(Collectors.toList());
-                for (Long stepId : stepIds) {
-                    StepDetailDto stepDetailDto = this.stepInfo(stepId);
-                    stepDetailDtos.add(stepDetailDto);
-                }
-                // 回刷缓存
-                HashMap<Long, StepDetailDto> stepDetailDtoMapFormDb = new HashMap<Long, StepDetailDto>();
-                stepDetailDtos.stream().forEach(stepDetailDto ->
-                        stepDetailDtoMapFormDb.put(stepDetailDto.getStepId(), stepDetailDto));
-                log.info("[StepDomainImpl:listStepInfo] refresh cache info {}", JSON.toJSONString(stepDetailDtoMapFormDb));
-                sceneStepRelCache.updateSceneStepRels(sceneId, stepDetailDtoMapFormDb);
+            List<StepDetailDto> stepDetailDtos = stepCacheService.getStepInSceneFromCache(sceneId);
+            if (stepDetailDtos.isEmpty()) {
+                return Collections.EMPTY_LIST;
             }
-
             StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             if (stepOrderDo == null) {
                 return Collections.EMPTY_LIST;

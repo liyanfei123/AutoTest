@@ -1,6 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.service.RecordCacheService;
 import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
@@ -50,6 +51,9 @@ public class SceneListImpl implements SceneListService {
     private RecordDomain recordDomain;
 
     @Autowired
+    private RecordCacheService recordCacheService;
+
+    @Autowired
     private StepOrderRepository stepOrderRepository;
 
     @Autowired
@@ -96,7 +100,7 @@ public class SceneListImpl implements SceneListService {
             recordQry.setSize(1);
             recordQry.setType(SceneExecuteEnum.SINGLE.getType()); // 仅查询单独场景的执行
             CompletableFuture<HashMap<Long, SceneSimpleExecuteDto>> sceneExeRecordsFuture = CompletableFuture.supplyAsync(()
-                    -> recordDomain.listSceneSimpleExeRecord(sceneIds, recordQry));
+                    -> recordCacheService.RecSceneSimpleExeRecFromCache(sceneIds));
 
             return CompletableFuture.allOf(sceneExeRecordsFuture).thenApply(e -> {
                 HashMap<Long, SceneSimpleExecuteDto> sceneSimpleExeRecords = sceneExeRecordsFuture.join();

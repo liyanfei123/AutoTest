@@ -3,16 +3,16 @@ package com.testframe.autotest.core.enums;
 /**
  * 场景步骤是否执行
  */
-public enum StepStatusEnum {
+public enum OpenStatusEnum {
 
-    OPEN(1, "开启"),
-    CLOSE(2, "关闭");
+    CLOSE(0, "关闭"),
+    OPEN(1, "开启");
 
     private int type;
 
     private String name;
 
-    StepStatusEnum(int type, String name) {
+    OpenStatusEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
@@ -25,10 +25,10 @@ public enum StepStatusEnum {
         return name;
     }
 
-    public static StepStatusEnum getByType(int type) {
-        for (StepStatusEnum stepStatusEnum : values()) {
-            if (stepStatusEnum.getType() == type) {
-                return stepStatusEnum;
+    public static OpenStatusEnum getByType(int type) {
+        for (OpenStatusEnum openStatusEnum : values()) {
+            if (openStatusEnum.getType() == type) {
+                return openStatusEnum;
             }
         }
         return null;

@@ -239,7 +239,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             for (StepExe stepExe : stepExes) {
                 try {
                     // 判断暂停的步骤，更新其状态为暂停
-                    if (stepExe.getStatus() == StepStatusEnum.CLOSE.getType()) {
+                    if (stepExe.getStatus() == OpenStatusEnum.CLOSE.getType()) {
                         stepExecuteRecordMap.get(stepExe.getStepId()).setStatus(StepRunResultEnum.STOP.getType());
                         continue;
                     }

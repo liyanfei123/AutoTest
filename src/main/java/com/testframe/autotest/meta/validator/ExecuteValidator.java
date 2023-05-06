@@ -1,6 +1,6 @@
 package com.testframe.autotest.meta.validator;
 
-import com.testframe.autotest.core.enums.StepStatusEnum;
+import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
@@ -31,7 +31,7 @@ public class ExecuteValidator {
         List<SceneStepRelDo> sceneStepRelDos = sceneStepRepository.querySceneStepsBySceneId(sceneId);
         List<Integer> status = sceneStepRelDos.stream().map(sceneStepRelDo -> sceneStepRelDo.getStatus())
                 .collect(Collectors.toList());
-        if (status.isEmpty() || !status.contains(StepStatusEnum.OPEN.getType())) {
+        if (status.isEmpty() || !status.contains(OpenStatusEnum.OPEN.getType())) {
             throw new AutoTestException("当前场景下无可执行步骤");
         }
     }

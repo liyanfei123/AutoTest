@@ -5,6 +5,7 @@ import com.testframe.autotest.cache.key.CategoryCacheKeys;
 import com.testframe.autotest.cache.key.SceneStepRelCacheKeys;
 import com.testframe.autotest.cache.meta.co.CategoryDetailCo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
+import com.testframe.autotest.core.meta.po.CategoryScene;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,38 @@ public class CategoryCache {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    // 一级类目
+    public CategoryDetailCo getCategoryInfo(Integer categoryId) {
+        String key = CategoryCacheKeys.genCategoryInfoKey(categoryId);
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            try {
+                return JSON.parseObject(stringRedisTemplate.opsForValue().get(key),CategoryDetailCo.class);
+            } catch (Exception ex) {
+                log.error("[CategoryCache:getCategoryInfo] catch-exception, key = {}, ex = {}", key, ex);
+            }
+        }
+        return null;
+    }
+
+    public void updateCategoryInfo(Integer categoryId, CategoryDetailCo categoryDetailCo) {
+        try {
+            String key = CategoryCacheKeys.genCategoryInfoKey(categoryId);
+            if (categoryDetailCo != null) {
+                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(categoryDetailCo));
+            }
+        } catch (Exception ex) {
+            log.error("[SceneStepRelCache:updateCategoryInfo] catch-exception, keyInfo = {}, ex = {}",
+                    JSON.toJSONString(categoryDetailCo), ex);
+        }
+    }
+
+    public void clearCategoryInfo(Integer categoryId) {
+        String key = CategoryCacheKeys.genCategoryInfoKey(categoryId);
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            stringRedisTemplate.opsForHash().delete(key);
+        }
+    }
 
     // 一级类目
     public HashMap<Integer, CategoryDetailCo> getFirstCategory() {
@@ -141,41 +174,33 @@ public class CategoryCache {
         return null;
     }
 
-    public void updateSceneToCategory(Integer categoryId, CategorySceneDo categorySceneDo) {
-        String key = CategoryCacheKeys.genSceneInCategoryKey(categoryId);
-        try {
-            stringRedisTemplate.opsForZSet().add(key, String.valueOf(categorySceneDo.getSceneId()),
-                    categorySceneDo.getCreateTime());
-            stringRedisTemplate.expire(key, CategoryCacheKeys.EXPIRATION_TIME_SCENE_CATEGORY, TimeUnit.MILLISECONDS);
-        } catch (Exception ex) {
-            log.error("[CategoryCache:addSceneToCategory] catch-exception, add scene-category = {}, ex = {}",
-                    JSON.toJSONString(categorySceneDo), ex);
-        }
-    }
-
     public void updateSceneInCategorys(Integer categoryId, List<CategorySceneDo> categorySceneDos) {
         String key = CategoryCacheKeys.genSceneInCategoryKey(categoryId);
         try {
-            for (CategorySceneDo categorySceneDo : categorySceneDos) {
-                stringRedisTemplate.opsForZSet().add(key, String.valueOf(categorySceneDo.getSceneId()),
-                        categorySceneDo.getCreateTime());
+            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+                for (CategorySceneDo categorySceneDo : categorySceneDos) {
+                    stringRedisTemplate.opsForZSet().add(key, String.valueOf(categorySceneDo.getSceneId()),
+                            categorySceneDo.getCreateTime());
+                    stringRedisTemplate.expire(key, CategoryCacheKeys.EXPIRATION_TIME_SCENE_CATEGORY, TimeUnit.MILLISECONDS);
+                }
             }
-            stringRedisTemplate.expire(key, CategoryCacheKeys.EXPIRATION_TIME_SCENE_CATEGORY, TimeUnit.MILLISECONDS);
         } catch (Exception ex) {
-            log.error("[CategoryCache:updateSceneInCategory] catch-exception, update scene-category = {}, ex = {}",
+            log.error("[CategoryCache:addSceneToCategory] catch-exception, add scene-category = {}, ex = {}",
                     JSON.toJSONString(categorySceneDos), ex);
         }
     }
 
-    public void delSceneInCategory(Integer categoryId, Long sceneId) {
+    public void clearSceneInCategory(Integer categoryId, List<Long> sceneIds) {
         String key = CategoryCacheKeys.genSceneInCategoryKey(categoryId);
         try {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
-                stringRedisTemplate.opsForZSet().remove(key, String.valueOf(sceneId));
+                for (Long sceneId : sceneIds) {
+                    stringRedisTemplate.opsForZSet().remove(key, String.valueOf(sceneId));
+                }
             }
         } catch (Exception ex) {
             log.error("[CategoryCache:addSceneToCategory] catch-exception, del scene-category = {}-{}, ex = {}",
-                    sceneId, categoryId, ex);
+                    JSON.toJSONString(sceneIds), categoryId, ex);
         }
     }
 }

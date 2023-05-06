@@ -2,13 +2,13 @@ package com.testframe.autotest.meta.validator;
 
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.domain.sceneStep.SceneStepDomain;
 import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.meta.command.StepUpdateCmd;
-import com.testframe.autotest.core.enums.StepStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
@@ -77,7 +77,7 @@ public class StepValidator {
             throw new AutoTestException("步骤信息不能为空");
         }
         // 检验执行状态参数是否正确
-        if (stepUpdateCmd.getStatus() == null || StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+        if (stepUpdateCmd.getStatus() == null || OpenStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
             throw new AutoTestException("步骤状态错误");
         }
         StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
@@ -115,7 +115,7 @@ public class StepValidator {
             throw new AutoTestException("步骤id错误");
         }
         // 检验执行状态参数是否正确
-        if (StepStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
+        if (OpenStatusEnum.getByType(stepUpdateCmd.getStatus()) == null) {
             throw new AutoTestException("步骤状态错误");
         }
         StepInfoModel stepInfoModel = JSON.parseObject(stepUpdateCmd.getStepInfo(), StepInfoModel.class);
@@ -146,7 +146,7 @@ public class StepValidator {
         if (status.isEmpty()) { // 无步骤
             return sceneDetailDo;
         }
-        if (!status.contains(StepStatusEnum.OPEN.getType())) {
+        if (!status.contains(OpenStatusEnum.OPEN.getType())) {
             throw new AutoTestException("子场景所有步骤均未开启");
         }
         return sceneDetailDo;
@@ -233,7 +233,7 @@ public class StepValidator {
     }
 
     public Boolean checkStepStatus(StepStatusUpdateCmd stepStatusUpdateCmd) {
-        if (StepStatusEnum.getByType(stepStatusUpdateCmd.getStatus()) == null) {
+        if (OpenStatusEnum.getByType(stepStatusUpdateCmd.getStatus()) == null) {
             throw new AutoTestException("步骤状态错误");
         }
         return true;
