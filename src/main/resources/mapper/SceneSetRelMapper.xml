@@ -4,8 +4,8 @@
   <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SceneSetRel" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="setId" property="setId" jdbcType="BIGINT" />
-    <result column="stepId" property="stepId" jdbcType="INTEGER" />
-    <result column="sceneId" property="sceneId" jdbcType="INTEGER" />
+    <result column="stepId" property="stepId" jdbcType="BIGINT" />
+    <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="sort" property="sort" jdbcType="INTEGER" />
     <result column="type" property="type" jdbcType="INTEGER" />
     <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
@@ -22,10 +22,76 @@
     from AUTO_TEST_SCENE_SET_REL
     where id = #{id,jdbcType=BIGINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+
+  <select id="queryRelBySetIdAndSceneId" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SCENE_SET_REL
+    where setId = #{setId,jdbcType=BIGINT}
+    AND sceneId = #{sceneId,jdbcType=BIGINT} AND isDelete = 0
+  </select>
+
+  <select id="queryRelBySetIdAndStepId" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SCENE_SET_REL
+    where setId = #{setId,jdbcType=BIGINT}
+    AND stepId = #{stepId,jdbcType=BIGINT} AND isDelete = 0
+  </select>
+
+    <select id="queryRelBySetId" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+      select *
+      from AUTO_TEST_SCENE_SET_REL
+      where isDelete = 0 and setId = #{setId}
+      order by updateTime asc
+      limit #{pageQry.offset}, #{pageQry.size}
+    </select>
+
+  <select id="queryRelBySetIdWithSort" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select * from
+     (select * from AUTO_TEST_SCENE_SET_REL order by sort = #{sort})
+    order by updateTime
+    <!--优先执行的，需要根据updateTime倒叙排列-->
+    <if test="sort == 1" >
+      desc
+    </if>
+    <!--最后执行/正常执行的，需要根据updateTime正叙排列-->
+    <if test="sort == -1 || sort == 0" >
+      asc
+    </if>
+    where isDelete = 0 and setId = #{setId}
+    limit #{pageQry.offset}, #{pageQry.size}
+  </select>
+
+  <select id="countRelWithSort" resultType="java.lang.Integer">
+    select count(*)
+    from AUTO_TEST_SCENE_SET_REL
+    where setId = #{setId} and sort = #{sort} and  isDelete = 0
+  </select>
+
+  <select id="countRelWithType" resultType="java.lang.Integer">
+    select count(*)
+    from AUTO_TEST_SCENE_SET_REL
+    where setId = #{setId} and type = #{type} and  isDelete = 0
+  </select>
+
+    <select id="queryRelBySetIdWithTypeAndStatus" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+      select *
+      from AUTO_TEST_SCENE_SET_REL
+      where setId = #{setId} and type = #{type}
+      <if test="status != null || status != -1" >
+        and status = #{status},
+      </if>
+      and isDelete = 0
+      order by updateTime asc
+    </select>
+
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_SCENE_SET_REL
     where id = #{id,jdbcType=BIGINT}
   </delete>
+
   <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SceneSetRel" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
@@ -34,7 +100,7 @@
       sort, type, isDelete, 
       status, createTime, updateTime
       )
-    values (#{setId,jdbcType=BIGINT}, #{stepId,jdbcType=INTEGER}, #{sceneId,jdbcType=INTEGER}, 
+    values (#{setId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{sceneId,jdbcType=BIGINT},
       #{sort,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, 
       #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT}
       )
@@ -78,10 +144,10 @@
         #{setId,jdbcType=BIGINT},
       </if>
       <if test="stepId != null" >
-        #{stepId,jdbcType=INTEGER},
+        #{stepId,jdbcType=BIGINT},
       </if>
       <if test="sceneId != null" >
-        #{sceneId,jdbcType=INTEGER},
+        #{sceneId,jdbcType=BIGINT},
       </if>
       <if test="sort != null" >
         #{sort,jdbcType=INTEGER},
@@ -110,10 +176,10 @@
         setId = #{setId,jdbcType=BIGINT},
       </if>
       <if test="stepId != null" >
-        stepId = #{stepId,jdbcType=INTEGER},
+        stepId = #{stepId,jdbcType=BIGINT},
       </if>
       <if test="sceneId != null" >
-        sceneId = #{sceneId,jdbcType=INTEGER},
+        sceneId = #{sceneId,jdbcType=BIGINT},
       </if>
       <if test="sort != null" >
         sort = #{sort,jdbcType=INTEGER},
@@ -139,8 +205,8 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SceneSetRel" >
     update AUTO_TEST_SCENE_SET_REL
     set setId = #{setId,jdbcType=BIGINT},
-      stepId = #{stepId,jdbcType=INTEGER},
-      sceneId = #{sceneId,jdbcType=INTEGER},
+      stepId = #{stepId,jdbcType=BIGINT},
+      sceneId = #{sceneId,jdbcType=BIGINT},
       sort = #{sort,jdbcType=INTEGER},
       type = #{type,jdbcType=INTEGER},
       isDelete = #{isDelete,jdbcType=INTEGER},
@@ -149,4 +215,5 @@
       updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
 </mapper>

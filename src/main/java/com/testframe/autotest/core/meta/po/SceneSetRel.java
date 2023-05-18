@@ -5,9 +5,9 @@ public class SceneSetRel {
 
     private Long setId;
 
-    private Integer stepId;
+    private Long stepId;
 
-    private Integer sceneId;
+    private Long sceneId;
 
     private Integer sort;
 
@@ -37,19 +37,19 @@ public class SceneSetRel {
         this.setId = setId;
     }
 
-    public Integer getStepId() {
+    public Long getStepId() {
         return stepId;
     }
 
-    public void setStepId(Integer stepId) {
+    public void setStepId(Long stepId) {
         this.stepId = stepId;
     }
 
-    public Integer getSceneId() {
+    public Long getSceneId() {
         return sceneId;
     }
 
-    public void setSceneId(Integer sceneId) {
+    public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
     }
 

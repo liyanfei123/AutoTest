@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 场景步骤是否执行
+ * 执行顺序
+ * 根据updateTime排序
  */
-public enum OpenStatusEnum {
+public enum ExeOrderEnum {
 
-    CLOSE(0, "关闭"),
-    OPEN(1, "开启");
+    LAST(-1, "最后执行"),
+    NORMAL(0, "正常执行"),
+    HEAD(1, "优先执行");
 
     private int type;
 
     private String name;
 
-    OpenStatusEnum(int type, String name) {
+    ExeOrderEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
@@ -28,10 +30,10 @@ public enum OpenStatusEnum {
         return name;
     }
 
-    public static OpenStatusEnum getByType(int type) {
-        for (OpenStatusEnum openStatusEnum : values()) {
-            if (openStatusEnum.getType() == type) {
-                return openStatusEnum;
+    public static ExeOrderEnum getByType(int type) {
+        for (ExeOrderEnum exeOrderEnum : values()) {
+            if (exeOrderEnum.getType() == type) {
+                return exeOrderEnum;
             }
         }
         return null;
@@ -39,8 +41,8 @@ public enum OpenStatusEnum {
 
     public static List<Integer> getTypes() {
         List<Integer> allTypes = new ArrayList<>();
-        for (OpenStatusEnum openStatusEnum : values()) {
-            allTypes.add(openStatusEnum.type);
+        for (ExeOrderEnum exeOrderEnum : values()) {
+            allTypes.add(exeOrderEnum.type);
         }
         return allTypes;
     }

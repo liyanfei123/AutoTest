@@ -1,5 +1,6 @@
 package com.testframe.autotest.cache.service;
 
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 
 import java.util.HashMap;
@@ -16,5 +17,8 @@ public interface StepCacheService {
     List<StepDetailDto> getStepInSceneFromCache(Long sceneId);
 
     StepDetailDto getStepInfoFromCache(Long stepId);
+
+    HashMap<Long, StepDetailDto> getStepInfosFromCache(List<Long> stepIds);
+
 
 }

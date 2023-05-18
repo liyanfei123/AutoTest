@@ -22,7 +22,12 @@ public class PageVO {
 
     private int pageSize;
 
+    private boolean hasNext;
     private Long lastId;
+
+    private int totalPage;
+
+    private int totalCount;
 
     public PageVO(PageRequest pageParam) {
         this.pageNum = pageParam.getPage();

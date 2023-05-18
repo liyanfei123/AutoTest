@@ -76,5 +76,10 @@ public class TestController {
         return f.get(sceneId);
     }
 
+    @GetMapping("exception")
+    public HttpResult exception() {
+        throw new AutoTestException(12345, "自定义测试");
+    }
+
 
 }

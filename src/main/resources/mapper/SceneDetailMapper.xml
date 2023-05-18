@@ -202,7 +202,6 @@
     select *
     from AUTO_TEST_SCENE_DETAIL
     where id > #{pageQry.lastId} and isDelete = 0 and sceneName like '%${sceneName}%'
-    order by createTime
       limit #{pageQry.offset}, #{pageQry.size}
     ]]></select>
 

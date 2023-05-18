@@ -1,7 +1,9 @@
 package com.testframe.autotest.core.repository.mapper;
 
 import com.testframe.autotest.core.meta.po.ExeSet;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface ExeSetMapper {
     int deleteByPrimaryKey(Long id);
 

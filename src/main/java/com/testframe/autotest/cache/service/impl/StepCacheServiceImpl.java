@@ -8,6 +8,7 @@ import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
 import com.testframe.autotest.core.meta.Do.StepDetailDo;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,15 @@ public class StepCacheServiceImpl implements StepCacheService {
         log.info("[StepCacheServiceImpl:stepInfo] refresh stepInfo cache from db, stepId = {} stepInfo = {}",
                 stepId, JSON.toJSONString(stepDetailDto));
         return stepDetailDto;
+    }
+
+    @Override
+    public HashMap<Long, StepDetailDto> getStepInfosFromCache(List<Long> stepIds) {
+        HashMap<Long, StepDetailDto> stepDetailDtoMap = new HashMap<>();
+        for (Long stepId : stepIds) {
+            stepDetailDtoMap.put(stepId, this.getStepInfoFromCache(stepId));
+        }
+        return stepDetailDtoMap;
     }
 
     @Override

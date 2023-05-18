@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -61,4 +62,12 @@ public class SceneCacheServiceImpl implements SceneCacheService {
         return sceneDetailDto;
     }
 
+    @Override
+    public HashMap<Long, SceneDetailDto> getSceneDetailsFromCache(List<Long> sceneIds) {
+        HashMap<Long, SceneDetailDto> sceneDetailDtoMap = new HashMap<>();
+        for (Long sceneId : sceneIds) {
+            sceneDetailDtoMap.put(sceneId, this.getSceneDetailFromCache(sceneId));
+        }
+        return sceneDetailDtoMap;
+    }
 }
