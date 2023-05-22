@@ -79,15 +79,26 @@
       select *
       from AUTO_TEST_SCENE_SET_REL
       where setId = #{setId} and type = #{type}
-      <if test="status != null || status != -1" >
-        and status = #{status},
+      <if test="status != null and status != -1" >
+        and status = #{status}
       </if>
       and isDelete = 0
-      order by updateTime asc
     </select>
 
+  <select id="queryRelByStepId" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select *
+    from AUTO_TEST_SCENE_SET_REL
+    where stepId = #{stepId} and isDelete = 0
+  </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+  <select id="queryRelBySceneId" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select *
+    from AUTO_TEST_SCENE_SET_REL
+    where sceneId = #{sceneId} and isDelete = 0
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_SCENE_SET_REL
     where id = #{id,jdbcType=BIGINT}
   </delete>

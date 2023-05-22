@@ -13,7 +13,7 @@ public class SceneDetailCacheKeys {
         return String.format("scene_detail_%s", sceneId);
     }
 
-    public static final long EXPIRATION_TIME_SCENE_DETAIL = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_SCENE_DETAIL = 5 * 60 * 1000;
 
     /**
      * 场景总数

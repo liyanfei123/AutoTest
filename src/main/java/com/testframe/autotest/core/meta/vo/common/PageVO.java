@@ -1,6 +1,5 @@
 package com.testframe.autotest.core.meta.vo.common;
 
-import com.testframe.autotest.core.meta.request.PageRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class PageVO {
 
     private int pageNum;
@@ -23,15 +21,16 @@ public class PageVO {
     private int pageSize;
 
     private boolean hasNext;
+
     private Long lastId;
 
     private int totalPage;
 
     private int totalCount;
 
-    public PageVO(PageRequest pageParam) {
-        this.pageNum = pageParam.getPage();
-        this.pageSize = pageParam.getPageSize();
-        this.lastId = pageParam.getLastId();
-    }
+//    public PageVO(PageRequest pageParam) {
+//        this.pageNum = pageParam.getPage();
+//        this.pageSize = pageParam.getPageSize();
+//        this.lastId = pageParam.getLastId();
+//    }
 }

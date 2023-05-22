@@ -12,11 +12,17 @@ import java.util.List;
 @Data
 public class SceneSetRelTopCmd {
 
-    public Long setId;
+    private Long setId;
 
-    // status可不传
-    public SceneSetRelSceneDto sceneSetRelSceneDto;
+    private Long sceneId;
 
-    // status可不传
-    public SceneSetRelStepDto sceneSetRelStepDto;
+    private Long stepId;
+
+    private Integer sort;
+//
+//    // status可不传
+//    public SceneSetRelSceneDto sceneSetRelSceneDto;
+//
+//    // status可不传
+//    public SceneSetRelStepDto sceneSetRelStepDto;
 }

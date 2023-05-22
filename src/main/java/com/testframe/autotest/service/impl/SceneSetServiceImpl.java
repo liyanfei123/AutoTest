@@ -5,8 +5,12 @@ import com.testframe.autotest.core.enums.ExeOrderEnum;
 import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.Do.ExeSetDo;
+import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
+import com.testframe.autotest.core.meta.common.http.HttpStatus;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.meta.vo.common.PageVO;
+import com.testframe.autotest.core.repository.ExeSetRepository;
 import com.testframe.autotest.core.repository.SceneSetRelRepository;
 import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
 import com.testframe.autotest.meta.bo.SceneSetBo;
@@ -26,13 +30,14 @@ import com.testframe.autotest.meta.vo.SetRelListVo;
 import com.testframe.autotest.service.SceneSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class SceneSetServiceImpl implements SceneSetService {
 
     @Autowired
@@ -50,24 +55,63 @@ public class SceneSetServiceImpl implements SceneSetService {
     @Autowired
     private SceneSetRelRepository sceneSetRelRepository;
 
+    @Autowired
+    private ExeSetRepository exeSetRepository;
+
     @Override
     public Long updateSceneSet(ExeSetUpdateCmd exeSetUpdateCmd) {
         log.info("[SceneSetServiceImpl:updateSceneSet] update scene set, exeSetUpdateCmd = {}",
                 JSON.toJSONString(exeSetUpdateCmd));
-        if (exeSetUpdateCmd.getStatus() == null) {
+        if (exeSetUpdateCmd.getSetId() == null && exeSetUpdateCmd.getStatus() == null) {
             exeSetUpdateCmd.setStatus(OpenStatusEnum.OPEN.getType()); // 默认开启
         }
+        sceneSetValidator.checkSceneSetUpdate(exeSetUpdateCmd);
         try {
-            sceneSetValidator.checkSceneSetUpdate(exeSetUpdateCmd);
             ExeSetDto exeSetDto = new ExeSetDto();
             exeSetDto.setSetId(exeSetUpdateCmd.getSetId());
-            exeSetDto.setSetName(exeSetDto.getSetName());
+            exeSetDto.setSetName(exeSetUpdateCmd.getSetName());
             exeSetDto.setStatus(exeSetUpdateCmd.getStatus());
             return sceneSetDomain.updateSceneSet(exeSetDto);
         } catch (Exception e) {
             log.error("[SceneSetServiceImpl:updateSceneSet] update scene set error, reason = {}", e.getStackTrace());
             throw new AutoTestException(e.getMessage());
         }
+    }
+
+    @Override
+    public ExeSetDto querySet(Long setId) {
+        ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
+        if (exeSetDo == null) {
+            throw new AutoTestException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "执行集id错误");
+        }
+        ExeSetDto exeSetDto = new ExeSetDto();
+        exeSetDto.setSetId(exeSetDo.getSetId());
+        exeSetDto.setSetName(exeSetDo.getSetName());
+        exeSetDto.setStatus(exeSetDo.getStatus());
+        return exeSetDto;
+    }
+
+    @Override
+    public List<ExeSetDto> queryRelByStepId(Long stepId, Long sceneId) {
+        List<SceneSetRelDo> sceneSetRelDos = new ArrayList<>();
+        List<ExeSetDto> exeSetDtos = new ArrayList<>();
+        if (sceneId > 0) {
+            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(0L, sceneId);
+        } else if (stepId > 0) {
+            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(stepId, 0L);
+        }
+        sceneSetRelDos.forEach(sceneSetRelDo -> {
+            Long setId = sceneSetRelDo.getSetId();
+            ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
+            if (exeSetDo != null) {
+                ExeSetDto exeSetDto = new ExeSetDto();
+                exeSetDto.setSetId(exeSetDo.getSetId());
+                exeSetDto.setSetName(exeSetDo.getSetName());
+                exeSetDto.setStatus(exeSetDo.getStatus());
+                exeSetDtos.add(exeSetDto);
+            }
+        });
+        return exeSetDtos;
     }
 
     @Override
@@ -83,7 +127,7 @@ public class SceneSetServiceImpl implements SceneSetService {
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
-            log.error("[SceneSetServiceImpl:deleteSceneSet] delete scene set error, reason = {}", e.getStackTrace());
+            log.error("[SceneSetServiceImpl:deleteSceneSet] delete scene set error, reason = {}", e);
             return false;
         }
     }
@@ -92,26 +136,26 @@ public class SceneSetServiceImpl implements SceneSetService {
     public Boolean deleteSceneSetRel(SceneSetRelDelCmd sceneSetRelDelCmd) {
         log.info("[SceneSetServiceImpl:deleteSceneSetRel] delete scene set-rel, sceneSetRelDelCmd = {}",
                 JSON.toJSONString(sceneSetRelDelCmd));
-        if (sceneSetRelDelCmd.getSetId() != null && sceneSetRelDelCmd.getSetId() <= 0L) {
+        dealNullParam(sceneSetRelDelCmd);
+        if (sceneSetRelDelCmd.getSetId() <= 0L) {
             throw new AutoTestException("请输入正确的执行集合id");
         }
-        if (sceneSetRelDelCmd.getSetId() > 0 && sceneSetRelDelCmd.getSceneId() > 0) {
+        if (sceneSetRelDelCmd.getSceneId() > 0 && sceneSetRelDelCmd.getStepId() > 0) {
             throw new AutoTestException("不可同时删除场景和步骤关联");
         }
-        if (sceneSetRelDelCmd.getSceneId() != null && sceneSetRelDelCmd.getSceneId() < 0) {
-            throw new AutoTestException("请输入正确的关联场景id");
-        }
-        if (sceneSetRelDelCmd.getStepId() != null && sceneSetRelDelCmd.getStepId() < 0) {
-            throw new AutoTestException("请输入正确的关联步骤id");
+        if (sceneSetRelDelCmd.getSceneId() <= 0 || sceneSetRelDelCmd.getStepId() <= 0) {
+            throw new AutoTestException("请输入正确的关联场景/步骤id");
         }
         try {
             sceneSetValidator.checkSceneSetValid(sceneSetRelDelCmd.getSetId());
-            return sceneSetDomain.deleteSceneSetRel(sceneSetRelDelCmd.getSetId(), sceneSetRelDelCmd.getSceneId(),
+            return sceneSetRelRepository.deleteSceneSetRel(sceneSetRelDelCmd.getSetId(), sceneSetRelDelCmd.getSceneId(),
                     sceneSetRelDelCmd.getStepId());
         } catch (AutoTestException e) {
+            e.printStackTrace();
             throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
-            log.error("[SceneSetServiceImpl:deleteSceneSetRel] delete scene set-rel error, reason = {}", e.getStackTrace());
+            e.printStackTrace();
+            log.error("[SceneSetServiceImpl:deleteSceneSetRel] delete scene set-rel error, reason = {}", e);
             return false;
         }
     }
@@ -125,35 +169,36 @@ public class SceneSetServiceImpl implements SceneSetService {
         List<SceneSetRelStepDto> sceneSetRelStepDtos = sceneSetRelCmd.getSceneSetRelStepDtos();
         log.info("[SceneSetServiceImpl:updateSceneSetRel] update scene set rel, sceneSetRelSceneDtos = {}, sceneSetRelStepDtos = {}",
                 JSON.toJSONString(sceneSetRelSceneDtos), JSON.toJSONString(sceneSetRelStepDtos));
-        if (sceneSetRelSceneDtos.size() > 0 && sceneSetRelSceneDtos.size() > 0) {
-            throw new AutoTestException("场景和步骤不可同时添加");
-        }
-        Long setId = sceneSetRelCmd.getSetId();
-        // 预处理
-        sceneSetRelSceneDtos.forEach(sceneSetRelSceneDto -> {
-            if (sceneSetRelSceneDto.getSceneId() == null || sceneSetRelSceneDto.getSceneId() < 0) {
-                throw new AutoTestException("输入正确的场景id");
-            }
-            if (sceneSetRelSceneDto.getStatus() == null) {
-                sceneSetRelSceneDto.setStatus(OpenStatusEnum.OPEN.getType());
-            }
-            if (sceneSetRelSceneDto.getSort() == null) {
-                sceneSetRelSceneDto.setSort(ExeOrderEnum.NORMAL.getType());
-            }
-        });
-        sceneSetRelStepDtos.forEach(sceneSetRelStepDto -> {
-            if (sceneSetRelStepDto.getStepId() == null || sceneSetRelStepDto.getStepId() < 0) {
-                throw new AutoTestException("输入正确的步骤id");
-            }
-            if (sceneSetRelStepDto.getStatus() == null) {
-                sceneSetRelStepDto.setStatus(OpenStatusEnum.OPEN.getType());
-            }
-            if (sceneSetRelStepDto.getSort() == null) {
-                sceneSetRelStepDto.setSort(ExeOrderEnum.NORMAL.getType());
-            }
-        });
 
         try {
+            if (sceneSetRelSceneDtos.size() > 0 && sceneSetRelStepDtos.size() > 0) {
+                throw new AutoTestException("场景和步骤不可同时添加");
+            }
+            Long setId = sceneSetRelCmd.getSetId();
+            // 预处理
+            sceneSetRelSceneDtos.forEach(sceneSetRelSceneDto -> {
+                if (sceneSetRelSceneDto.getSceneId() == null || sceneSetRelSceneDto.getSceneId() <= 0) {
+                    throw new AutoTestException("输入正确的场景id");
+                }
+                if (sceneSetRelSceneDto.getStatus() == null) {
+                    sceneSetRelSceneDto.setStatus(OpenStatusEnum.OPEN.getType());
+                }
+                if (sceneSetRelSceneDto.getSort() == null) {
+                    sceneSetRelSceneDto.setSort(ExeOrderEnum.NORMAL.getType());
+                }
+            });
+            sceneSetRelStepDtos.forEach(sceneSetRelStepDto -> {
+                if (sceneSetRelStepDto.getStepId() == null || sceneSetRelStepDto.getStepId() <= 0) {
+                    throw new AutoTestException("输入正确的步骤id");
+                }
+                if (sceneSetRelStepDto.getStatus() == null) {
+                    sceneSetRelStepDto.setStatus(OpenStatusEnum.OPEN.getType());
+                }
+                if (sceneSetRelStepDto.getSort() == null) {
+                    sceneSetRelStepDto.setSort(ExeOrderEnum.NORMAL.getType());
+                }
+            });
+
             sceneSetValidator.checkSceneSetValid(setId);
             sceneSetRelSceneDtos.forEach(sceneSetRelSceneDto -> sceneSetRelSceneDto.setSetId(setId));
             sceneSetRelStepDtos.forEach(sceneSetRelStepDto -> sceneSetRelStepDto.setSetId(setId));
@@ -163,7 +208,8 @@ public class SceneSetServiceImpl implements SceneSetService {
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
-            log.error("[SceneSetServiceImpl:updateSceneSetRel] update scene set rel error, reason = {}", e.getStackTrace());
+            e.printStackTrace();
+            log.error("[SceneSetServiceImpl:updateSceneSetRel] update scene set rel error, reason = {}", e);
             return false;
         }
     }
@@ -173,46 +219,51 @@ public class SceneSetServiceImpl implements SceneSetService {
         if (sceneSetRelTopCmd.getSetId() == null || sceneSetRelTopCmd.getSetId() < 0) {
             throw new AutoTestException("请输入正确的执行集id");
         }
-        SceneSetRelSceneDto sceneSetRelSceneDto = sceneSetRelTopCmd.getSceneSetRelSceneDto();
-        SceneSetRelStepDto sceneSetRelStepDto = sceneSetRelTopCmd.getSceneSetRelStepDto();
-        log.info("[SceneSetServiceImpl:topSetSceneOrStepRel] update scene set rel, sceneSetRelSceneDto = {}, sceneSetRelStepDto = {}",
-                JSON.toJSONString(sceneSetRelSceneDto), JSON.toJSONString(sceneSetRelStepDto));
-        if (sceneSetRelSceneDto != null && sceneSetRelSceneDto != null) {
+        log.info("[SceneSetServiceImpl:topSetSceneOrStepRel] update scene set rel, SceneSetRelTopCmd = {}",
+                JSON.toJSONString(sceneSetRelTopCmd));
+        dealNullParam(sceneSetRelTopCmd);
+        if (sceneSetRelTopCmd.getSceneId() > 0 && sceneSetRelTopCmd.getStepId() > 0) {
             throw new AutoTestException("场景和步骤不可同时修改置顶状态");
         }
-
+        if (sceneSetRelTopCmd.getSceneId() <= 0) {
+            throw new AutoTestException("输入正确的场景id");
+        }
+        if (sceneSetRelTopCmd.getStepId() <= 0) {
+            throw new AutoTestException("输入正确的步骤id");
+        }
         Long setId = sceneSetRelTopCmd.getSetId();
-        // 预处理
-        if (sceneSetRelSceneDto != null) {
-            sceneSetRelSceneDto.setSetId(setId);
-            if (sceneSetRelSceneDto.getSceneId() == null || sceneSetRelSceneDto.getSceneId() < 0) {
-                throw new AutoTestException("输入正确的场景id");
-            }
-            if (sceneSetRelSceneDto.getSort() == null) {
-                sceneSetRelSceneDto.setSort(ExeOrderEnum.NORMAL.getType());
-            }
+        sceneSetValidator.checkSceneSetValid(setId);
+        if (sceneSetRelTopCmd.getSort() == null) {
+            sceneSetRelTopCmd.setSort(ExeOrderEnum.NORMAL.getType());
         }
-        if (sceneSetRelStepDto != null) {
-            sceneSetRelStepDto.setSetId(setId);
-            if (sceneSetRelStepDto.getStepId() == null || sceneSetRelStepDto.getStepId() < 0) {
-                throw new AutoTestException("输入正确的步骤id");
-            }
-            if (sceneSetRelStepDto.getSort() == null) {
-                sceneSetRelSceneDto.setSort(ExeOrderEnum.NORMAL.getType());
-            }
-        }
-
         try {
-            sceneSetValidator.checkSceneSetValid(setId);
-            sceneSetValidator.checkRelValid(Collections.singletonList(sceneSetRelSceneDto),
-                    Collections.singletonList(sceneSetRelStepDto));
-            List<Long> failIds = sceneSetDomain.updateSceneSetRel(Collections.singletonList(sceneSetRelSceneDto),
-                    Collections.singletonList(sceneSetRelStepDto));
+            List<Long> failIds = new ArrayList<>();
+            if (sceneSetRelTopCmd.getSceneId() != null && sceneSetRelTopCmd.getSceneId() > 0) {
+                SceneSetRelSceneDto sceneSetRelSceneDto = new SceneSetRelSceneDto();
+                sceneSetRelSceneDto.setSetId(setId);
+                sceneSetRelSceneDto.setSceneId(sceneSetRelTopCmd.getSceneId());
+                sceneSetRelSceneDto.setSort(sceneSetRelTopCmd.getSort());
+                log.info("[SceneSetServiceImpl:topSetSceneOrStepRel] change scene top, sceneSetRelSceneDto = {}",
+                        JSON.toJSONString(sceneSetRelSceneDto));
+                sceneSetValidator.checkRelSortValid(Collections.singletonList(sceneSetRelSceneDto), Collections.EMPTY_LIST);
+                failIds = sceneSetDomain.updateSceneSetRel(Collections.singletonList(sceneSetRelSceneDto),
+                        Collections.EMPTY_LIST);
+            } else if (sceneSetRelTopCmd.getSetId() != null && sceneSetRelTopCmd.getStepId() > 0) {
+                SceneSetRelStepDto sceneSetRelStepDto = new SceneSetRelStepBo();
+                sceneSetRelStepDto.setSetId(setId);
+                sceneSetRelStepDto.setStepId(sceneSetRelTopCmd.getStepId());
+                sceneSetRelStepDto.setSort(sceneSetRelTopCmd.getSort());
+                log.info("[SceneSetServiceImpl:topSetSceneOrStepRel] change step top, sceneSetRelSceneDto = {}",
+                        JSON.toJSONString(sceneSetRelStepDto));
+                sceneSetValidator.checkRelSortValid(Collections.EMPTY_LIST, Collections.singletonList(sceneSetRelStepDto));
+                failIds = sceneSetDomain.updateSceneSetRel(Collections.EMPTY_LIST,
+                        Collections.singletonList(sceneSetRelStepDto));
+            }
             return failIds.isEmpty() ? true : false;
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
-            log.error("[SceneSetServiceImpl:topSetSceneOrStepRel] update scene set rel error, reason = {}", e.getStackTrace());
+            log.error("[SceneSetServiceImpl:topSetSceneOrStepRel] update scene set rel error, reason = {}", e);
             return false;
         }
     }
@@ -230,45 +281,69 @@ public class SceneSetServiceImpl implements SceneSetService {
             throw new AutoTestException("请输入正确的状态");
         }
         SetRelListVo setRelListVo = new SetRelListVo();
-        PageVO pageVO = new PageVO();
         SceneSetBo sceneSetBo;
-        int totalRel;
-        Long lastId;
+        int totalRel = 0;
+        Long lastId = 0L;
+        Boolean hasNext = false;
         switch (SetMemTypeEnum.getByType(type)) {
             case SCENE:
                 sceneSetBo = sceneSetDomain.querySetBySetId(setId, SetMemTypeEnum.SCENE.getType(), status, pageQry);
                 totalRel = sceneSetRelRepository.countSetRelBySetIdWithType(setId, SetMemTypeEnum.SCENE.getType());
                 List<SceneSetRelSceneBo> sceneSetRelSceneBos = sceneSetBo.getSceneSetRelSceneBos();
-                if (totalRel == pageSize + 1) {
+                if (sceneSetRelSceneBos.size() == pageSize + 1) {
+                    hasNext = true;
                     sceneSetRelSceneBos.remove(pageSize); // 移除掉多找到到的一个
                 }
-                lastId = sceneSetRelSceneBos.get(sceneSetRelSceneBos.size()-1).getRelId();
+                if (sceneSetRelSceneBos.size() > 0) {
+                    lastId = sceneSetRelSceneBos.get(sceneSetRelSceneBos.size() - 1).getRelId();
+                }
                 setRelListVo.setScenes(sceneSetRelSceneBos);
+                setRelListVo.setSteps(Collections.EMPTY_LIST);
+                break;
             case STEP:
                 sceneSetBo = sceneSetDomain.querySetBySetId(setId, SetMemTypeEnum.STEP.getType(), status, pageQry);
                 totalRel = sceneSetRelRepository.countSetRelBySetIdWithType(setId, SetMemTypeEnum.STEP.getType());
                 List<SceneSetRelStepBo> sceneSetRelStepBos = sceneSetBo.getSceneSetRelStepBos();
-                if (totalRel == pageSize + 1) {
+                if (sceneSetRelStepBos.size() == pageSize + 1) {
+                    hasNext = true;
                     sceneSetRelStepBos.remove(pageSize); // 移除掉多找到到的一个
                 }
-                lastId = sceneSetRelStepBos.get(sceneSetRelStepBos.size()-1).getRelId();
+                if (sceneSetRelStepBos.size() > 0) {
+                    lastId = sceneSetRelStepBos.get(sceneSetRelStepBos.size()-1).getRelId();
+                }
                 setRelListVo.setSteps(sceneSetRelStepBos);
+                setRelListVo.setScenes(Collections.EMPTY_LIST);
+                break;
             default:
-                throw new AutoTestException(500, "类型错误");
+                throw new AutoTestException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "类型错误");
         }
+        PageVO pageVO = new PageVO();
         pageVO.setPageNum(page);
         pageVO.setPageSize(pageSize);
         pageVO.setTotalCount(totalRel);
         pageVO.setTotalPage(totalRel / pageSize + (totalRel % pageSize == 0 ? 0 : 1));
-        if (totalRel == pageSize + 1) {
-            pageVO.setHasNext(true);
-        } else {
-            pageVO.setHasNext(false);
-        }
+        pageVO.setHasNext(hasNext);
         pageVO.setLastId(lastId);
         setRelListVo.setPageVO(pageVO);
         return setRelListVo;
     }
 
 
+    private void dealNullParam(SceneSetRelTopCmd sceneSetRelTopCmd) {
+        if (sceneSetRelTopCmd.getSceneId() == null) {
+            sceneSetRelTopCmd.setSceneId(0L);
+        }
+        if (sceneSetRelTopCmd.getStepId() == null) {
+            sceneSetRelTopCmd.setStepId(0L);
+        }
+    }
+
+    private void dealNullParam(SceneSetRelDelCmd sceneSetRelDelCmd) {
+        if (sceneSetRelDelCmd.getSceneId() == null) {
+            sceneSetRelDelCmd.setSceneId(0L);
+        }
+        if (sceneSetRelDelCmd.getStepId() == null) {
+            sceneSetRelDelCmd.setStepId(0L);
+        }
+    }
 }

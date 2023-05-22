@@ -27,6 +27,7 @@ public class SceneSetRelConvertor {
 
     public SceneSetRel DoToPo(SceneSetRelDo sceneSetRelDo) {
         SceneSetRel sceneSetRel = new SceneSetRel();
+        sceneSetRel.setId(sceneSetRelDo.getRelId());
         sceneSetRel.setSetId(sceneSetRelDo.getSetId());
         sceneSetRel.setSceneId(sceneSetRelDo.getSceneId());
         sceneSetRel.setStepId(sceneSetRelDo.getStepId());

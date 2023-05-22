@@ -5,8 +5,10 @@ import com.testframe.autotest.meta.command.ExeSetUpdateCmd;
 import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
+import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.vo.SetRelListVo;
-import com.testframe.autotest.meta.vo.SetStepListVo;
+
+import java.util.List;
 
 /**
  * 执行集
@@ -14,6 +16,10 @@ import com.testframe.autotest.meta.vo.SetStepListVo;
 public interface SceneSetService {
 
     Long updateSceneSet(ExeSetUpdateCmd exeSetUpdateCmd);
+
+    ExeSetDto querySet(Long setId);
+
+    List<ExeSetDto> queryRelByStepId(Long stepId, Long sceneId);
 
     Boolean deleteSceneSet(Long setId);
 
@@ -23,7 +29,7 @@ public interface SceneSetService {
 
     Boolean topSetSceneOrStepRel(SceneSetRelTopCmd sceneSetRelTopCmd);
 
-    SetRelListVo querySetScenes((Long setId, Integer status, Integer type, Integer page, Integer pageSize));
+    SetRelListVo querySetRels(Long setId, Integer status, Integer type, Integer page, Integer pageSize);
 
 
 

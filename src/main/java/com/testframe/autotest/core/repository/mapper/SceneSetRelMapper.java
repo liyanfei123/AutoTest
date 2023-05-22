@@ -36,6 +36,10 @@ public interface SceneSetRelMapper {
 
     List<SceneSetRel> queryRelBySetIdWithTypeAndStatus(Long setId, Integer type, Integer status);
 
+    List<SceneSetRel> queryRelByStepId(Long stepId);
+
+    List<SceneSetRel> queryRelBySceneId(Long sceneId);
+
     Integer countRelWithSort(Long setId, Integer sort);
 
     Integer countRelWithType(Long setId, Integer type);

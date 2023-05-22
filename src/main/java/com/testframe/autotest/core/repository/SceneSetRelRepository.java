@@ -63,9 +63,10 @@ public class SceneSetRelRepository {
     public Boolean deleteSceneSetRel(Long setId, Long sceneId, Long stepId) {
         if (sceneId > 0) {
             return this.deleteSceneSetRelWithSceneId(setId, sceneId);
-        } else  {
+        } else if (stepId > 0)  {
             return this.deleteSceneSetRelWithStepId(setId, stepId);
         }
+        return false;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -82,7 +83,7 @@ public class SceneSetRelRepository {
     public Boolean deleteSceneSetRelWithStepId(Long setId, Long stepId) {
         SceneSetRel sceneSetRel = sceneSetRelDao.querySetRelByStepId(setId, stepId);
         if (sceneSetRel == null) {
-            return null;
+            return false;
         }
         sceneSetRel.setIsDelete(1);
         return sceneSetRelDao.updateSceneSetRel(sceneSetRel) > 0L ? true : false;
@@ -109,6 +110,18 @@ public class SceneSetRelRepository {
         List<SceneSetRel> sceneSetRels = sceneSetRelDao.querySetRelBySetId(setId, sort, pageQry);
         if (sceneSetRels.isEmpty()) {
             return Collections.EMPTY_LIST;
+        }
+        List<SceneSetRelDo> sceneSetRelDos = sceneSetRels.stream().map(sceneSetRel ->
+                sceneSetRelConvertor.PoToDo(sceneSetRel)).collect(Collectors.toList());
+        return sceneSetRelDos;
+    }
+
+    public List<SceneSetRelDo> querySetRelByStepIdOrSceneId(Long stepId, Long sceneId) {
+        List<SceneSetRel> sceneSetRels = new ArrayList<>();
+        if (stepId > 0) {
+            sceneSetRels = sceneSetRelDao.queryRelByStepId(stepId);
+        } else if (sceneId > 0) {
+            sceneSetRels = sceneSetRelDao.queryRelBySceneId(sceneId);
         }
         List<SceneSetRelDo> sceneSetRelDos = sceneSetRels.stream().map(sceneSetRel ->
                 sceneSetRelConvertor.PoToDo(sceneSetRel)).collect(Collectors.toList());

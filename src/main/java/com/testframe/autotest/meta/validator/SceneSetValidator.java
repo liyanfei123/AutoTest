@@ -43,6 +43,23 @@ public class SceneSetValidator {
         }
     }
 
+    public void checkRelSortValid(List<SceneSetRelSceneDto> sceneSetRelSceneDtos,
+                              List<SceneSetRelStepDto> sceneSetRelStepDtos) {
+        for (SceneSetRelSceneDto sceneSetRelSceneDto : sceneSetRelSceneDtos) {
+            if (!ExeOrderEnum.getTypes().contains(sceneSetRelSceneDto.getSort())) {
+                throw new AutoTestException("关联场景执行顺序错误");
+            }
+            sceneValidator.sceneIsExist(sceneSetRelSceneDto.getSceneId());
+        }
+        for (SceneSetRelStepDto sceneSetRelStepDto : sceneSetRelStepDtos) {
+            if (!ExeOrderEnum.getTypes().contains(sceneSetRelStepDto.getSort())) {
+                throw new AutoTestException("关联步骤执行顺序错误");
+            }
+            stepValidator.checkStepId(sceneSetRelStepDto.getStepId());
+        }
+    }
+
+
     public void checkRelValid(List<SceneSetRelSceneDto> sceneSetRelSceneDtos,
                                       List<SceneSetRelStepDto> sceneSetRelStepDtos) {
         for (SceneSetRelSceneDto sceneSetRelSceneDto : sceneSetRelSceneDtos) {

@@ -21,6 +21,9 @@ public class GlobalDefaultExceptionHandler {
     @ResponseBody
     public ErrorInfo<Object> defaultErrorhandler(HttpServletRequest request, AutoTestException e) {
         ErrorInfo errorInfo = new ErrorInfo();
+        if (e.getErrCode() == null) {
+            e.setErrCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        }
         errorInfo.setCode(e.getErrCode());
         errorInfo.setMsg(e.getMessage());
         errorInfo.setUrl(request.getRequestURI());

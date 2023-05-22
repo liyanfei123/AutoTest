@@ -1,5 +1,6 @@
 package com.testframe.autotest.domain.sceneSet.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.cache.service.StepCacheService;
 import com.testframe.autotest.core.enums.ExeOrderEnum;
@@ -71,7 +72,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                     changeFlag = Boolean.TRUE;
                 }
                 if (exeSetDto.getStatus() != null && !exeSetDo.equals(exeSetDto.getStatus())) {
-                    exeSetDo.setStatus(exeSetDo.getStatus());
+                    exeSetDo.setStatus(exeSetDto.getStatus());
                     changeFlag = Boolean.TRUE;
                 }
                 if (!changeFlag) {
@@ -96,7 +97,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
         // 先判断当前执行集下是否有其他关联的场景或步骤，若有，则不给删除
         Integer stepCount = sceneSetRelRepository.countSetRelBySetIdWithType(setId, SetMemTypeEnum.STEP.getType());
         Integer sceneCount = sceneSetRelRepository.countSetRelBySetIdWithType(setId, SetMemTypeEnum.SCENE.getType());
-        if (stepCount + stepCount > 0) {
+        if (stepCount + sceneCount > 0) {
             throw new AutoTestException("当前执行集下有有效步骤");
         }
         Boolean flag = exeSetRepository.deleteExeSet(setId);
@@ -118,6 +119,8 @@ public class SceneSetDomainImpl implements SceneSetDomain {
     @Override
     public List<Long> updateSceneSetRel(List<SceneSetRelSceneDto> sceneSetRelSceneDtos,
                                         List<SceneSetRelStepDto> sceneSetRelStepDtos) {
+        log.info("[SceneSetDomainImpl:updateSceneSetRel] sceneSetRelSceneDtos = {}, sceneSetRelStepDtos  = {}",
+                JSON.toJSONString(sceneSetRelSceneDtos), JSON.toJSONString(sceneSetRelStepDtos));
         if (sceneSetRelSceneDtos.size() > 0 && sceneSetRelStepDtos.size() > 0) {
             throw new AutoTestException("禁止步骤和场景一起添加");
         }
@@ -139,12 +142,15 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                     if ((sceneSetRelSceneDto.getStatus() == null ||
                             sceneSetRelDo.getStatus() == sceneSetRelSceneDto.getStatus()) // 状态未变
                         &&(sceneSetRelSceneDto.getSort() == null ||
-                            sceneSetRelDo.getSort() == sceneSetRelSceneDto.getSort()) ) { // 顺序未变
+                            (sceneSetRelDo.getSort() == sceneSetRelSceneDto.getSort() &&
+                                    sceneSetRelSceneDto.getSort() == ExeOrderEnum.NORMAL.getType())) ) { // 顺序未变, 但是操作置顶和置后时需要更新updateTime
                         continue;
                     }
                     sceneSetRelDo.setType(SetMemTypeEnum.SCENE.getType());
                     sceneSetRelDo.setStatus(sceneSetRelSceneDto.getStatus());
                     sceneSetRelDo.setSort(sceneSetRelSceneDto.getSort());
+                    log.info("[SceneSetDomainImpl:updateSceneSetRel] update scene rel in set, sceneSetRelSceneDto = {}, sceneSetRelDo = {}",
+                            JSON.toJSONString(sceneSetRelSceneDto), JSON.toJSONString(sceneSetRelDo));
                 }
                 sceneSetRelDos.add(sceneSetRelDo);
             }
@@ -165,12 +171,15 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                     if ((sceneSetRelStepDto.getStatus() == null ||
                             sceneSetRelDo.getStatus() == sceneSetRelStepDto.getStatus()) // 状态未变
                         && (sceneSetRelStepDto.getSort() == null ||
-                            sceneSetRelDo.getSort() == sceneSetRelStepDto.getSort())) { // 顺序未变
+                            (sceneSetRelDo.getSort() == sceneSetRelStepDto.getSort() &&
+                                    sceneSetRelStepDto.getSort() == ExeOrderEnum.NORMAL.getType()))) { // 顺序未变
                         continue;
                     }
                     sceneSetRelDo.setType(SetMemTypeEnum.STEP.getType());
                     sceneSetRelDo.setStatus(sceneSetRelStepDto.getStatus());
                     sceneSetRelDo.setSort(sceneSetRelStepDto.getSort());
+                    log.info("[SceneSetDomainImpl:updateSceneSetRel] update step rel in set, sceneSetRelStepDto = {}, sceneSetRelDo = {}",
+                            JSON.toJSONString(sceneSetRelStepDto), JSON.toJSONString(sceneSetRelDo));
                 }
                 sceneSetRelDos.add(sceneSetRelDo);
             }
@@ -187,6 +196,8 @@ public class SceneSetDomainImpl implements SceneSetDomain {
      */
     @Override
     public SceneSetBo querySetBySetId(Long setId, Integer type, Integer status, PageQry pageQry) {
+        log.info("[SceneSetDomainImpl:querySetBySetId] query param, setId = {}, type = {}, status = {}, pageQry = {}",
+                setId, type, status, JSON.toJSONString(pageQry));
         SceneSetBo sceneSetBo = new SceneSetBo();
         ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
         if (exeSetDo == null) {
@@ -200,6 +211,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
             case 1:
                 return this.querySceneRel(sceneSetBo, setId, SetMemTypeEnum.STEP.getType(), status, pageQry);
             default:
+                log.info("[SceneSetDomainImpl:querySetBySetId] incorrect type");
                 return sceneSetBo;
         }
     }
@@ -233,17 +245,27 @@ public class SceneSetDomainImpl implements SceneSetDomain {
         List<SceneSetRelDo> headRels = diffSortSceneMap.get(ExeOrderEnum.HEAD.getType());
         List<SceneSetRelDo> normalRels = diffSortSceneMap.get(ExeOrderEnum.NORMAL.getType());
         List<SceneSetRelDo> lastRels = diffSortSceneMap.get(ExeOrderEnum.LAST.getType());
-        headRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime).reversed()); // 按UpdateTime降序排列
-        normalRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime)); // 按UpdateTime升序排列
-        lastRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime)); // 按UpdateTime升序排列
+        headRels = headRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime).reversed())
+                .collect(Collectors.toList()); // 按UpdateTime降序排列
+        normalRels = normalRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime))
+                .collect(Collectors.toList()); // 按UpdateTime升序排列
+        lastRels = lastRels.stream().sorted(Comparator.comparing(SceneSetRelDo::getUpdateTime))
+                .collect(Collectors.toList()); // 按UpdateTime升序排列
         List<SceneSetRelDo> allRels = new ArrayList<>();
         allRels.addAll(headRels);
         allRels.addAll(normalRels);
         allRels.addAll(lastRels);
+        List<SceneSetRelDo> resRels;
+        log.info("[SceneSetDomainImpl:querySceneRel] query result size = {}", allRels.size());
 
         Integer needSize = pageQry.getSize();
         Long offset = pageQry.getOffset();
-        List<SceneSetRelDo> resRels = allRels.subList(offset.intValue(), needSize);
+        if (pageQry.getSize() > 0) { // -1代表全部查询
+            resRels = allRels.subList(offset.intValue(),
+                    allRels.size() >= needSize ? needSize : allRels.size());
+        } else {
+            resRels = allRels;
+        }
 
         if (type == SetMemTypeEnum.SCENE.getType()) {
             sceneSetBo.setSceneSetRelStepBos(Collections.EMPTY_LIST);

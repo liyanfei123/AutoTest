@@ -52,6 +52,13 @@ public class SceneSetRelDao {
         return sceneSetRelMapper.queryRelBySetIdWithTypeAndStatus(setId, type, status);
     }
 
+    public List<SceneSetRel> queryRelByStepId(Long stepId) {
+        return sceneSetRelMapper.queryRelByStepId(stepId);
+    }
+
+    public List<SceneSetRel> queryRelBySceneId(Long sceneId) {
+        return sceneSetRelMapper.queryRelBySceneId(sceneId);
+    }
 
     public Integer countSetRelBySort(Long setId, Integer sort) {
         return sceneSetRelMapper.countRelWithSort(setId, sort);
