@@ -20,6 +20,7 @@ public class SceneExecuteRecordConverter {
     public SceneRecord DoToPo(SceneExecuteRecordDo sceneExecuteRecordDo) {
         SceneRecord sceneRecord = new SceneRecord();
         sceneRecord.setId(sceneExecuteRecordDo.getRecordId());
+        sceneRecord.setSetRecordId(sceneExecuteRecordDo.getSetRecordId());
         sceneRecord.setSceneId(sceneExecuteRecordDo.getSceneId());
         sceneRecord.setSceneName(sceneExecuteRecordDo.getSceneName());
         sceneRecord.setUrl(sceneExecuteRecordDo.getUrl());
@@ -35,6 +36,7 @@ public class SceneExecuteRecordConverter {
     public SceneExecuteRecordDo PoToDo(SceneRecord sceneRecord) {
         SceneExecuteRecordDo sceneExecuteRecord = new SceneExecuteRecordDo();
         sceneExecuteRecord.setRecordId(sceneRecord.getId());
+        sceneExecuteRecord.setSetRecordId(sceneRecord.getSetRecordId());
         sceneExecuteRecord.setSceneId(sceneRecord.getSceneId());
         sceneExecuteRecord.setSceneName(sceneRecord.getSceneName());
         sceneExecuteRecord.setUrl(sceneRecord.getUrl());
@@ -50,6 +52,7 @@ public class SceneExecuteRecordConverter {
     public SceneExecuteRecordDo DtoToDo(SceneExecuteRecordDto sceneExecuteRecordDto) {
         SceneExecuteRecordDo sceneExecuteRecordDo = new SceneExecuteRecordDo();
         sceneExecuteRecordDo.setRecordId(sceneExecuteRecordDto.getRecordId());
+        sceneExecuteRecordDo.setSetRecordId(sceneExecuteRecordDto.getSetRecordId());
         sceneExecuteRecordDo.setSceneId(sceneExecuteRecordDto.getSceneId());
         sceneExecuteRecordDo.setSceneName(sceneExecuteRecordDto.getSceneName());
         sceneExecuteRecordDo.setUrl(sceneExecuteRecordDto.getUrl());
@@ -65,6 +68,7 @@ public class SceneExecuteRecordConverter {
     public SceneExecuteRecordDto DoToDto(SceneExecuteRecordDo sceneExecuteRecordDo) {
         SceneExecuteRecordDto sceneExecuteRecordDto = new SceneExecuteRecordDto();
         sceneExecuteRecordDto.setRecordId(sceneExecuteRecordDo.getRecordId());
+        sceneExecuteRecordDto.setSetRecordId(sceneExecuteRecordDo.getSetRecordId());
         sceneExecuteRecordDto.setSceneId(sceneExecuteRecordDo.getSceneId());
         sceneExecuteRecordDto.setSceneName(sceneExecuteRecordDo.getSceneName());
         sceneExecuteRecordDto.setUrl(sceneExecuteRecordDo.getUrl());

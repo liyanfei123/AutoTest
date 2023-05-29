@@ -75,8 +75,17 @@ public class SceneExecuteRecordRepository {
         return true;
     }
 
-    public List<SceneExecuteRecordDo> querySceneExecuteRecordBySceneId(Long sceneId, RecordQry recordQry) {
-        List<SceneRecord> sceneRecords = sceneExecuteRecordDao.getSceneRecordsBySceneId(sceneId, recordQry);
+    public List<SceneExecuteRecordDo> querySceneExecuteRecordBySceneId(Long sceneId, Boolean needSet, RecordQry recordQry) {
+        List<SceneRecord> sceneRecords = sceneExecuteRecordDao.getSceneRecordsBySceneId(sceneId, needSet, recordQry);
+        return this.convert(sceneRecords);
+    }
+
+    public List<SceneExecuteRecordDo> querySceneExecuteRecordBySetRecordId(Long setRecordId) {
+        List<SceneRecord> sceneRecords = sceneExecuteRecordDao.getSceneRecordsBySetRecordId(setRecordId);
+        return this.convert(sceneRecords);
+    }
+
+    private List<SceneExecuteRecordDo> convert(List<SceneRecord> sceneRecords) {
         if (CollectionUtils.isEmpty(sceneRecords)) {
             return Collections.EMPTY_LIST;
         }

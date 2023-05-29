@@ -3,6 +3,8 @@ package com.testframe.autotest.core.meta.po;
 public class SceneRecord {
     private Long id;
 
+    private Long setRecordId;
+
     private Long sceneId;
 
     private String sceneName;
@@ -30,6 +32,10 @@ public class SceneRecord {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public Long getSetRecordId() {return setRecordId;}
+
+    public void setSetRecordId(Long setRecordId) {this.setRecordId = setRecordId;}
 
     public Long getSceneId() {
         return sceneId;

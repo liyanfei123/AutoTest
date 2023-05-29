@@ -38,7 +38,8 @@ public class RecordCacheServiceImpl implements RecordCacheService {
                 recordQry.setPage(1);
                 recordQry.setSize(1);
                 recordQry.setType(SceneExecuteEnum.SINGLE.getType());
-                List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
+                List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(
+                        sceneId, false, recordQry);
                 if (!sceneExecuteRecordDos.isEmpty()) {
                     sceneSimpleExecuteDto = SceneSimpleExecuteDto.DoToDto(sceneExecuteRecordDos.get(0));
                     log.info("[RecordCacheServiceImpl:RecSceneSimpleExeRecFromCache] load db, sceneId = {}, result = {}",

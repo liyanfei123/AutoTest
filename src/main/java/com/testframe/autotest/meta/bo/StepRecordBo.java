@@ -16,6 +16,7 @@ public class StepRecordBo {
 
     private StepExecuteRecordDto stepExecuteRecordDto;
 
+    // 子场景执行记录
     private SceneRecordBo sceneRecordBo;
 
 }

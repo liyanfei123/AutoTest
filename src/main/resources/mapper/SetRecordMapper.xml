@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.testframe.autotest.core.repository.mapper.SetRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SetRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="setId" property="setId" jdbcType="BIGINT" />
+    <result column="setName" property="setName" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, setId, setName, status, createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SET_EXECUTE_RECORD
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+    <select id="selectBySetId" resultType="com.testframe.autotest.core.meta.po.SetRecord">
+      select 'false' as QUERYID,
+      <include refid="Base_Column_List" />
+      from AUTO_TEST_SET_EXECUTE_RECORD
+      where setId = #{setId,jdbcType=BIGINT}
+      order by createTime desc
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from AUTO_TEST_SET_EXECUTE_RECORD
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SET_EXECUTE_RECORD (setId, setName, status, 
+      createTime)
+    values (#{setId,jdbcType=BIGINT}, #{setName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into AUTO_TEST_SET_EXECUTE_RECORD
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="setId != null" >
+        setId,
+      </if>
+      <if test="setName != null" >
+        setName,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="setId != null" >
+        #{setId,jdbcType=BIGINT},
+      </if>
+      <if test="setName != null" >
+        #{setName,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
+    update AUTO_TEST_SET_EXECUTE_RECORD
+    <set >
+      <if test="setId != null" >
+        setId = #{setId,jdbcType=BIGINT},
+      </if>
+      <if test="setName != null" >
+        setName = #{setName,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
+    update AUTO_TEST_SET_EXECUTE_RECORD
+    set setId = #{setId,jdbcType=BIGINT},
+      setName = #{setName,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

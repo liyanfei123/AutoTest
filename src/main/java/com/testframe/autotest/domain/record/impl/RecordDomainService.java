@@ -6,34 +6,44 @@ import com.testframe.autotest.cache.service.RecordCacheService;
 import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
+import com.testframe.autotest.core.meta.Do.SetExecuteRecordDo;
 import com.testframe.autotest.core.meta.Do.StepExecuteRecordDo;
 import com.testframe.autotest.core.meta.convertor.SceneExecuteRecordConverter;
+import com.testframe.autotest.core.meta.convertor.SetExecuteRecordConvertor;
 import com.testframe.autotest.core.meta.convertor.StepExecuteRecordConverter;
 import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
+import com.testframe.autotest.core.repository.SetExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
+import com.testframe.autotest.domain.record.SetRecordDomain;
 import com.testframe.autotest.meta.bo.StepRecordBo;
 import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import com.testframe.autotest.meta.bo.SceneRecordBo;
+import com.testframe.autotest.meta.dto.record.SetExecuteRecordDto;
 import com.testframe.autotest.meta.dto.record.StepExecuteRecordDto;
 import com.testframe.autotest.meta.query.RecordQry;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.Max;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class RecordDomainService implements RecordDomain {
+public class RecordDomainService implements RecordDomain, SetRecordDomain {
 
     @Autowired
     private SceneExecuteRecordRepository sceneExecuteRecordRepository;
 
     @Autowired
     private StepExecuteRecordRepository stepExecuteRecordRepository;
+
+    @Autowired
+    private SetExecuteRecordRepository setExecuteRecordRepository;
 
     @Autowired
     private SceneRecordCache sceneRecordCache;
@@ -46,6 +56,9 @@ public class RecordDomainService implements RecordDomain {
 
     @Autowired
     private StepExecuteRecordConverter stepExecuteRecordConverter;
+
+    @Autowired
+    private SetExecuteRecordConvertor setExecuteRecordConvertor;
 
     @Override
     public HashMap<Long, SceneSimpleExecuteDto> listRecSceneSimpleExeRecord(List<Long> sceneIds) {
@@ -61,10 +74,12 @@ public class RecordDomainService implements RecordDomain {
     }
 
     @Override
-    public List<SceneRecordBo> sceneExeRecord(Long sceneId, RecordQry recordQry) {
-        log.info("[SceneListInterImpl:getStepExeInRecord] sceneId = {}, recordQry = {}", sceneId, JSON.toJSONString(recordQry));
+    public List<SceneRecordBo> sceneExeRecord(Long sceneId, Boolean needSet, RecordQry recordQry) {
+        log.info("[SceneListInterImpl:getStepExeInRecord] sceneId = {}, needSet = {}, recordQry = {}",
+                sceneId, needSet, JSON.toJSONString(recordQry));
         List<SceneRecordBo> sceneRecordBos = new ArrayList<>();
-        List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
+        List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.
+                querySceneExecuteRecordBySceneId(sceneId, needSet, recordQry);
         if (sceneExecuteRecordDos.isEmpty()) {
             return null;
         } else {
@@ -80,6 +95,7 @@ public class RecordDomainService implements RecordDomain {
                 sceneRecordBos.add(sceneRecordBo);
             }
         }
+        // 按执行时间排序
         log.info("[SceneListInterImpl:getStepExeInRecord] scene exe reocrds = {}", JSON.toJSONString(sceneRecordBos));
         return sceneRecordBos;
     }
@@ -144,28 +160,28 @@ public class RecordDomainService implements RecordDomain {
 
 
     @Override
-    public HashMap<Long, List<SceneRecordBo>> listSceneExeRecord(List<Long> sceneIds, RecordQry recordQry) {
+    public HashMap<Long, List<SceneRecordBo>> listSceneExeRecord(List<Long> sceneIds, Boolean needSet, RecordQry recordQry) {
         HashMap<Long, List<SceneRecordBo>> sceneExecuteDtoMap = new HashMap<>();
         if (sceneIds.isEmpty()) {
             return null;
         }
         for (Long sceneId : sceneIds) {
-            List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySceneId(sceneId, recordQry);
-            List<SceneRecordBo> sceneRecordBos = sceneExeRecord(sceneId, recordQry);
+            List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.
+                    querySceneExecuteRecordBySceneId(sceneId, needSet, recordQry);
+            List<SceneRecordBo> sceneRecordBos = sceneExeRecord(sceneId, needSet, recordQry);
             sceneExecuteDtoMap.put(sceneId, sceneRecordBos);
         }
-        log.info("[SceneListInterImpl:batchGetSceneExeRecord] sceneIds = {}, result = {}",
-                JSON.toJSONString(sceneIds), JSON.toJSONString(sceneExecuteDtoMap));
+        log.info("[SceneListInterImpl:batchGetSceneExeRecord] sceneIds = {}, needSet = {}, result = {}",
+                JSON.toJSONString(sceneIds), needSet, JSON.toJSONString(sceneExecuteDtoMap));
         return sceneExecuteDtoMap;
     }
-
 
 
     @Override
     public Long updateSceneExeRecord(SceneExecuteRecordDto sceneExecuteRecordDto, List<StepExecuteRecordDto> stepExecuteRecordDtos) {
         try {
             if (sceneExecuteRecordDto.getRecordId() == null || sceneExecuteRecordDto.getRecordId() == 0) {
-                // 保存
+                // 新增
                 SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordConverter.DtoToDo(sceneExecuteRecordDto);
                 sceneExecuteRecordDo.setRecordId(null);
                 Long recordId = sceneExecuteRecordRepository.saveSceneExecuteRecord(sceneExecuteRecordDo);
@@ -192,9 +208,79 @@ public class RecordDomainService implements RecordDomain {
            }
         } catch (Exception e) {
             log.error("[RecordDomainService:updateSceneExeRecord] error, reason = {}", e);
-            e.printStackTrace();
             return 0L;
         }
     }
 
+    @Override
+    public Long updateSetExeRecord(SetExecuteRecordDto setExecuteRecordDto) {
+        try {
+            SetExecuteRecordDo setExecuteRecordDo = setExecuteRecordConvertor.DtoToDo(setExecuteRecordDto);
+            if (setExecuteRecordDto.getSetRecordId() == null || setExecuteRecordDto.getSetRecordId() == 0) {
+                // 新增
+                setExecuteRecordDo.setSetRecordId(null);
+                Long setRecordId = setExecuteRecordRepository.saveSetExecuteRecord(setExecuteRecordDo);
+                log.info("[RecordDomainService:updateSetExeRecord] save set exe record, record = {}, recordId = {}",
+                        JSON.toJSONString(setExecuteRecordDo), setRecordId);
+                return setRecordId;
+            } else {
+                // 更新
+                Boolean flag = setExecuteRecordRepository.updateSetExecuteRecord(setExecuteRecordDo);
+                log.info("[RecordDomainService:updateSetExeRecord] update set exe record, set record = {}, res = {}",
+                        JSON.toJSONString(setExecuteRecordDo), flag);
+                if (!flag) {
+                    return 0L;
+                }
+                return setExecuteRecordDto.getSetRecordId();
+            }
+        } catch (Exception e) {
+            log.error("[RecordDomainService:updateSceneExeRecord] error, reason = {}", e);
+            return 0L;
+        }
+    }
+
+    /**
+     * 根据执行集执行记录id来获取其下的场景执行裂变
+     * @param setRecordId
+     * @return
+     */
+    @Override
+    public List<SceneRecordBo> sceneExeRecordWithSetRecord(Long setRecordId) {
+        log.info("[SceneListInterImpl:sceneExeRecordWithSetRecord] setRecordId = {}", setRecordId);
+        List<SceneRecordBo> sceneRecordBos = new ArrayList<>();
+        List<SceneExecuteRecordDo> sceneExecuteRecordDos = sceneExecuteRecordRepository.querySceneExecuteRecordBySetRecordId(setRecordId);
+        if (sceneExecuteRecordDos.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        } else {
+            // 获取每次执行时的步骤信息
+            for (SceneExecuteRecordDo sceneExecuteRecordDo : sceneExecuteRecordDos) {
+                SceneRecordBo sceneRecordBo = new SceneRecordBo();
+                SceneExecuteRecordDto sceneExecuteRecordDto = sceneExecuteRecordConverter.DoToDto(sceneExecuteRecordDo);
+                Long recordId = sceneExecuteRecordDto.getRecordId();
+                List<Long> stepOrderList = sceneExecuteRecordDto.getStepOrderList();
+                List<StepRecordBo> stepRecordBos = this.getStepExeInRecord(recordId,stepOrderList);
+                sceneRecordBo.setSceneExecuteRecordDto(sceneExecuteRecordDto);
+                sceneRecordBo.setStepRecordBos(stepRecordBos);
+                sceneRecordBos.add(sceneRecordBo);
+            }
+        }
+        log.info("[SceneListInterImpl:sceneExeRecordWithSetRecord] setRecordId = {}, scene exe reocrds = {}",
+                setRecordId, JSON.toJSONString(sceneRecordBos));
+        return sceneRecordBos;
+    }
+
+    @Override
+    public List<SetExecuteRecordDto> setExeRecord(Long setId, RecordQry recordQry) {
+        log.info("[SceneListInterImpl:setExeRecord] setId = {}, recordQry", setId, JSON.toJSONString(recordQry));
+        List<SetExecuteRecordDo> setExecuteRecordDos = setExecuteRecordRepository.querySetExeRecordBySetId(setId, recordQry);
+        if (setExecuteRecordDos.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        List<SetExecuteRecordDto> setExecuteRecordDtos = new ArrayList<>();
+        setExecuteRecordDos.forEach(setExecuteRecordDo -> {
+            SetExecuteRecordDto setExecuteRecordDto = setExecuteRecordConvertor.DoToDto(setExecuteRecordDo);
+            setExecuteRecordDtos.add(setExecuteRecordDto);
+        });
+        return setExecuteRecordDtos;
+    }
 }

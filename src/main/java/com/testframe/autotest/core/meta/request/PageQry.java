@@ -17,6 +17,8 @@ public class PageQry {
 
     private int page = 1; // 务必从1开始
     private long offset = 0;
+
+    // -1表示查找全部
     private int size = 10;
     private long lastId = -1L;
     // 1为按时间倒序排，2为正序

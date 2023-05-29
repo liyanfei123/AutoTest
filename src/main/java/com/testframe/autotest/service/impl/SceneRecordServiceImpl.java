@@ -9,6 +9,7 @@ import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
+import com.testframe.autotest.domain.record.SetRecordDomain;
 import com.testframe.autotest.meta.bo.SceneRecordBo;
 import com.testframe.autotest.meta.bo.StepRecordBo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
@@ -56,6 +57,16 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     @Autowired
     private RecordDomain recordDomain;
 
+    @Autowired
+    private SetRecordDomain setRecordDomain;
+
+    /**
+     * 查询当前场景的执行记录
+     * 默认为20条，可配置
+     * 不分页
+     * @param sceneId
+     * @return
+     */
     @Override
     public SceneRecordListVo records(Long sceneId) {
         try {
@@ -68,9 +79,10 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             // todo 增加分页查询逻辑
             RecordQry recordQry = new RecordQry();
             recordQry.setOffset(0);
-            recordQry.setSize(autoTestConfig.getRecordSize());
+            recordQry.setSize(autoTestConfig.getRecordSize()); // 固定20条记录
             recordQry.setType(SceneExecuteEnum.SINGLE.getType());
-            List<SceneRecordBo> sceneRecordBos = recordDomain.sceneExeRecord(sceneId, recordQry);
+            Boolean needSet = autoTestConfig.getSceneRecordWithSet();
+            List<SceneRecordBo> sceneRecordBos = recordDomain.sceneExeRecord(sceneId, needSet, recordQry);
 
             if (sceneRecordBos.isEmpty()) {
                 // 当前场景从未执行过
@@ -83,20 +95,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             sceneRecordBos.forEach(sceneRecordDto -> {
                 sceneRecordMap.put(sceneRecordDto.getSceneExecuteRecordDto().getRecordId(), sceneRecordDto);
             });
-
-            List<SceneExeRecordVo> sceneExeRecordVos = new ArrayList<>();
-            for (SceneRecordBo sceneRecordBo : sceneRecordBos) {
-                List<StepRecordBo> stepRecordBos = sceneRecordBo.getStepRecordBos();
-                SceneExecuteRecordDto sceneExecuteRecordDto = sceneRecordBo.getSceneExecuteRecordDto();
-                SceneExeRecordVo sceneExeRecordVo = new SceneExeRecordVo();
-                sceneExeRecordVo.setStepNum(stepRecordBos.size());
-                SceneExeInfoVo sceneExeInfoVo = SceneExeInfoVo.build(sceneExecuteRecordDto);
-                sceneExeRecordVo.setSceneExeInfo(sceneExeInfoVo);
-                sceneExeRecordVo.setStatus(sceneExeInfoVo.getStatus());
-                List<StepExeRecordInfo> stepExeInfos = this.getStepExeInfos(stepRecordBos);
-                sceneExeRecordVo.setStepExeInfos(stepExeInfos);
-                sceneExeRecordVos.add(sceneExeRecordVo);
-            }
+            List<SceneExeRecordVo> sceneExeRecordVos = buildSceneExeRecordVos(sceneRecordBos);
             sceneRecordListVo.setSceneExeRecordVos(sceneExeRecordVos);
             return sceneRecordListVo;
         } catch (Exception e) {
@@ -104,6 +103,24 @@ public class SceneRecordServiceImpl implements SceneRecordService {
             log.error("[SceneDetailImpl:query] query execute records {} error, reason: ", sceneId, e);
             throw new AutoTestException("查询执行记录失败");
         }
+    }
+
+    public List<SceneExeRecordVo> buildSceneExeRecordVos(List<SceneRecordBo> sceneRecordBos) {
+        List<SceneExeRecordVo> sceneExeRecordVos = new ArrayList<>();
+        for (SceneRecordBo sceneRecordBo : sceneRecordBos) {
+            List<StepRecordBo> stepRecordBos = sceneRecordBo.getStepRecordBos();
+            SceneExecuteRecordDto sceneExecuteRecordDto = sceneRecordBo.getSceneExecuteRecordDto();
+            SceneExeRecordVo sceneExeRecordVo = new SceneExeRecordVo();
+            sceneExeRecordVo.setSceneId(sceneRecordBo.getSceneExecuteRecordDto().getSceneId());
+            sceneExeRecordVo.setStepNum(stepRecordBos.size());
+            SceneExeInfoVo sceneExeInfoVo = SceneExeInfoVo.build(sceneExecuteRecordDto);
+            sceneExeRecordVo.setSceneExeInfo(sceneExeInfoVo);
+            sceneExeRecordVo.setStatus(sceneExeInfoVo.getStatus());
+            List<StepExeRecordInfo> stepExeInfos = this.getStepExeInfos(stepRecordBos);
+            sceneExeRecordVo.setStepExeInfos(stepExeInfos);
+            sceneExeRecordVos.add(sceneExeRecordVo);
+        }
+        return sceneExeRecordVos;
     }
 
     private List<StepExeRecordInfo> getStepExeInfos(List<StepRecordBo> stepRecordBos){

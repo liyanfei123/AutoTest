@@ -33,4 +33,8 @@ public class AutoTestConfig {
     // 类目名称长度上限
     @Value("${category.name.length:20}")
     private Integer categoryNameLength;
+
+    // 场景执行记录是否需要包含执行集的执行记录
+    @Value("${scene.record.withSet:False}")
+    private Boolean sceneRecordWithSet;
 }

@@ -1,6 +1,5 @@
 package com.testframe.autotest;
 
-import com.testframe.autotest.meta.bo.StepExecuteRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;

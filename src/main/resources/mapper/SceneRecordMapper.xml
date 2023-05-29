@@ -3,6 +3,7 @@
 <mapper namespace="com.testframe.autotest.core.repository.mapper.SceneRecordMapper" >
   <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SceneRecord" >
     <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="setRecordId" property="setId" jdbcType="BIGINT" />
     <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="sceneName" property="sceneName" jdbcType="VARCHAR" />
     <result column="url" property="url" jdbcType="VARCHAR" />
@@ -15,7 +16,7 @@
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, sceneId, sceneName, url, waitType, waitTime, status, type, orderList, extInfo, createTime
+    id, setRecordId, sceneId, sceneName, url, waitType, waitTime, status, type, orderList, extInfo, createTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -33,11 +34,11 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_SCENE_EXECUTE_RECORD (sceneId, sceneName, url, 
+    insert into AUTO_TEST_SCENE_EXECUTE_RECORD (setRecordId, sceneId, sceneName, url,
       waitType, waitTime, status, type,
       orderList, extInfo, createTime
       )
-    values (#{sceneId,jdbcType=BIGINT}, #{sceneName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, 
+    values (#{setRecordId,jdbcType=BIGINT}, #{sceneId,jdbcType=BIGINT}, #{sceneName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
       #{waitType,jdbcType=INTEGER}, #{waitTime,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
       #{type,jdbcType=INTEGER}, #{orderList,jdbcType=VARCHAR}, #{extInfo,jdbcType=VARCHAR},
       #{createTime,jdbcType=BIGINT}
@@ -49,6 +50,9 @@
     </selectKey>
     insert into AUTO_TEST_SCENE_EXECUTE_RECORD
     <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="setRecordId != null" >
+        setRecordId,
+      </if>
       <if test="sceneId != null" >
         sceneId,
       </if>
@@ -81,6 +85,9 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="setId != null" >
+        #{setRecordId,jdbcType=BIGINT},
+      </if>
       <if test="sceneId != null" >
         #{sceneId,jdbcType=BIGINT},
       </if>
@@ -116,6 +123,9 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
     update AUTO_TEST_SCENE_EXECUTE_RECORD
     <set >
+      <if test="setRecordId != null" >
+        setRecordId = #{setRecordId,jdbcType=BIGINT},
+      </if>
       <if test="sceneId != null" >
         sceneId = #{sceneId,jdbcType=BIGINT},
       </if>
@@ -151,7 +161,8 @@
   </update>
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SceneRecord" >
     update AUTO_TEST_SCENE_EXECUTE_RECORD
-    set sceneId = #{sceneId,jdbcType=BIGINT},
+    set setRecordId = #{setRecordId,jdbcType=BIGINT},
+      sceneId = #{sceneId,jdbcType=BIGINT},
       sceneName = #{sceneName,jdbcType=VARCHAR},
       url = #{url,jdbcType=VARCHAR},
       waitType = #{waitType,jdbcType=INTEGER},
@@ -168,6 +179,9 @@
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
     where sceneId = #{sceneId,jdbcType=BIGINT} AND type = #{recordQry.type,jdbcType=INTEGER}
+    <if test="needSet == false" >
+      AND setRecordId = 0
+    </if>
     order by createTime DESC limit #{recordQry.offset}, #{recordQry.size}
   </select>
 
@@ -175,5 +189,13 @@
     select *
     from AUTO_TEST_SCENE_EXECUTE_RECORD
     where id = #{recordId,jdbcType=BIGINT}
+  </select>
+
+  <select id="getSceneRecordBySetRecordId" resultType="com.testframe.autotest.core.meta.po.SceneRecord">
+    select *
+    from AUTO_TEST_SCENE_EXECUTE_RECORD
+    where setRecordId = #{setRecordId,jdbcType=BIGINT}
+    order by createTime DESC
+    limit #{recordQry.offset}, #{recordQry.size}
   </select>
 </mapper>

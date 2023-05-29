@@ -24,6 +24,11 @@ public class SceneRecordController {
     @Autowired
     private SceneRecordServiceImpl sceneRecordService;
 
+    /**
+     * 单独查询场景的执行记录
+     * @param sceneId
+     * @return
+     */
     @GetMapping("/query")
     public HttpResult<SceneRecordListVo> querySceneRecords(@RequestParam(required = true) Long sceneId) {
         try {

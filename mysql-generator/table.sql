@@ -51,9 +51,20 @@ CREATE TABLE AUTO_TEST_STEP_ORDER(
      PRIMARY KEY (id)
 ) COMMENT = '场景步骤执行顺序表';
 
+CREATE TABLE AUTO_TEST_SET_EXECUTE_RECORD(
+  id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
+  setId BIGINT NOT NULL DEFAULT 0  COMMENT '执行集id' ,
+  setName VARCHAR(1024) NULL DEFAULT '' COMMENT '执行集名称',
+  status INT NULL DEFAULT 0  COMMENT '执行集执行结果 0:成功，1:失败' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '执行集执行记录表 ';
 
+-- todo 增加setId字段关联执行集，creatTime从小到大即为执行顺序
+-- todo 添加updateTime
 CREATE TABLE AUTO_TEST_SCENE_EXECUTE_RECORD(
    id BIGINT NOT NULL AUTO_INCREMENT  COMMENT '执行记录id' ,
+   setRecordId BIGINT NOT NULL AUTO_INCREMENT  COMMENT '执行集记录id 0:独立执行 >0:执行集执行' ,
    sceneId BIGINT NOT NULL  DEFAULT 0 COMMENT '场景id' ,
    sceneName VARCHAR(128) NOT NULL  DEFAULT '' COMMENT '场景名称 当前执行时的场景名称' ,
    url VARCHAR(1024) NULL  DEFAULT '' COMMENT '访问地址 执行时所定义的访问地址' ,
@@ -66,6 +77,8 @@ CREATE TABLE AUTO_TEST_SCENE_EXECUTE_RECORD(
    createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
    PRIMARY KEY (id)
 ) COMMENT = '场景执行记录表 ';
+
+alter table AUTO_TEST_SCENE_EXECUTE_RECORD ADD COLUMN `setRecordId` BIGINT NOT NULL DEFAULT 0 COMMENT '执行集记录id 0:独立执行 >0:执行集执行' after `id`;
 
 CREATE TABLE AUTO_TEST_STEP_EXECUTE_RECORD(
   id BIGINT NOT NULL AUTO_INCREMENT  COMMENT 'id' ,

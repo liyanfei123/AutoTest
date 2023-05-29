@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SceneSimpleExecuteDto {
 
+    private Long sceneRecordId;
+
     private Integer status;
 
     // 最近执行时间
@@ -25,6 +27,7 @@ public class SceneSimpleExecuteDto {
 
     public static SceneSimpleExecuteDto DoToDto(SceneExecuteRecordDo sceneExecuteRecordDo) {
         SceneSimpleExecuteDto sceneExecuteDto = new SceneSimpleExecuteDto();
+        sceneExecuteDto.setSceneRecordId(sceneExecuteRecordDo.getRecordId());
         sceneExecuteDto.setStatus(sceneExecuteRecordDo.getStatus());
         sceneExecuteDto.setExecuteTime(sceneExecuteRecordDo.getExecuteTime());
         return sceneExecuteDto;

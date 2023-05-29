@@ -2,6 +2,8 @@ package com.testframe.autotest.ui.handler;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 /**
  * Description:
  *
@@ -20,5 +22,7 @@ public interface EventHandlerI<T> {
 //    }
 
     public abstract void eventHandler(T event);
+
+    public abstract void eventListHandler(List<T> event);
 
 }

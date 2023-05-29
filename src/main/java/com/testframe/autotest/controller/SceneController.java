@@ -113,21 +113,6 @@ public class SceneController {
         }
     }
 
-    // 执行场景
-    // 没有步骤的场景不允许执行
-    @GetMapping("/execute")
-    public HttpResult<Object> executeScene(@RequestParam(required = true) Long sceneId,
-                                           @RequestParam(required = false) Integer browserType) {
-        try {
-            if (browserType == null) {
-                browserType = BrowserEnum.CHROME.getType();
-            }
-            sceneExecuteService.execute(sceneId, browserType);
-            return HttpResult.ok(sceneId);
-        } catch (AutoTestException e) {
-            return HttpResult.error(e.getMessage());
-        }
-    }
 
     /**
      * 移动场景所在的目录

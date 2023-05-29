@@ -10,6 +10,7 @@ public interface RecordCacheService {
 
     /**
      * 场景下的最新一条执行记录
+     * 不考虑执行集执行的结果
      * @param sceneIds
      * @return
      */

@@ -4,12 +4,21 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
+import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.repository.ExeSetRepository;
+import com.testframe.autotest.core.repository.SetExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
+import com.testframe.autotest.domain.record.SetRecordDomain;
 import com.testframe.autotest.domain.scene.SceneDomain;
+import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
 import com.testframe.autotest.domain.step.StepDomain;
+import com.testframe.autotest.meta.bo.SceneSetBo;
+import com.testframe.autotest.meta.bo.SceneSetRelSceneBo;
 import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
+import com.testframe.autotest.meta.dto.record.SetExecuteRecordDto;
 import com.testframe.autotest.meta.query.RecordQry;
 import com.testframe.autotest.ui.meta.StepUIInfo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
@@ -54,7 +63,16 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     private StepDomain stepDomain;
 
     @Autowired
+    private SceneSetDomain sceneSetDomain;
+
+    @Autowired
+    private SetRecordDomain setRecordDomain;
+
+    @Autowired
     private StepOrderRepository stepOrderRepository;
+
+    @Autowired
+    private ExeSetRepository exeSetRepository;
 
     @Autowired
     private RecordDomain recordDomain;
@@ -67,40 +85,99 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 //        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
 //    }
 
-    public void execute(Long sceneId, Integer browserType) {
+    public void executeScene(Long sceneId, Integer browserType) {
         try {
             if (SceneTypeEnum.getByType(browserType) == null) {
                 throw new AutoTestException("浏览器选择错误");
             }
-            SeleniumRunEvent seleniumRunEvent = generateEvent(sceneId, SceneExecuteEnum.SINGLE.getType());
+            SeleniumRunEvent seleniumRunEvent = generateEvent(0L, sceneId, SceneExecuteEnum.SINGLE.getType());
             seleniumRunEvent.setBrowserType(browserType);
-            log.info("[SceneExecuteServiceImpl:execute] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
+            log.info("[SceneExecuteServiceImpl:executeScene] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
             eventBus.post(seleniumRunEvent);
         } catch (Exception e) {
-            log.error("[SceneExecuteServiceImpl:execute] execute scene {} error, reason = {}", sceneId, e);
+            log.error("[SceneExecuteServiceImpl:executeScene] execute scene {} error, reason = {}", sceneId, e);
+            throw new AutoTestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void executeSet(Long setId, Integer browserType) {
+        if (SceneTypeEnum.getByType(browserType) == null) {
+            throw new AutoTestException("浏览器选择错误");
+        }
+        // 检验执行集是否存在
+        ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
+        if (exeSetDo == null) {
+            throw new AutoTestException("执行集id错误");
+        }
+
+        // 目前只支持场景执行
+        PageQry pageQry = new PageQry();
+        pageQry.setSize(-1); // 查找所有
+        SceneSetBo sceneSetBo = sceneSetDomain.querySetBySetId(setId, SetMemTypeEnum.SCENE.getType(),
+                OpenStatusEnum.OPEN.getType(), pageQry);
+        List<SceneSetRelSceneBo> sceneSetRelSceneBos = sceneSetBo.getSceneSetRelSceneBos();
+        if (sceneSetRelSceneBos.isEmpty()) {
+            throw new AutoTestException("当前执行集下无可执行场景");
+        }
+        List<Long> sceneIds = sceneSetRelSceneBos.stream().map(sceneSetRelSceneBo -> sceneSetRelSceneBo.getSceneId())
+                .collect(Collectors.toList());
+
+        // 生成执行集执行记录id
+        SetExecuteRecordDto setExecuteRecordDto = new SetExecuteRecordDto();
+        setExecuteRecordDto.setSetId(setId);
+        setExecuteRecordDto.setSetName(exeSetDo.getSetName());
+        setExecuteRecordDto.setStatus(SetRunResultEnum.NORUN.getType());
+        Long setRecordId = setRecordDomain.updateSetExeRecord(setExecuteRecordDto);
+        SetRunRecordInfo setRunRecordInfo = new SetRunRecordInfo();
+        setRunRecordInfo.setSetRecordId(setRecordId);
+        setRunRecordInfo.setSetId(setId);
+
+        // 执行集场景初始化失败
+        List<SeleniumRunEvent> seleniumRunEvents = new ArrayList<>();
+        try {
+            for (Long sceneId : sceneIds) {
+                SeleniumRunEvent seleniumRunEvent = generateEvent(setRecordId, sceneId, SceneExecuteEnum.SINGLE.getType());
+                seleniumRunEvent.setBrowserType(browserType);
+                seleniumRunEvent.setSetRunRecordInfo(setRunRecordInfo);
+                seleniumRunEvents.add(seleniumRunEvent);
+            }
+            log.info("[SceneExecuteServiceImpl:executeSet] post event, events = {}", JSON.toJSONString(seleniumRunEvents));
+            eventBus.post(seleniumRunEvents);
+        } catch (AutoTestException e) {
+            // 初始化失败时，将执行集执行状态修改
+            log.error("[SceneExecuteServiceImpl:executeSet] execute set {} error, reason = {}", setId, e);
+            setExecuteRecordDto.setSetRecordId(setRecordId);
+            setExecuteRecordDto.setStatus(SetRunResultEnum.FAIL.getType());
+            Long result = setRecordDomain.updateSetExeRecord(setExecuteRecordDto);
+            if (result == 0L) {
+                log.error("[SceneExecuteServiceImpl:executeSet] update set record {} error, setRecordId = {},  reason = {}",
+                        setId, setRecordId, e);
+            }
             throw new AutoTestException(e.getMessage());
         }
     }
 
     /**
      * 生成执行事件内容
+     * @param setRecordId 执行集记录id
      * @param sceneId
      * @param type SceneExecuteEnum，若是作为子场景执行，传2
      * @return
      */
-    public SeleniumRunEvent generateEvent(Long sceneId, Integer type) {
+    public SeleniumRunEvent generateEvent(Long setRecordId, Long sceneId, Integer type) {
         try {
             SceneDetailDto sceneDetailDto = sceneCacheService.getSceneDetailFromCache(sceneId);
             if (sceneDetailDto == null) {
                 throw new AutoTestException("请输入正确的场景id");
             }
-            // 判断当前是否有正常进行中的场景
-            List sceneIds = new ArrayList(){{add(sceneId);}};
-            HashMap<Long, SceneSimpleExecuteDto> recordMap = recordDomain.listRecSceneSimpleExeRecord(sceneIds);
-            SceneSimpleExecuteDto sceneSimpleExecuteDto = recordMap.get(sceneId);
-            if (sceneSimpleExecuteDto != null && sceneSimpleExecuteDto.getStatus() == SceneStatusEnum.ING.getType()) {
-                throw new AutoTestException("当前场景正在执行中，勿重复执行");
-            }
+//            // 判断当前是否有正常进行中的场景
+//            List sceneIds = new ArrayList(){{add(sceneId);}};
+//            HashMap<Long, SceneSimpleExecuteDto> recordMap = recordDomain.listRecSceneSimpleExeRecord(sceneIds);
+//            SceneSimpleExecuteDto sceneSimpleExecuteDto = recordMap.get(sceneId);
+//            if (sceneSimpleExecuteDto != null && sceneSimpleExecuteDto.getStatus() == SceneStatusEnum.ING.getType()) {
+//                throw new AutoTestException("当前场景正在执行中，勿重复执行");
+//            }
 
             List<StepDetailDto> stepDetailDtos = stepDomain.listStepInfo(sceneId);
             // 过滤掉执行状态关闭的步骤
@@ -114,7 +191,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             // 生成执行记录
             StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             List<Long> stepOrderList = stepOrderDo.getOrderList();
-            SceneExecuteRecordDto sceneExecuteRecordDto = this.buildInit(sceneDetailDto);
+            SceneExecuteRecordDto sceneExecuteRecordDto = this.buildInit(setRecordId, sceneDetailDto);
             sceneExecuteRecordDto.setStatus(SceneStatusEnum.INT.getType());
             sceneExecuteRecordDto.setType(type);
             sceneExecuteRecordDto.setStepOrderList(stepOrderList);
@@ -157,9 +234,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
         }
     }
 
-    private SceneExecuteRecordDto buildInit(SceneDetailDto sceneDetailDto) {
+    private SceneExecuteRecordDto buildInit(Long setRecordId, SceneDetailDto sceneDetailDto) {
         SceneExecuteRecordDto sceneExecuteRecordDto = new SceneExecuteRecordDto();
         sceneExecuteRecordDto.setRecordId(null);
+        sceneExecuteRecordDto.setSetRecordId(setRecordId);
         sceneExecuteRecordDto.setSceneId(sceneDetailDto.getSceneId());
         sceneExecuteRecordDto.setSceneName(sceneDetailDto.getSceneName());
         sceneExecuteRecordDto.setUrl(sceneDetailDto.getUrl());

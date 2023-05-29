@@ -6,8 +6,10 @@ import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.exception.SeleniumRunException;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
+import com.testframe.autotest.core.meta.Do.SetExecuteRecordDo;
 import com.testframe.autotest.core.meta.convertor.SceneExecuteRecordConverter;
 import com.testframe.autotest.core.repository.SceneExecuteRecordRepository;
+import com.testframe.autotest.core.repository.SetExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepExecuteRecordRepository;
 import com.testframe.autotest.domain.record.RecordDomain;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
@@ -112,6 +114,9 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
     private SceneExecuteRecordRepository sceneExecuteRecordRepository;
 
     @Autowired
+    private SetExecuteRecordRepository setExecuteRecordRepository;
+
+    @Autowired
     private SceneRecordCache sceneRecordCache;
 
     @Autowired
@@ -144,7 +149,49 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                     JSON.toJSONString(seleniumRunEvent));
             executeEvent(seleniumRunEvent, SceneExecuteEnum.SINGLE.getType());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[SeleniumEventHandler:eventHandler] run seleniumRunEvent error, reason={}", e);
+            throw new SeleniumRunException("场景执行失败");
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void eventListHandler(List<SeleniumRunEvent> seleniumRunEvents) {
+        if (seleniumRunEvents.isEmpty()) {
+            return;
+        }
+        // 判断是否属于同一执行集
+        List<Long> setRecordIds = seleniumRunEvents.stream().map(seleniumRunEvent ->
+                        seleniumRunEvent.getSetRunRecordInfo().getSetRecordId()).collect(Collectors.toList());
+        Set setRecordIdSet = new HashSet(setRecordIds);
+        if (setRecordIdSet.size() != 1) {
+            log.error("[SeleniumEventHandler:eventHandler] seleniumRunEvents can not belong to one setRecord!!!",
+                    JSON.toJSONString(seleniumRunEvents));
+            return;
+        }
+
+        SetExecuteRecordDo setExecuteRecordDo = new SetExecuteRecordDo();
+        setExecuteRecordDo.setSetRecordId(setRecordIds.get(0));
+        try {
+            log.info("[SeleniumEventHandler:eventHandler] get seleniumRunEvents, events={}",
+                    JSON.toJSONString(seleniumRunEvents));
+            setExecuteRecordDo.setStatus(SetRunResultEnum.RUN.getType());
+            setExecuteRecordRepository.updateSetExecuteRecord(setExecuteRecordDo);
+            String sceneFailReason = "";
+            for (SeleniumRunEvent seleniumRunEvent : seleniumRunEvents) {
+                sceneFailReason = executeEvent(seleniumRunEvent, SceneExecuteEnum.SINGLE.getType());
+            }
+            if (sceneFailReason != "" && sceneFailReason.length() > 0) {
+                setExecuteRecordDo.setStatus(SetRunResultEnum.RUN.getType());
+            } else {
+                setExecuteRecordDo.setStatus(SetRunResultEnum.SUCCESS.getType());
+            }
+            setExecuteRecordRepository.updateSetExecuteRecord(setExecuteRecordDo);
+        } catch (Exception e) {
+            setExecuteRecordDo.setStatus(SetRunResultEnum.FAIL.getType());
+            setExecuteRecordRepository.updateSetExecuteRecord(setExecuteRecordDo);
+            log.error("[SeleniumEventHandler:eventListHandler] run seleniumRunEvent list error, reason={}", e);
+            throw new SeleniumRunException("执行集执行失败");
+
         }
     }
 
@@ -157,13 +204,19 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         if (seleniumRunEvent == null) {
             return "";
         }
-        if (type == SceneExecuteEnum.SINGLE.getType()) {
-            log.info("[SeleniumEventHandler:executeEvent] start execute event");
-        } else if (type == SceneExecuteEnum.BELOW.getType()){
-            log.info("[SeleniumEventHandler:executeEvent] start execute son scene event");
+        Long setRecordId = 0L;
+        if (seleniumRunEvent.getSetRunRecordInfo() != null && seleniumRunEvent.getSetRunRecordInfo().getSetRecordId() > 0L) {
+            setRecordId = seleniumRunEvent.getSetRunRecordInfo().getSetRecordId();
         }
         Long sceneId = seleniumRunEvent.getSceneRunInfo().getSceneId();
-        Long recordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId(); // 主场景执行id
+        Long sceneRecordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId(); // 主场景执行id
+        if (type == SceneExecuteEnum.SINGLE.getType()) {
+            log.info("[SeleniumEventHandler:executeEvent] start execute event, setRecordId = {}, sceneId = {}, sceneRecordId = {}",
+                    setRecordId, sceneId, sceneRecordId);
+        } else if (type == SceneExecuteEnum.BELOW.getType()){
+            log.info("[SeleniumEventHandler:executeEvent] start execute son scene event, setRecordId = {}, sceneId = {}, sceneRecordId = {}",
+                    setRecordId, sceneId, sceneRecordId);
+        }
         Map<Long, StepExecuteRecordDto> stepExecuteRecordMap = new HashMap<>(); // 步骤执行信息保存
         List<StepExe> stepExes = seleniumRunEvent.getStepExes();  // 需要执行的步骤信息
         stepExes.forEach(stepExe -> {
@@ -175,8 +228,9 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             stepExecuteRecord.setStatus(StepRunResultEnum.NORUN.getType());
             stepExecuteRecordMap.put(stepExe.getStepId(), stepExecuteRecord);
         });
+
         String sceneFailReason = "";  // 场景失败原因
-        SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordRepository.getSceneExeRecordById(recordId);
+        SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordRepository.getSceneExeRecordById(sceneRecordId);
         SceneExecuteRecordDto sceneExecuteRecordDto = sceneExecuteRecordConverter.DoToDto(sceneExecuteRecordDo);
         sceneExecuteRecordDto.setExecuteTime(System.currentTimeMillis());
 
@@ -212,7 +266,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
 
         // 执行步骤
         try {
-            sceneFailReason = executeStepSet(stepExes, stepExecuteRecordMap, sceneFailReason);
+            sceneFailReason = executeStepSet(setRecordId, stepExes, stepExecuteRecordMap, sceneFailReason);
         } catch (Exception e) {
             // 场景未成功开启的其他失败原因
             e.printStackTrace();
@@ -233,7 +287,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
         return sceneFailReason;
     }
 
-    private String executeStepSet(List<StepExe> stepExes, Map<Long, StepExecuteRecordDto> stepExecuteRecordMap,
+    private String executeStepSet(Long setRecordId, List<StepExe> stepExes, Map<Long, StepExecuteRecordDto> stepExecuteRecordMap,
                              String sceneFailReason) {
         try {
             for (StepExe stepExe : stepExes) {
@@ -250,7 +304,8 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                                 JSON.toJSONString(stepExe));
                         SeleniumRunEvent seleniumRunEvent = null;
                         try {
-                            seleniumRunEvent = sceneExecuteService.generateEvent(stepExe.getStepSceneId(), SceneExecuteEnum.BELOW.getType());
+                            seleniumRunEvent = sceneExecuteService.generateEvent(setRecordId, stepExe.getStepSceneId(),
+                                    SceneExecuteEnum.BELOW.getType());
                             // 修改子场景执行记录id
                             Long sonSceneRecordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId();
                             stepExecuteRecordMap.get(stepExe.getStepId()).setSceneRecordId(sonSceneRecordId);
@@ -509,8 +564,8 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             }
             sceneExecuteRecordDto.setStatus(sceneExeStatus);
             sceneExecuteRecordDto.setExtInfo(sceneExtInfo);
-            Long recordId = recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, stepExecuteRecords);
-            if (recordId == 0) {
+            Long sceneRecordId = recordDomain.updateSceneExeRecord(sceneExecuteRecordDto, stepExecuteRecords);
+            if (sceneRecordId == 0) {
                 throw new AutoTestException("场景执行信息保存失败");
             }
             // 更新缓存

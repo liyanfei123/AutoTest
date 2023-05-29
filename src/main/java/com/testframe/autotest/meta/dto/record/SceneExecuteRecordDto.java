@@ -15,6 +15,8 @@ public class SceneExecuteRecordDto {
 
     private Long recordId;
 
+    private Long setRecordId;
+
     private Long sceneId;
 
     private String sceneName;

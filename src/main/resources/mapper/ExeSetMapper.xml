@@ -26,10 +26,10 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_SET (setName, status, isDelete, 
-      createTime, updateTime)
-    values (#{setName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, 
-      #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
+    insert into AUTO_TEST_SET (setName, status, isDelete,
+    createTime, updateTime)
+    values (#{setName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER},
+    #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.ExeSet" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -95,10 +95,10 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.ExeSet" >
     update AUTO_TEST_SET
     set setName = #{setName,jdbcType=VARCHAR},
-      status = #{status,jdbcType=INTEGER},
-      isDelete = #{isDelete,jdbcType=INTEGER},
-      createTime = #{createTime,jdbcType=BIGINT},
-      updateTime = #{updateTime,jdbcType=BIGINT}
+    status = #{status,jdbcType=INTEGER},
+    isDelete = #{isDelete,jdbcType=INTEGER},
+    createTime = #{createTime,jdbcType=BIGINT},
+    updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

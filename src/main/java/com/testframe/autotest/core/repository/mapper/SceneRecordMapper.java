@@ -23,5 +23,8 @@ public interface SceneRecordMapper {
 
     int updateByPrimaryKey(SceneRecord record);
 
-    List<SceneRecord> getRecordBySceneId(@Param("sceneId") Long sceneId, @Param("recordQry") RecordQry recordQry);
+    List<SceneRecord> getRecordBySceneId(@Param("sceneId") Long sceneId, @Param("needSet") Boolean needSet,
+                                         @Param("recordQry") RecordQry recordQry);
+
+    List<SceneRecord> getSceneRecordBySetRecordId(@Param("setRecordId") Long setRecordId);
 }

@@ -29,8 +29,16 @@ public class SceneExecuteRecordDao {
         return sceneRecordMapper.updateByPrimaryKeySelective(sceneRecord) > 0 ? true : false;
     }
 
-    public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, RecordQry recordQry) {
-        List<SceneRecord> sceneRecords = sceneRecordMapper.getRecordBySceneId(sceneId, recordQry);
+    public List<SceneRecord> getSceneRecordsBySceneId(Long sceneId, Boolean needSet, RecordQry recordQry) {
+        List<SceneRecord> sceneRecords = sceneRecordMapper.getRecordBySceneId(sceneId, needSet, recordQry);
+        if (CollectionUtils.isEmpty(sceneRecords)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sceneRecords;
+    }
+
+    public List<SceneRecord> getSceneRecordsBySetRecordId(Long setRecordId) {
+        List<SceneRecord> sceneRecords = sceneRecordMapper.getSceneRecordBySetRecordId(setRecordId);
         if (CollectionUtils.isEmpty(sceneRecords)) {
             return Collections.EMPTY_LIST;
         }

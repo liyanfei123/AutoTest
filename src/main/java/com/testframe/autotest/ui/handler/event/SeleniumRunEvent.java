@@ -23,6 +23,8 @@ public class SeleniumRunEvent {
     // 浏览器类型
     private Integer browserType;
 
+    private SetRunRecordInfo setRunRecordInfo;
+
     private SceneRunInfo sceneRunInfo;
 
     // 场景执行记录信息
