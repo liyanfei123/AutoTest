@@ -47,7 +47,7 @@ public class SceneStepRelCache {
             String key = SceneStepRelCacheKeys.genStepInScene(sceneId);
             if (stepDetailDto != null) {
                 stringRedisTemplate.opsForHash().put(key, stepId.toString(), JSON.toJSONString(stepDetailDto));
-                stringRedisTemplate.expire(key, SceneStepRelCacheKeys.EXPIRATION_TIME_STEP_SCENE, TimeUnit.MILLISECONDS);
+//                stringRedisTemplate.expire(key, SceneStepRelCacheKeys.EXPIRATION_TIME_STEP_SCENE, TimeUnit.MILLISECONDS);
             }
         } catch (Exception ex) {
             log.error("[SceneStepRelCache:updateSceneStepRel] catch-exception, keyInfo = {}, ex = {}",
@@ -64,7 +64,7 @@ public class SceneStepRelCache {
                     newStepDetailDtoMap.put(stepId.toString(), JSON.toJSONString(stepDetailDtoMap.get(stepId)));
                 }
                 stringRedisTemplate.opsForHash().putAll(key, newStepDetailDtoMap);
-                stringRedisTemplate.expire(key, SceneStepRelCacheKeys.EXPIRATION_TIME_STEP_SCENE, TimeUnit.MILLISECONDS);
+//                stringRedisTemplate.expire(key, SceneStepRelCacheKeys.EXPIRATION_TIME_STEP_SCENE, TimeUnit.MILLISECONDS);
             }
         }  catch (Exception ex) {
             log.error("[SceneStepRelCache:updateSceneStepRels] catch-exception, keyInfo = {}, ex = {}",

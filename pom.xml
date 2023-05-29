@@ -183,7 +183,7 @@
                     <!--配置文件的位置-->
                     <configurationFile>mysql-generator/configuration.xml</configurationFile>
                     <verbose>true</verbose>
-                    <overwrite>true</overwrite>
+                    <overwrite>false</overwrite>
                 </configuration>
             </plugin>
         </plugins>

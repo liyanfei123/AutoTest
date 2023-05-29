@@ -48,7 +48,7 @@ public class TestController {
 
     @GetMapping("/execute")
     public void execute() {
-        sceneExecuteService.execute(123L, null);
+        sceneExecuteService.executeSet(123L, null);
     }
 
     @GetMapping("/config")

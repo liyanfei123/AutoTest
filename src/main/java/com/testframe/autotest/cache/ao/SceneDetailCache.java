@@ -48,7 +48,7 @@ public class SceneDetailCache {
             String key = SceneDetailCacheKeys.genSceneDetailKey(sceneId);
             stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(sceneDetailDto));
             // 不设置时间就是永不失效
-            stringRedisTemplate.expire(key, SceneDetailCacheKeys.EXPIRATION_TIME_SCENE_DETAIL, TimeUnit.MILLISECONDS);
+//            stringRedisTemplate.expire(key, SceneDetailCacheKeys.EXPIRATION_TIME_SCENE_DETAIL, TimeUnit.MILLISECONDS);
         } catch (Exception ex) {
             log.error("[SceneDetailCache:updateSceneDetail] catch-exception, keyInfo = {}, ex = {}",
                     JSON.toJSONString(sceneDetailDto), ex);

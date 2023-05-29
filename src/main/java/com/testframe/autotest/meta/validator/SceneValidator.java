@@ -122,6 +122,9 @@ public class SceneValidator {
     public List<SceneDetailDto> sceneIsExistInCategoryId(List<Long> sceneIds, Integer categoryId) {
         List<SceneDetailDto> sceneDetailDtos = new ArrayList<>();
         for (Long sceneId : sceneIds) {
+            if (sceneId == null) {
+                continue;
+            }
             SceneDetailDto sceneDetailDto = this.sceneIsExist(sceneId);
             if (sceneDetailDto.getCategoryId() != categoryId) {
                 throw new AutoTestException("当前场景不属于该类目");

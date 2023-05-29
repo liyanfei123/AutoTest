@@ -11,7 +11,7 @@ public class StepDetailCacheKeys {
         return String.format("step_detail_%s", stepId);
     }
 
-    public static final long EXPIRATION_TIME_STEP_DETAIL = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_STEP_DETAIL = -1;
 
 
 

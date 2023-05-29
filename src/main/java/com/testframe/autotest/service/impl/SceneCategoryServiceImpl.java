@@ -35,7 +35,8 @@ public class SceneCategoryServiceImpl implements SceneCategoryService {
                 && sceneCategoryCmd.getCategoryName().length() > autoTestConfig.getCategoryNameLength()) {
             throw new AutoTestException("类目名称超过上限");
         }
-        if (sceneCategoryCmd.getCategoryId() > 0 && sceneCategoryCmd.getRelatedCategoryId() > 0
+        if (sceneCategoryCmd.getCategoryId() != null && sceneCategoryCmd.getRelatedCategoryId() != null
+                && sceneCategoryCmd.getCategoryId() > 0 && sceneCategoryCmd.getRelatedCategoryId() > 0
                 && sceneCategoryCmd.getCategoryId() == sceneCategoryCmd.getRelatedCategoryId()) {
             throw new AutoTestException("类目id不可与自己绑定");
         }

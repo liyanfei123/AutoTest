@@ -131,6 +131,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                 // 优化加载策略
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.setPageLoadStrategy(PageLoadStrategy.NONE);
+                chromeOptions.addArguments("--remote-allow-origins=*");
                 driver = new ChromeDriver(chromeOptions);
                 break;
             case FIREF0X:
@@ -181,7 +182,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                 sceneFailReason = executeEvent(seleniumRunEvent, SceneExecuteEnum.SINGLE.getType());
             }
             if (sceneFailReason != "" && sceneFailReason.length() > 0) {
-                setExecuteRecordDo.setStatus(SetRunResultEnum.RUN.getType());
+                setExecuteRecordDo.setStatus(SetRunResultEnum.FAIL.getType());
             } else {
                 setExecuteRecordDo.setStatus(SetRunResultEnum.SUCCESS.getType());
             }
@@ -261,6 +262,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
             sceneSimpleExecuteDto.setExecuteTime(sceneExecuteRecordDto.getExecuteTime());
             sceneSimpleExecuteDto.setStatus(SceneStatusEnum.INTFAIL.getType());
             sceneRecordCache.updateSceneRecExe(sceneId, sceneSimpleExecuteDto);
+            log.error("[SeleniumEventHandler:executeEvent] execute event init error, reason = {}", e);
             throw new SeleniumRunException("初始化失败");
         }
 

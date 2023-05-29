@@ -38,7 +38,7 @@ public class StepDetailCache {
             if (stepDetailDto != null) {
                 String key = StepDetailCacheKeys.genStepDetailKey(stepId);
                 stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(stepDetailDto));
-                stringRedisTemplate.expire(key, StepDetailCacheKeys.EXPIRATION_TIME_STEP_DETAIL, TimeUnit.MILLISECONDS);
+//                stringRedisTemplate.expire(key, StepDetailCacheKeys.EXPIRATION_TIME_STEP_DETAIL, TimeUnit.MILLISECONDS);
             }
         } catch (Exception ex) {
             log.error("[StepDetailCache:updateStepDetail] catch-exception, keyInfo = {}, ex = {}",

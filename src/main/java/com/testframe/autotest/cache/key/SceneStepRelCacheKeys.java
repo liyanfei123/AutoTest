@@ -14,7 +14,7 @@ public class SceneStepRelCacheKeys {
         return String.format("steps_in_scene_%s", sceneId);
     }
 
-    public static final long EXPIRATION_TIME_STEP_SCENE = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_STEP_SCENE = -1;
 
 
 }

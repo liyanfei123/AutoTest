@@ -36,7 +36,7 @@ public class StepOrderCache {
         try {
             String key = StepOrderCacheKeys.genBeforeStepOrderKey(sceneId);
             stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(stepOrderDo));
-            stringRedisTemplate.expire(key, StepOrderCacheKeys.EXPIRATION_TIME_BEFORE_STEP_ORDER, TimeUnit.MILLISECONDS);
+//            stringRedisTemplate.expire(key, StepOrderCacheKeys.EXPIRATION_TIME_BEFORE_STEP_ORDER, TimeUnit.MILLISECONDS);
         } catch (Exception ex) {
             log.error("[StepOrderCache:updateBeforeStepOrder] catch-exception, keyInfo = {}, ex = {}",
                     JSON.toJSONString(stepOrderDo), ex);

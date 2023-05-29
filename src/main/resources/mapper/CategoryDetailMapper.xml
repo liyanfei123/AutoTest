@@ -25,6 +25,7 @@
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY
     where relateCategoryId = #{relateCategoryId,jdbcType=INTEGER} AND isDelete=0
+    order by createTime ASC
   </select>
 
   <select id="queryAllByType" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
@@ -32,6 +33,7 @@
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY
     where type = #{type,jdbcType=INTEGER} AND isDelete=0
+    order by createTime ASC
   </select>
 
   <select id="selectByCategoryName" resultType="com.testframe.autotest.core.meta.po.CategoryDetail"

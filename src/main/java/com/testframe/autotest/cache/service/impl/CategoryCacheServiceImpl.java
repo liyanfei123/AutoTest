@@ -45,14 +45,14 @@ public class CategoryCacheServiceImpl implements CategoryCacheService {
 
     @Override
     public CategoryDetailCo getCategoryInfo(Integer categoryId) {
-        if (!(categoryId > 0)) {
+        if (categoryId <= 0) {
             return null;
         }
         CategoryDetailCo categoryDetailCo = categoryCache.getCategoryInfo(categoryId);
         if (categoryDetailCo != null) {
             return categoryDetailCo;
         } else {
-            CategoryQry categoryQry = new CategoryQry(null, null, categoryId, null);
+            CategoryQry categoryQry = new CategoryQry(categoryId, null, null, null);
             List<CategoryDetailDo> categoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
             if (categoryDetailDos.isEmpty()) {
                 return null;

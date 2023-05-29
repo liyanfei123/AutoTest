@@ -41,7 +41,7 @@ public class SceneRecordCache {
             }
             String key = SceneRecordCacheKeys.genSceneRecentlyExe(sceneId);
             stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(sceneSimpleExecuteDto));
-            stringRedisTemplate.expire(key, SceneRecordCacheKeys.EXPIRATION_TIME_SCENE_RECENTLY_EXE, TimeUnit.MILLISECONDS);
+//            stringRedisTemplate.expire(key, SceneRecordCacheKeys.EXPIRATION_TIME_SCENE_RECENTLY_EXE, TimeUnit.MILLISECONDS);
         } catch (Exception ex) {
             log.error("[SceneRecordCache:updateSceneRecExe] catch-exception, keyInfo = {}, ex = {}",
                     JSON.toJSONString(sceneSimpleExecuteDto), ex);

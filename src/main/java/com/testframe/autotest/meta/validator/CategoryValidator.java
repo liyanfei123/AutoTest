@@ -40,7 +40,7 @@ public class CategoryValidator {
     private CategoryDomain categoryDomain;
 
     public void checkCategoryUpdate(SceneCategoryCmd sceneCategoryCmd) {
-        if (sceneCategoryCmd.getCategoryId() > 0) {
+        if (sceneCategoryCmd.getCategoryId() != null && sceneCategoryCmd.getCategoryId() > 0) {
             checkCategoryId(sceneCategoryCmd);
             checkRelatedCategoryId(sceneCategoryCmd);
             checkCategoryName(sceneCategoryCmd);
@@ -60,6 +60,9 @@ public class CategoryValidator {
     }
 
     public void checkCategoryId(Integer categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            throw new AutoTestException("当前类目id错误");
+        }
         CategoryDetailCo categoryDetailCo = categoryCacheService.getCategoryInfo(categoryId);
         if (categoryDetailCo == null) {
             throw new AutoTestException("当前类目id错误");
@@ -94,10 +97,12 @@ public class CategoryValidator {
     }
 
     public void checkRelatedCategoryId(SceneCategoryCmd sceneCategoryCmd) {
-        CategoryQry categoryQry = new CategoryQry(sceneCategoryCmd.getRelatedCategoryId(), null, null, null);
-        List<CategoryDetailDo> relatedCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
-        if (relatedCategoryDetailDos.isEmpty()) {
-            throw new AutoTestException("当前关联类目id错误");
+        if (sceneCategoryCmd.getRelatedCategoryId() != null && sceneCategoryCmd.getRelatedCategoryId() > 0) {
+            CategoryQry categoryQry = new CategoryQry(sceneCategoryCmd.getRelatedCategoryId(), null, null, null);
+            List<CategoryDetailDo> relatedCategoryDetailDos = categoryDetailRepository.queryCategory(categoryQry);
+            if (relatedCategoryDetailDos.isEmpty()) {
+                throw new AutoTestException("当前关联类目id错误");
+            }
         }
     }
 

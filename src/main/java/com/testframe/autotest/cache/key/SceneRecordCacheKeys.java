@@ -13,7 +13,7 @@ public class SceneRecordCacheKeys {
         return String.format("scene_execute_record_%s", sceneId);
     }
 
-    public static final long EXPIRATION_TIME_SCENE_RECORD = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_SCENE_RECORD = -1;
 
 
     /**
@@ -25,7 +25,7 @@ public class SceneRecordCacheKeys {
         return String.format("scene_recently_exe_%s", sceneId);
     }
 
-    public static final long EXPIRATION_TIME_SCENE_RECENTLY_EXE = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_SCENE_RECENTLY_EXE = -1;
 
 
 }

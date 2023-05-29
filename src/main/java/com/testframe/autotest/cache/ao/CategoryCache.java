@@ -181,7 +181,7 @@ public class CategoryCache {
                 for (CategorySceneDo categorySceneDo : categorySceneDos) {
                     stringRedisTemplate.opsForZSet().add(key, String.valueOf(categorySceneDo.getSceneId()),
                             categorySceneDo.getCreateTime());
-                    stringRedisTemplate.expire(key, CategoryCacheKeys.EXPIRATION_TIME_SCENE_CATEGORY, TimeUnit.MILLISECONDS);
+//                    stringRedisTemplate.expire(key, CategoryCacheKeys.EXPIRATION_TIME_SCENE_CATEGORY, TimeUnit.MILLISECONDS);
                 }
             }
         } catch (Exception ex) {

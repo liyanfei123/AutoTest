@@ -127,14 +127,14 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--        </table>-->
 
-        <table schema="AUTOTEST" tableName="AUTO_TEST_SET_EXECUTE_RECORD"
-               domainObjectName="SetRecord"
-               enableSelectByExample="false" enableDeleteByExample="false"
-               enableCountByExample="false"  enableUpdateByExample="false"
-               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">
-            <property name="useActualColumnNames" value="true"/>
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-        </table>
+<!--        <table schema="AUTOTEST" tableName="AUTO_TEST_SET_EXECUTE_RECORD"-->
+<!--               domainObjectName="SetRecord"-->
+<!--               enableSelectByExample="false" enableDeleteByExample="false"-->
+<!--               enableCountByExample="false"  enableUpdateByExample="false"-->
+<!--               selectByPrimaryKeyQueryId="false" selectByExampleQueryId="false">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
 
 <!--        <table schema="AUTOTEST" tableName="AUTO_TEST_SCENE_SET_REL"-->
 <!--               domainObjectName="SceneSetRel"-->

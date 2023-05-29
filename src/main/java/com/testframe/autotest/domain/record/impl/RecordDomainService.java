@@ -271,7 +271,7 @@ public class RecordDomainService implements RecordDomain, SetRecordDomain {
 
     @Override
     public List<SetExecuteRecordDto> setExeRecord(Long setId, RecordQry recordQry) {
-        log.info("[SceneListInterImpl:setExeRecord] setId = {}, recordQry", setId, JSON.toJSONString(recordQry));
+        log.info("[SceneListInterImpl:setExeRecord] setId = {}, recordQry = {}", setId, JSON.toJSONString(recordQry));
         List<SetExecuteRecordDo> setExecuteRecordDos = setExecuteRecordRepository.querySetExeRecordBySetId(setId, recordQry);
         if (setExecuteRecordDos.isEmpty()) {
             return Collections.EMPTY_LIST;

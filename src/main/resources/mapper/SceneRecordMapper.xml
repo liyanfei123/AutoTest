@@ -3,7 +3,7 @@
 <mapper namespace="com.testframe.autotest.core.repository.mapper.SceneRecordMapper" >
   <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.SceneRecord" >
     <id column="id" property="id" jdbcType="BIGINT" />
-    <result column="setRecordId" property="setId" jdbcType="BIGINT" />
+    <result column="setRecordId" property="setRecordId" jdbcType="BIGINT" />
     <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="sceneName" property="sceneName" jdbcType="VARCHAR" />
     <result column="url" property="url" jdbcType="VARCHAR" />
@@ -85,7 +85,7 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="setId != null" >
+      <if test="setRecordId != null" >
         #{setRecordId,jdbcType=BIGINT},
       </if>
       <if test="sceneId != null" >
@@ -196,6 +196,5 @@
     from AUTO_TEST_SCENE_EXECUTE_RECORD
     where setRecordId = #{setRecordId,jdbcType=BIGINT}
     order by createTime DESC
-    limit #{recordQry.offset}, #{recordQry.size}
   </select>
 </mapper>

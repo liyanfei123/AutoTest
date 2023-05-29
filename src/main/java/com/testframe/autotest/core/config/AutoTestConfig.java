@@ -35,6 +35,6 @@ public class AutoTestConfig {
     private Integer categoryNameLength;
 
     // 场景执行记录是否需要包含执行集的执行记录
-    @Value("${scene.record.withSet:False}")
+    @Value("${scene.record.withSet:true}")
     private Boolean sceneRecordWithSet;
 }

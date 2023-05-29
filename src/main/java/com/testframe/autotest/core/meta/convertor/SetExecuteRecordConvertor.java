@@ -47,6 +47,6 @@ public class SetExecuteRecordConvertor implements ConverterI<SetRecord, SetExecu
         setExecuteRecordDto.setSetName(setExecuteRecordDo.getSetName());
         setExecuteRecordDto.setStatus(setExecuteRecordDo.getStatus());
         setExecuteRecordDto.setExecuteTime(setExecuteRecordDo.getExecuteTime());
-        return null;
+        return setExecuteRecordDto;
     }
 }

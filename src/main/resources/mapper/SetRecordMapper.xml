@@ -18,15 +18,15 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
 
-    <select id="selectBySetId" resultType="com.testframe.autotest.core.meta.po.SetRecord">
-      select 'false' as QUERYID,
-      <include refid="Base_Column_List" />
-      from AUTO_TEST_SET_EXECUTE_RECORD
-      where setId = #{setId,jdbcType=BIGINT}
-      order by createTime desc
-    </select>
+  <select id="selectBySetId" resultType="com.testframe.autotest.core.meta.po.SetRecord">
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_SET_EXECUTE_RECORD
+    where setId = #{setId,jdbcType=BIGINT}
+    order by createTime desc
+  </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_SET_EXECUTE_RECORD
     where id = #{id,jdbcType=BIGINT}
   </delete>
@@ -34,10 +34,10 @@
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_SET_EXECUTE_RECORD (setId, setName, status, 
-      createTime)
-    values (#{setId,jdbcType=BIGINT}, #{setName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
-      #{createTime,jdbcType=BIGINT})
+    insert into AUTO_TEST_SET_EXECUTE_RECORD (setId, setName, status,
+    createTime)
+    values (#{setId,jdbcType=BIGINT}, #{setName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
+    #{createTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -94,9 +94,9 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.SetRecord" >
     update AUTO_TEST_SET_EXECUTE_RECORD
     set setId = #{setId,jdbcType=BIGINT},
-      setName = #{setName,jdbcType=VARCHAR},
-      status = #{status,jdbcType=INTEGER},
-      createTime = #{createTime,jdbcType=BIGINT}
+    setName = #{setName,jdbcType=VARCHAR},
+    status = #{status,jdbcType=INTEGER},
+    createTime = #{createTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -63,7 +63,7 @@ public class SceneController {
     }
 
 
-    @GetMapping("query")
+    @GetMapping("/query")
     public HttpResult<SceneDetailVo> queryScene(@RequestParam(required = true) Long sceneId) {
         try {
             return HttpResult.ok(sceneDetailService.query(sceneId));
@@ -122,9 +122,9 @@ public class SceneController {
      * @return
      */
     @GetMapping("/move")
-    public HttpResult<Object> move(@RequestParam(required = true) List<Long> sceneIds,
-                                   @RequestParam(required = true) Integer oldCategoryId,
-                                   @RequestParam(required = true) Integer newCategoryId) {
+    public HttpResult<Object> move(@RequestParam(name = "sceneIds", required = true) List<Long> sceneIds,
+                                   @RequestParam(name = "oldCategoryId",required = true) Integer oldCategoryId,
+                                   @RequestParam(name = "newCategoryId",required = true) Integer newCategoryId) {
         try {
             List<Long> repeatSceneIds = sceneDetailService.moveScene(sceneIds, oldCategoryId, newCategoryId);
             return HttpResult.ok(repeatSceneIds);

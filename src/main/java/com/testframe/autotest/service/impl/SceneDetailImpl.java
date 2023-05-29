@@ -192,7 +192,7 @@ public class SceneDetailImpl implements SceneDetailService {
     public List<Long> moveScene(List<Long> sceneIds, Integer oldCategoryId, Integer newCategoryId) {
         log.info("[SceneDetailImpl:moveScene] move scenes {} from {} to categoryId {}", JSON.toJSONString(sceneIds),
                 oldCategoryId, newCategoryId);
-        if (oldCategoryId == newCategoryId) {
+        if (oldCategoryId == newCategoryId || sceneIds.isEmpty() || sceneIds == null) {
             return Collections.EMPTY_LIST;
         }
         categoryValidator.checkCategoryId(newCategoryId);

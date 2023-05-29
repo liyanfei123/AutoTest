@@ -11,7 +11,7 @@ public class StepOrderCacheKeys {
         return String.format("before_step_order_%s", sceneId);
     }
 
-    public static final long EXPIRATION_TIME_BEFORE_STEP_ORDER = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_BEFORE_STEP_ORDER = -1;
 
 
 }

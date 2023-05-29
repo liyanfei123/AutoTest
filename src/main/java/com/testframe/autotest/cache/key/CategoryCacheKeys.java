@@ -50,7 +50,7 @@ public class CategoryCacheKeys {
         return String.format("scene_in_category_%s", categoryId);
     }
 
-    public static final long EXPIRATION_TIME_SCENE_CATEGORY = 1 * 60 * 1000;
+    public static final long EXPIRATION_TIME_SCENE_CATEGORY = -1;
 
     /**
      * set 所有类目id
