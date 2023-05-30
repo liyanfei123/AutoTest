@@ -7,4 +7,6 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class ExeSetUpdateCmd extends ExeSetDo {
+
+    private Integer categoryId;
 }

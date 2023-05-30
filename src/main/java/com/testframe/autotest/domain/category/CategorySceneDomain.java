@@ -11,9 +11,9 @@ public interface CategorySceneDomain {
 
     Boolean addCategoryScene(CategorySceneDto categorySceneDto);
 
-    Boolean batchUpdateCategoryScene(Integer oldCategoryId, List<CategorySceneDto> categorySceneDtos);
+    Boolean batchUpdateCategoryScene(Integer oldCategoryId, List<CategorySceneDto> categorySceneDtos, Integer type);
 
-    Boolean deleteCategoryScene(CategorySceneDto categorySceneDto);
+    Boolean deleteCategoryScene(CategorySceneDto categorySceneDto, Integer type);
 
     CategorySceneBo listSceneInCategory(Integer categoryId);
 }

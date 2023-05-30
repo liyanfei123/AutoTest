@@ -7,12 +7,14 @@ import com.testframe.autotest.core.enums.ExeOrderEnum;
 import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
 import com.testframe.autotest.core.meta.convertor.ExeSetConverter;
 import com.testframe.autotest.core.meta.convertor.SceneSetRelConvertor;
 import com.testframe.autotest.core.meta.po.SceneSetRel;
 import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.core.repository.ExeSetRepository;
 import com.testframe.autotest.core.repository.SceneSetRelRepository;
 import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
@@ -46,6 +48,9 @@ public class SceneSetDomainImpl implements SceneSetDomain {
     private SceneSetRelRepository sceneSetRelRepository;
 
     @Autowired
+    private CategorySceneRepository categorySceneRepository;
+
+    @Autowired
     private SceneCacheService sceneCacheService;
 
     @Autowired
@@ -67,13 +72,28 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                     throw new AutoTestException("场景集合id错误");
                 }
                 Boolean changeFlag = Boolean.FALSE;
-                if (exeSetDto.getSetName().trim().length() > 0 && !exeSetDo.equals(exeSetDto.getSetName())) {
+                if (exeSetDto.getSetName() != null && exeSetDto.getSetName().trim().length() > 0
+                        && !exeSetDo.getSetName().equals(exeSetDto.getSetName())) {
                     exeSetDo.setSetName(exeSetDto.getSetName());
                     changeFlag = Boolean.TRUE;
                 }
-                if (exeSetDto.getStatus() != null && !exeSetDo.equals(exeSetDto.getStatus())) {
+                if (exeSetDto.getStatus() != null && !exeSetDo.getSetName().equals(exeSetDto.getStatus())) {
                     exeSetDo.setStatus(exeSetDto.getStatus());
                     changeFlag = Boolean.TRUE;
+                }
+                if (exeSetDto.getCategoryId() != null && exeSetDto.getCategoryId() > 0) {
+                    CategorySceneDo categorySceneDo = categorySceneRepository.queryBySetId(exeSetDto.getSetId());
+                    if (categorySceneDo == null) {
+                        log.error("[SceneSetDomainImpl:updateSceneSet] error data, exeSetDo = {}", exeSetDo);
+                        throw new AutoTestException("脏数据");
+                    }
+                    if (!categorySceneDo.getCategoryId().equals(exeSetDto.getCategoryId())) {
+                        changeFlag = Boolean.TRUE;
+                    } else {
+                        exeSetDto.setCategoryId(null);
+                    }
+                } else {
+                    exeSetDto.setCategoryId(null);
                 }
                 if (!changeFlag) {
                     return exeSetDto.getSetId();
@@ -82,12 +102,12 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                 exeSetDo.setSetName(exeSetDto.getSetName());
                 exeSetDo.setStatus(exeSetDto.getStatus());
             }
-            return exeSetRepository.updateExeSet(exeSetDo);
+            return exeSetRepository.updateExeSet(exeSetDo, exeSetDto.getCategoryId());
         } catch (AutoTestException e) {
-            log.error("[SceneSetDomainImpl:updateSceneSet] expected error, reason = {}", e.getMessage());
+            log.error("[SceneSetDomainImpl:updateSceneSet] expected error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         } catch (Exception e) {
-            log.error("[SceneSetDomainImpl:updateSceneSet] unexpected error, reason = {}", e.getMessage());
+            log.error("[SceneSetDomainImpl:updateSceneSet] unexpected error, reason = {}", e);
             throw new AutoTestException(e.getMessage());
         }
     }
@@ -204,6 +224,12 @@ public class SceneSetDomainImpl implements SceneSetDomain {
             return sceneSetBo;
         }
         ExeSetDto exeSetDto = exeSetConverter.DoToDto(exeSetDo);
+        CategorySceneDo categorySceneDo = categorySceneRepository.queryBySetId(setId);
+        if (categorySceneDo == null) {
+            log.warn("[SceneSetDomainImpl:querySetBySetId] set doesn't rel category!!!");
+        } else {
+            exeSetDto.setCategoryId(categorySceneDo.getCategoryId());
+        }
         sceneSetBo.setSceneSetDto(exeSetDto);
         switch (type) {
             case 0: // 关联的场景

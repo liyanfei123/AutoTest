@@ -1,8 +1,10 @@
 package com.testframe.autotest.core.repository.mapper;
 
 import com.testframe.autotest.core.meta.po.CategoryScene;
+import com.testframe.autotest.core.meta.po.SceneDetail;
 import com.testframe.autotest.core.meta.request.PageQry;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,13 +18,15 @@ public interface CategorySceneMapper {
 
     CategoryScene selectByPrimaryKey(Long id);
 
-    List<CategoryScene> selectByCategoryId(Integer categoryId, PageQry pageQry);
+    List<CategoryScene> selectByCategoryId(Integer categoryId, Integer type, PageQry pageQry);
 
     CategoryScene selectBySceneId(Long sceneId);
+
+    CategoryScene selectBySetId(Long setId);
 
     int updateByPrimaryKeySelective(CategoryScene record);
 
     int updateByPrimaryKey(CategoryScene record);
 
-    Long countByCategoryId(Long categoryId);
+    Long countByCategoryId(Integer categoryId, Integer type);
 }

@@ -33,14 +33,24 @@ public class CategorySceneDao {
     }
 
 
-    public List<CategoryScene> queryByCategoryId(Integer categoryId, PageQry pageQry) {
-        return categorySceneMapper.selectByCategoryId(categoryId, pageQry);
+    public List<CategoryScene> queryByCategoryId(Integer categoryId, Integer type, PageQry pageQry) {
+        return categorySceneMapper.selectByCategoryId(categoryId, type, pageQry);
     }
 
-    public Long countByCategoryId(Long categoryId) {
-        return categorySceneMapper.countByCategoryId(categoryId);
+    /**
+     * 统计数量
+     * @param categoryId
+     * @param type CategoryRelEnum
+     * @return
+     */
+    public Long countByCategoryId(Integer categoryId, Integer type) {
+        return categorySceneMapper.countByCategoryId(categoryId, type);
     }
     public CategoryScene queryBySceneId(Long sceneId) {
         return categorySceneMapper.selectBySceneId(sceneId);
+    }
+
+    public CategoryScene queryBySetId(Long setId) {
+        return categorySceneMapper.selectBySetId(setId);
     }
 }

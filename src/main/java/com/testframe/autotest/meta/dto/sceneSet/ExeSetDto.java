@@ -7,4 +7,6 @@ import lombok.Data;
 @Data
 public class ExeSetDto extends ExeSetDo {
 
+    private Integer categoryId;
+
 }

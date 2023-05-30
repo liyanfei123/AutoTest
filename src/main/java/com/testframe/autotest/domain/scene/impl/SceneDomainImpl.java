@@ -5,6 +5,7 @@ import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.cache.ao.SceneDetailCache;
 import com.testframe.autotest.cache.service.CategoryCacheService;
 import com.testframe.autotest.cache.service.SceneCacheService;
+import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
@@ -91,7 +92,9 @@ public class SceneDomainImpl implements SceneDomain {
                 SceneDetailDo sceneDetailDo = sceneDetailConvertor.DtoToDo(sceneDetailDto);
                 sceneDetailDo.setIsDelete(0);
                 sceneDo.setSceneDetailDo(sceneDetailDo);
-                CategorySceneDo categorySceneDo = new CategorySceneDo(null, sceneDetailDto.getCategoryId(), null, null, null);
+                CategorySceneDo categorySceneDo = new CategorySceneDo();
+                categorySceneDo.setCategoryId(sceneDetailDto.getCategoryId());
+                categorySceneDo.setSceneId(sceneDetailDto.getSceneId());
                 sceneDo.setCategorySceneDo(categorySceneDo);
                 log.info("[SceneDomainImpl:updateScene] add scene, sceneDetailDo = {}, categorySceneDo = {}",
                         JSON.toJSONString(sceneDetailDo), JSON.toJSONString(categorySceneDo));
@@ -132,19 +135,24 @@ public class SceneDomainImpl implements SceneDomain {
         SceneSearchListDto sceneSearchListDto = new SceneSearchListDto();
         List<Long> sceneIds = new ArrayList<>();
         List<SceneDetailDo> sceneDetailDos = new ArrayList<>();
-        // TODO: 2023/3/1 根据id搜索
         // 搜索优先级
-        if (sceneQry.getSceneId() > 1L) {
+        if (sceneQry.getSceneId() != null && sceneQry.getSceneId() > 0L) {
             sceneIds = Arrays.asList(sceneQry.getSceneId());
-        }
-        if ((sceneQry.getSceneName() == null || sceneQry.getSceneName() == "")
-                && sceneQry.getCategoryId() != null) { // 根据类目搜索，搜索当前目录下的所有场景
+            log.info("[SceneDomainImpl:searchScene] by sceneId = {}, sceneIds = {}", sceneQry.getSceneId(), sceneIds);
+
+            // 根据类目搜索，搜索当前目录下的所有场景
+        } else if ((sceneQry.getSceneName() == null || sceneQry.getSceneName() == "")
+                && sceneQry.getCategoryId() != null) {
             List<CategorySceneDto> categorySceneDtos = categoryCacheService.sceneCategoryRelFromCache(
                     sceneQry.getCategoryId(), sceneQry.getPageQry());
             sceneIds = categorySceneDtos.stream().map(categorySceneDto -> categorySceneDto.getSceneId())
                     .collect(Collectors.toList());
+            Long total = categorySceneRepository.countByCategoryId(sceneQry.getCategoryId(), CategoryRelEnum.SCENE.getType());
+            sceneSearchListDto.setTotal(total);
             log.info("[SceneDomainImpl:searchScene] by categoryId = {}, sceneIds = {}", sceneQry.getCategoryId(), sceneIds);
-        } else if (sceneQry.getSceneName() != null) {  // 根据名称搜索
+
+            // 根据名称搜索
+        } else if (sceneQry.getSceneName() != null && sceneQry.getSceneName() != "") {
             sceneDetailDos = sceneDetailRepository.queryScenes(null,
                     sceneQry.getSceneName(), sceneQry.getCategoryId(), sceneQry.getStatus(), sceneQry.getPageQry());
             sceneIds = sceneDetailDos.stream().map(sceneDetailDo -> sceneDetailDo.getSceneId())

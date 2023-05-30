@@ -13,7 +13,9 @@ public class CategorySceneConverter {
         CategoryScene categoryScene = new CategoryScene();
         categoryScene.setId(categorySceneDo.getId());
         categoryScene.setCategoryId(categorySceneDo.getCategoryId());
+        categoryScene.setStepId(categorySceneDo.getStepId());
         categoryScene.setSceneId(categorySceneDo.getSceneId());
+        categoryScene.setSetId(categorySceneDo.getSetId());
         categoryScene.setIsDelete(categorySceneDo.getIsDelete());
         return categoryScene;
     }
@@ -29,7 +31,9 @@ public class CategorySceneConverter {
         CategorySceneDo categorySceneDo = new CategorySceneDo();
         categorySceneDo.setId(categoryScene.getId());
         categorySceneDo.setCategoryId(categoryScene.getCategoryId());
+        categorySceneDo.setStepId(categoryScene.getStepId());
         categorySceneDo.setSceneId(categoryScene.getSceneId());
+        categorySceneDo.setSetId(categoryScene.getSetId());
         categorySceneDo.setIsDelete(categoryScene.getIsDelete());
         categorySceneDo.setCreateTime(categoryScene.getCreateTime());
         return categorySceneDo;
@@ -38,13 +42,17 @@ public class CategorySceneConverter {
     public CategorySceneDo DtoToDo(CategorySceneDto categorySceneDto) {
         CategorySceneDo categorySceneDo = new CategorySceneDo();
         categorySceneDo.setCategoryId(categorySceneDto.getCategoryId());
+        categorySceneDo.setStepId(categorySceneDto.getStepId());
         categorySceneDo.setSceneId(categorySceneDto.getSceneId());
+        categorySceneDo.setSetId(categorySceneDto.getSetId());
         return categorySceneDo;
     }
 
     public CategorySceneDo DtoToDo(CategorySceneDo categorySceneDo, CategorySceneDto categorySceneDto) {
         categorySceneDo.setCategoryId(categorySceneDto.getCategoryId());
+        categorySceneDo.setStepId(categorySceneDto.getStepId());
         categorySceneDo.setSceneId(categorySceneDto.getSceneId());
+        categorySceneDo.setSetId(categorySceneDto.getSetId());
         return categorySceneDo;
     }
 }

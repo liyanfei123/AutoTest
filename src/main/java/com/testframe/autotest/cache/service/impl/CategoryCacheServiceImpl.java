@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.cache.meta.co.CategoryDetailCo;
 import com.testframe.autotest.cache.service.CategoryCacheService;
+import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.enums.CategoryTypeEnum;
 import com.testframe.autotest.core.meta.Do.CategoryDetailDo;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -137,7 +138,7 @@ public class CategoryCacheServiceImpl implements CategoryCacheService {
         List<CategorySceneDto> categorySceneDtos;
         List<CategorySceneDo> categorySceneDos = categoryCache.getSceneInCategory(categoryId, start, end);
         if (categorySceneDos == null || categorySceneDos.isEmpty()) {
-            categorySceneDos = categorySceneRepository.querySceneByCategoryId(categoryId, pageQry);
+            categorySceneDos = categorySceneRepository.queryByCategoryId(categoryId, CategoryRelEnum.SCENE.getType(), pageQry);
             if (categorySceneDos.isEmpty()) {
                 return Collections.EMPTY_LIST;
             }
@@ -148,6 +149,15 @@ public class CategoryCacheServiceImpl implements CategoryCacheService {
         }
         categorySceneDtos = categorySceneDos.stream().map(categorySceneConverter::DoToDto)
                 .collect(Collectors.toList());
+        if (end == -1L) {
+            return categorySceneDtos;
+        } else {
+            if (categorySceneDtos.size() >= end) {
+                categorySceneDtos = categorySceneDtos.subList(start.intValue(), end.intValue());
+            } else {
+                categorySceneDtos = categorySceneDtos.subList(start.intValue(), categorySceneDtos.size());
+            }
+        }
         return categorySceneDtos;
     }
 }

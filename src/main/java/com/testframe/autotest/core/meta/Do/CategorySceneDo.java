@@ -13,7 +13,11 @@ public class CategorySceneDo {
 
     private Integer categoryId;
 
+    private Long stepId;
+
     private Long sceneId;
+
+    private Long setId;
 
     private Long createTime;
 

@@ -14,12 +14,8 @@ import java.util.List;
 @Data
 public class SceneListVO {
 
-//    private PageVO pageVO;
-
     private List<SceneSimpleInfo> scenes;
 
-    private Long lastId;
-
-    private Boolean hasNext;
+    private PageVO pageVO;
 
 }

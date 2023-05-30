@@ -14,6 +14,7 @@ import com.testframe.autotest.domain.category.CategorySceneDomain;
 import com.testframe.autotest.meta.bo.CategorySceneBo;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 import com.testframe.autotest.meta.query.CategoryQry;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -90,14 +91,17 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
      * @return
      */
     @Override
-    public Boolean batchUpdateCategoryScene(Integer oldCategoryId, List<CategorySceneDto> categorySceneDtos) {
+    public Boolean batchUpdateCategoryScene(Integer oldCategoryId, List<CategorySceneDto> categorySceneDtos, Integer type) {
         Map<Integer, List<CategorySceneDo>> updateCateSceneMap = new HashMap<>();
         List<CategorySceneDo> categorySceneDos = new ArrayList<>();
         for (CategorySceneDto categorySceneDto : categorySceneDtos) {
             CategorySceneDo categorySceneDo = categorySceneRepository.queryBySceneId(categorySceneDto.getSceneId()); // 原数据
-            if (categorySceneDto.getCategoryId() == categorySceneDo.getCategoryId()
-                    && categorySceneDto.getSceneId() == categorySceneDo.getSceneId()) {
-                continue;
+            if (categorySceneDto.getCategoryId() == categorySceneDo.getCategoryId()) {
+                if ((categorySceneDto.getStepId() > 0 && categorySceneDto.getStepId() == categorySceneDo.getStepId())
+                || (categorySceneDto.getSceneId() > 0 && categorySceneDto.getSceneId() == categorySceneDo.getSceneId())
+                || (categorySceneDto.getSetId() > 0 && categorySceneDto.getSceneId() == categorySceneDo.getSetId())) {
+                    continue;
+                }
             }
             categorySceneDo = categorySceneConverter.DtoToDo(categorySceneDo, categorySceneDto);
             categorySceneDos.add(categorySceneDo);
@@ -105,11 +109,11 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
         updateCateSceneMap.put(oldCategoryId, categorySceneDos);
         log.debug("[CategorySceneDomainImpl:batchUpdateCategoryScene] batch update category-scene, category-scene = {}",
                 JSON.toJSONString(updateCateSceneMap));
-        return categorySceneRepository.batchUpdateCategoryScene(updateCateSceneMap);
+        return categorySceneRepository.batchUpdateCategoryScene(updateCateSceneMap, type);
     }
 
     @Override
-    public Boolean deleteCategoryScene(CategorySceneDto categorySceneDto) {
+    public Boolean deleteCategoryScene(CategorySceneDto categorySceneDto, Integer type) {
         log.info("[CategorySceneDomainImpl:deleteCategoryScene] param = {}",
                 JSON.toJSONString(categorySceneDto));
         try {
@@ -119,7 +123,7 @@ public class CategorySceneDomainImpl implements CategorySceneDomain {
             }
             categorySceneDo.setIsDelete(0);
             categorySceneRepository.batchUpdateCategoryScene(
-                    this.buildUpdateCateSceneMap(categorySceneDo.getCategoryId(), categorySceneDo));
+                    this.buildUpdateCateSceneMap(categorySceneDo.getCategoryId(), categorySceneDo), type);
         } catch (Exception e) {
             log.error("[CategorySceneDomainImpl:deleteCategoryScene] delete category-scene error, reason = {}", e);
             return false;

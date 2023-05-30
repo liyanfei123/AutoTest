@@ -31,6 +31,6 @@ public interface SceneSetService {
 
     SetRelListVo querySetRels(Long setId, Integer status, Integer type, Integer page, Integer pageSize);
 
-
+    Boolean moveCategoryId(Long setId, Integer oldCategoryId, Integer newCategoryId);
 
 }

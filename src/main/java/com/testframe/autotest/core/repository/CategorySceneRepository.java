@@ -1,6 +1,7 @@
 package com.testframe.autotest.core.repository;
 
 import com.testframe.autotest.cache.ao.CategoryCache;
+import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.convertor.CategorySceneConverter;
@@ -47,38 +48,53 @@ public class CategorySceneRepository {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean batchUpdateCategoryScene(Map<Integer, List<CategorySceneDo>> categoryDetailDoMap) {
+    public Boolean batchUpdateCategoryScene(Map<Integer, List<CategorySceneDo>> categoryDetailDoMap, Integer type) {
         for (Integer categoryId : categoryDetailDoMap.keySet()) {
             List<CategorySceneDo> categorySceneDos = categoryDetailDoMap.get(categoryId);
             List<CategoryScene> categoryScenes = categorySceneDos.stream().map(categorySceneConverter::DoToPo)
                     .collect(Collectors.toList());
-            List<Long> sceneIds = new ArrayList<>();
-            Integer newCategoryId = null;
-            for (CategoryScene categoryScene : categoryScenes) {
-                if (!categorySceneDao.updateCategoryScene(categoryScene)) {
-                    throw new AutoTestException("类目场景关联更新失败");
-                }
-                newCategoryId = categoryScene.getCategoryId();
-                sceneIds.add(categoryScene.getSceneId());
+            switch (CategoryRelEnum.getByType(type)) {
+                case STEP:
+                    return false;
+                case SCENE:
+                    List<Long> sceneIds = new ArrayList<>();
+                    Integer newCategoryId = null;
+                    for (CategoryScene categoryScene : categoryScenes) {
+                        if (!categorySceneDao.updateCategoryScene(categoryScene)) {
+                            throw new AutoTestException("类目场景关联更新失败");
+                        }
+                        newCategoryId = categoryScene.getCategoryId();
+                        sceneIds.add(categoryScene.getSceneId());
+                    }
+                    // 删除原类目下的场景缓存
+                    categoryCache.clearSceneInCategory(categoryId, sceneIds);
+                    // 更新新类目下的场景缓存
+                    categoryCache.updateSceneInCategorys(newCategoryId, categorySceneDos);
+                    break;
+                case SET:
+                    for (CategoryScene categoryScene : categoryScenes) {
+                        if (!categorySceneDao.updateCategoryScene(categoryScene)) {
+                            throw new AutoTestException("类目执行集关联更新失败");
+                        }
+                    }
+                    break;
+                default:
+                    return false;
             }
-            // 删除原类目下的场景缓存
-            categoryCache.clearSceneInCategory(categoryId, sceneIds);
-            // 更新新类目下的场景缓存
-            categoryCache.updateSceneInCategorys(newCategoryId, categorySceneDos);
         }
         return true;
     }
 
-    public Long countByCategoryId(Long categoryId) {
-        Long count = categorySceneDao.countByCategoryId(categoryId);
+    public Long countByCategoryId(Integer categoryId, Integer type) {
+        Long count = categorySceneDao.countByCategoryId(categoryId, type);
         if (count == null) {
             return 0L;
         }
         return count;
     }
 
-    public List<CategorySceneDo> querySceneByCategoryId(Integer categoryId, PageQry pageQry) {
-        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, pageQry);
+    public List<CategorySceneDo> queryByCategoryId(Integer categoryId, Integer type, PageQry pageQry) {
+        List<CategoryScene> categoryScenes = categorySceneDao.queryByCategoryId(categoryId, type, pageQry);
         if (categoryScenes.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
@@ -88,7 +104,24 @@ public class CategorySceneRepository {
     }
 
     public CategorySceneDo queryBySceneId(Long sceneId) {
+        if (sceneId == 0) {
+            return null;
+        }
         CategoryScene categoryScene = categorySceneDao.queryBySceneId(sceneId);
+        if (categoryScene == null) {
+            return null;
+        }
+        CategorySceneDo categorySceneDo = categorySceneConverter.PoToDo(categoryScene);
+        List<CategorySceneDo> categorySceneDos = Arrays.asList(categorySceneDo);
+        categoryCache.updateSceneInCategorys(categorySceneDo.getCategoryId(), categorySceneDos);
+        return categorySceneDo;
+    }
+
+    public CategorySceneDo queryBySetId(Long setId) {
+        if (setId == 0) {
+            return null;
+        }
+        CategoryScene categoryScene = categorySceneDao.queryBySetId(setId);
         if (categoryScene == null) {
             return null;
         }

@@ -142,5 +142,20 @@ public class SceneSetController {
         return HttpResult.ok(setRelListVo);
     }
 
+    /**
+     * 移动执行集所在目录
+     * @param setId
+     * @param oldCategoryId
+     * @param newCategoryId
+     * @return
+     */
+    @GetMapping("/category/move")
+    public HttpResult<Boolean> moveCategory(@RequestParam(name = "setId", required = true) Long setId,
+                                            @RequestParam(name = "oldCategoryId",required = true) Integer oldCategoryId,
+                                            @RequestParam(name = "newCategoryId",required = true) Integer newCategoryId) {
+        Boolean res = sceneSetService.moveCategoryId(setId, oldCategoryId, newCategoryId);
+        return HttpResult.ok(res);
+    }
+
 
 }

@@ -1,17 +1,21 @@
 package com.testframe.autotest.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.enums.ExeOrderEnum;
 import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
 import com.testframe.autotest.core.meta.common.http.HttpStatus;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.meta.vo.common.PageVO;
+import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.core.repository.ExeSetRepository;
 import com.testframe.autotest.core.repository.SceneSetRelRepository;
+import com.testframe.autotest.domain.category.CategorySceneDomain;
 import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
 import com.testframe.autotest.meta.bo.SceneSetBo;
 import com.testframe.autotest.meta.bo.SceneSetRelSceneBo;
@@ -20,9 +24,12 @@ import com.testframe.autotest.meta.command.ExeSetUpdateCmd;
 import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
+import com.testframe.autotest.meta.dto.category.CategorySceneDto;
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
+import com.testframe.autotest.meta.validator.CategoryValidator;
 import com.testframe.autotest.meta.validator.SceneSetValidator;
 import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.validator.StepValidator;
@@ -50,13 +57,22 @@ public class SceneSetServiceImpl implements SceneSetService {
     private StepValidator stepValidator;
 
     @Autowired
+    private CategoryValidator categoryValidator;
+
+    @Autowired
     private SceneSetDomain sceneSetDomain;
+
+    @Autowired
+    private CategorySceneDomain categorySceneDomain;
 
     @Autowired
     private SceneSetRelRepository sceneSetRelRepository;
 
     @Autowired
     private ExeSetRepository exeSetRepository;
+
+    @Autowired
+    private CategorySceneRepository categorySceneRepository;
 
     @Override
     public Long updateSceneSet(ExeSetUpdateCmd exeSetUpdateCmd) {
@@ -65,12 +81,20 @@ public class SceneSetServiceImpl implements SceneSetService {
         if (exeSetUpdateCmd.getSetId() == null && exeSetUpdateCmd.getStatus() == null) {
             exeSetUpdateCmd.setStatus(OpenStatusEnum.OPEN.getType()); // 默认开启
         }
+        if (exeSetUpdateCmd.getCategoryId() != null && exeSetUpdateCmd.getCategoryId() > 0) {
+            categoryValidator.checkCategoryId(exeSetUpdateCmd.getCategoryId());
+        } else if (exeSetUpdateCmd.getSetId() == null) {
+            throw new AutoTestException("请输入类目id");
+        }
         sceneSetValidator.checkSceneSetUpdate(exeSetUpdateCmd);
+        // 检查当前类目下是否存在相同标题的场景
+        sceneSetValidator.checkTitleInCategory(exeSetUpdateCmd.getSetName(), exeSetUpdateCmd.getCategoryId());
         try {
             ExeSetDto exeSetDto = new ExeSetDto();
             exeSetDto.setSetId(exeSetUpdateCmd.getSetId());
             exeSetDto.setSetName(exeSetUpdateCmd.getSetName());
             exeSetDto.setStatus(exeSetUpdateCmd.getStatus());
+            exeSetDto.setCategoryId(exeSetUpdateCmd.getCategoryId());
             return sceneSetDomain.updateSceneSet(exeSetDto);
         } catch (Exception e) {
             log.error("[SceneSetServiceImpl:updateSceneSet] update scene set error, reason = {}", e.getStackTrace());
@@ -88,6 +112,12 @@ public class SceneSetServiceImpl implements SceneSetService {
         exeSetDto.setSetId(exeSetDo.getSetId());
         exeSetDto.setSetName(exeSetDo.getSetName());
         exeSetDto.setStatus(exeSetDo.getStatus());
+        CategorySceneDo categorySceneDo = categorySceneRepository.queryBySetId(setId);
+        if (categorySceneDo == null) {
+            log.warn("[SceneSetDomainImpl:querySetBySetId] set doesn't rel category!!!");
+        } else {
+            exeSetDto.setCategoryId(categorySceneDo.getCategoryId());
+        }
         return exeSetDto;
     }
 
@@ -320,7 +350,7 @@ public class SceneSetServiceImpl implements SceneSetService {
         PageVO pageVO = new PageVO();
         pageVO.setPageNum(page);
         pageVO.setPageSize(pageSize);
-        pageVO.setTotalCount(totalRel);
+        pageVO.setTotalCount(Long.valueOf(totalRel));
         pageVO.setTotalPage(totalRel / pageSize + (totalRel % pageSize == 0 ? 0 : 1));
         pageVO.setHasNext(hasNext);
         pageVO.setLastId(lastId);
@@ -328,6 +358,30 @@ public class SceneSetServiceImpl implements SceneSetService {
         return setRelListVo;
     }
 
+
+    @Override
+    public Boolean moveCategoryId(Long setId, Integer oldCategoryId, Integer newCategoryId) {
+        log.info("[SceneSetServiceImpl:moveCategoryId] move setId {} from {} to categoryId {}", JSON.toJSONString(setId),
+                oldCategoryId, newCategoryId);
+        if (oldCategoryId == newCategoryId || setId == null || setId < 0) {
+            return false;
+        }
+        sceneSetValidator.checkSceneSetValid(setId);
+        categoryValidator.checkCategoryId(newCategoryId);
+        categoryValidator.checkCategoryId(oldCategoryId);
+        CategorySceneDo categorySceneDo = categorySceneRepository.queryBySetId(setId);
+        if (categorySceneDo.getCategoryId() != oldCategoryId) {
+            throw new AutoTestException("当前执行集不属于该类目");
+        }
+        // 判断新的类目下是否会存在同名类目
+        sceneSetValidator.checkTitleInCategory(setId, newCategoryId);
+        CategorySceneDto categorySceneDto = new CategorySceneDto();
+        categorySceneDto.setCategoryId(newCategoryId);
+        categorySceneDto.setSetId(setId);
+        categorySceneDomain.batchUpdateCategoryScene(oldCategoryId,
+                Collections.singletonList(categorySceneDto), CategoryRelEnum.SET.getType());
+        return true;
+    }
 
     private void dealNullParam(SceneSetRelTopCmd sceneSetRelTopCmd) {
         if (sceneSetRelTopCmd.getSceneId() == null) {

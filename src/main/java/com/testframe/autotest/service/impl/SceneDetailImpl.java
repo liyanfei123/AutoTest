@@ -1,6 +1,7 @@
 package com.testframe.autotest.service.impl;
 
 import com.testframe.autotest.cache.service.SceneCacheService;
+import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.repository.*;
@@ -213,7 +214,7 @@ public class SceneDetailImpl implements SceneDetailService {
                 repeatSceneIds.add(sceneDetailDto.getSceneId());
             }
         }
-        categorySceneDomain.batchUpdateCategoryScene(oldCategoryId, categorySceneDtos);
+        categorySceneDomain.batchUpdateCategoryScene(oldCategoryId, categorySceneDtos, CategoryRelEnum.SCENE.getType());
         return repeatSceneIds;
     }
 

@@ -26,7 +26,7 @@ public class PageVO {
 
     private int totalPage;
 
-    private int totalCount;
+    private Long totalCount;
 
 //    public PageVO(PageRequest pageParam) {
 //        this.pageNum = pageParam.getPage();

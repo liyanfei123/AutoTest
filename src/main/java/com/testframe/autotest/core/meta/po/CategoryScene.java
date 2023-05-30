@@ -5,7 +5,11 @@ public class CategoryScene {
 
     private Integer categoryId;
 
+    private Long stepId;
+
     private Long sceneId;
+
+    private Long setId;
 
     private Integer isDelete;
 
@@ -29,12 +33,27 @@ public class CategoryScene {
         this.categoryId = categoryId;
     }
 
+    public Long getStepId() {
+        return stepId;
+    }
+    public void setStepId(Long stepId) {
+        this.stepId = stepId;
+    }
+
     public Long getSceneId() {
         return sceneId;
     }
 
     public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
+    }
+
+    public Long getSetId() {
+        return setId;
+    }
+
+    public void setSetId(Long setId) {
+        this.setId = setId;
     }
 
     public Integer getIsDelete() {

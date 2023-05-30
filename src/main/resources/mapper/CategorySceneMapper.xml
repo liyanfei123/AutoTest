@@ -4,13 +4,15 @@
   <resultMap id="BaseResultMap" type="com.testframe.autotest.core.meta.po.CategoryScene" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="categoryId" property="categoryId" jdbcType="INTEGER" />
+    <result column="stepId" property="stepId" jdbcType="BIGINT" />
     <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
+    <result column="setId" property="setId" jdbcType="BIGINT" />
     <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, categoryId, sceneId, isDelete, createTime, updateTime
+    id, categoryId, stepId, sceneId, setId, isDelete, createTime, updateTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -19,12 +21,22 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
 
-  <select id="selectByCategoryId" resultType="com.testframe.autotest.core.meta.po.CategoryScene"
-          parameterType="java.lang.Integer">
+  <select id="selectByCategoryId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
     select 'false' as QUERYID,
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY_SCENE
-    where categoryId = #{categoryId,jdbcType=INTEGER} AND isDelete = 0 order by
+    where categoryId = #{categoryId,jdbcType=INTEGER}
+    AND isDelete = 0
+    <if test="type == 1" >
+    AND stepId > 0 AND sceneId = 0 AND setId = 0
+    </if>
+    <if test="type == 2" >
+      AND stepId = 0 AND sceneId > 0 AND setId = 0
+    </if>
+    <if test="type == 3" >
+      AND stepId = 0 AND sceneId = 0 AND setId > 0
+    </if>
+    order by
     <if test="pageQry.orderType == 1" >
       createTime desc
     </if>
@@ -34,25 +46,27 @@
     limit #{pageQry.offset}, #{pageQry.size}
   </select>
 
+
   <select id="selectBySceneId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
     select 'false' as QUERYID,
     <include refid="Base_Column_List" />
     from AUTO_TEST_CATEGORY_SCENE
-    where sceneId = #{sceneId,jdbcType=BIGINT} AND isDelete = 0
+    where sceneId = #{sceneId,jdbcType=BIGINT} AND sceneId > 0 AND isDelete = 0
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_CATEGORY_SCENE
     where id = #{id,jdbcType=BIGINT}
   </delete>
+
   <insert id="insert" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into AUTO_TEST_CATEGORY_SCENE (categoryId, sceneId, isDelete,
+    insert into AUTO_TEST_CATEGORY_SCENE (categoryId, stepId, sceneId, setId, isDelete,
     createTime, updateTime)
-    values (#{categoryId,jdbcType=INTEGER}, #{sceneId,jdbcType=BIGINT}, #{isDelete,jdbcType=INTEGER},
-    #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
+    values (#{categoryId,jdbcType=INTEGER}, #{stepId,jdbcType=BIGINT}, #{sceneId,jdbcType=BIGINT},
+    #{isDelete,jdbcType=INTEGER}, #{setId,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -63,8 +77,14 @@
       <if test="categoryId != null" >
         categoryId,
       </if>
+      <if test="stepId != null" >
+        stepId,
+      </if>
       <if test="sceneId != null" >
         sceneId,
+      </if>
+      <if test="setId != null" >
+        setId,
       </if>
       <if test="isDelete != null" >
         isDelete,
@@ -80,8 +100,14 @@
       <if test="categoryId != null" >
         #{categoryId,jdbcType=INTEGER},
       </if>
+      <if test="stepId != null" >
+        #{stepId,jdbcType=BIGINT},
+      </if>
       <if test="sceneId != null" >
         #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="setId != null" >
+        #{setId,jdbcType=BIGINT},
       </if>
       <if test="isDelete != null" >
         #{isDelete,jdbcType=INTEGER},
@@ -100,8 +126,14 @@
       <if test="categoryId != null" >
         categoryId = #{categoryId,jdbcType=INTEGER},
       </if>
+      <if test="stepId != null" >
+        stepId = #{stepId,jdbcType=BIGINT},
+      </if>
       <if test="sceneId != null" >
         sceneId = #{sceneId,jdbcType=BIGINT},
+      </if>
+      <if test="setId != null" >
+        setId = #{setId,jdbcType=BIGINT},
       </if>
       <if test="isDelete != null" >
         isDelete = #{isDelete,jdbcType=INTEGER},
@@ -118,7 +150,9 @@
   <update id="updateByPrimaryKey" parameterType="com.testframe.autotest.core.meta.po.CategoryScene" >
     update AUTO_TEST_CATEGORY_SCENE
     set categoryId = #{categoryId,jdbcType=INTEGER},
+    stepId = #{stepId,jdbcType=BIGINT},
     sceneId = #{sceneId,jdbcType=BIGINT},
+    setId = #{setId,jdbcType=BIGINT},
     isDelete = #{isDelete,jdbcType=INTEGER},
     createTime = #{createTime,jdbcType=BIGINT},
     updateTime = #{updateTime,jdbcType=BIGINT}
@@ -129,6 +163,22 @@
     select count(*)
     from AUTO_TEST_CATEGORY_SCENE
     where isDelete = 0 and categoryId= #{categoryId,jdbcType=INTEGER}
+    <if test="type == 1" >
+      AND stepId > 0
+    </if>
+    <if test="type == 2" >
+      AND sceneId > 0
+    </if>
+    <if test="type == 3" >
+      AND setId > 0
+    </if>
+  </select>
+
+  <select id="selectBySetId" resultType="com.testframe.autotest.core.meta.po.CategoryScene">
+    select 'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from AUTO_TEST_CATEGORY_SCENE
+    where setId = #{setId,jdbcType=BIGINT} AND setId > 0 AND isDelete = 0
   </select>
 
 </mapper>

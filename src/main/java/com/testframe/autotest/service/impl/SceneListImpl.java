@@ -6,6 +6,7 @@ import com.testframe.autotest.core.enums.SceneExecuteEnum;
 import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.meta.vo.common.PageVO;
 import com.testframe.autotest.core.repository.*;
 import com.testframe.autotest.domain.record.RecordDomain;
 import com.testframe.autotest.domain.scene.SceneDomain;
@@ -65,19 +66,22 @@ public class SceneListImpl implements SceneListService {
         log.info("[SceneListImpl:queryScenes] queryScenes param = {}", JSON.toJSONString(sceneQry));
         try {
             PageQry pageQry = sceneQry.getPageQry();
-            pageQry.setSize(pageQry.getSize()+1); // 多找一个
+            PageVO pageVO = new PageVO();
+            pageVO.setPageNum(pageQry.getPage());
+            pageVO.setPageSize(pageQry.getSize());
             Long offset = Long.valueOf((pageQry.getPage()-1)*pageQry.getSize());
+            pageQry.setSize(pageQry.getSize()+1); // 多找一个
             pageQry.setOffset(offset);
             SceneListVO sceneListVO = new SceneListVO();
-//            PageVO pageVO = new PageVO(pageQry.getPage(), pageQry.getSize()-1, -1L);
-//            sceneListVO.setPageVO(pageVO);
 
             SceneSearchListDto sceneSearchListDto = sceneDomain.searchScene(sceneQry);
             List<SceneDetailDto> sceneDetailDtos = sceneSearchListDto.getSceneDetailDtos();
             if (sceneDetailDtos == null || sceneDetailDtos.isEmpty()) {
                 sceneListVO.setScenes(Collections.EMPTY_LIST);
-                sceneListVO.setHasNext(false);
-                sceneListVO.setLastId(-1L);
+                pageVO.setHasNext(false);
+                pageVO.setLastId(-1L);
+                pageVO.setTotalCount(0L);
+                pageVO.setTotalPage(0);
                 return sceneListVO;
             }
 
@@ -85,13 +89,16 @@ public class SceneListImpl implements SceneListService {
                     .collect(Collectors.toList());
             if (sceneIds.size() == pageQry.getSize()) { // 多找了一个出来
                 log.info("[SceneListImpl:queryScenes] queryScenes find more");
-                sceneListVO.setHasNext(true);
-                sceneListVO.setLastId(sceneIds.get(sceneIds.size()-2));
+                pageVO.setHasNext(true);
+                pageVO.setLastId(sceneIds.get(sceneIds.size()-2));
                 sceneDetailDtos.remove(pageQry.getSize()-1);
             } else {
-                sceneListVO.setHasNext(false);
-                sceneListVO.setLastId(sceneIds.get(sceneIds.size()-1));
+                pageVO.setHasNext(false);
+                pageVO.setLastId(sceneIds.get(sceneIds.size()-1));
             }
+            pageVO.setTotalCount(sceneSearchListDto.getTotal());
+            pageVO.setTotalPage((int) (sceneSearchListDto.getTotal() / pageVO.getPageSize()
+                    + (sceneSearchListDto.getTotal() % pageVO.getPageSize() == 0 ? 0 : 1)));
 
             // 批量获取场景执行记录
             // 仅需要最新的一条记录
@@ -115,6 +122,7 @@ public class SceneListImpl implements SceneListService {
                     return sceneSimpleInfo;
                 }).collect(Collectors.toList());
                 sceneListVO.setScenes(sceneSimpleInfoDtos);
+                sceneListVO.setPageVO(pageVO);
                 return sceneListVO;
             }).join();
         } catch (Exception e) {
