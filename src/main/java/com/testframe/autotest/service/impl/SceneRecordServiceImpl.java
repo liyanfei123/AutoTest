@@ -105,12 +105,27 @@ public class SceneRecordServiceImpl implements SceneRecordService {
         }
     }
 
+    @Override
+    public SceneExeRecordVo recordDetail(Long sceneRecordId) {
+        log.info("[SceneDetailImpl:recordDetail] query execute record by sceneRecordId {}", sceneRecordId);
+        if (sceneRecordId == null || sceneRecordId <= 0) {
+            throw new AutoTestException("请输入正确的执行记录id");
+        }
+        SceneRecordBo sceneRecordBo = recordDomain.sceneExeRecordDetail(sceneRecordId);
+        if (sceneRecordBo == null) {
+            throw new AutoTestException("执行记录id错误");
+        }
+        List<SceneExeRecordVo> sceneExeRecordVos = buildSceneExeRecordVos(Collections.singletonList(sceneRecordBo));
+        return sceneExeRecordVos.get(0);
+    }
+
     public List<SceneExeRecordVo> buildSceneExeRecordVos(List<SceneRecordBo> sceneRecordBos) {
         List<SceneExeRecordVo> sceneExeRecordVos = new ArrayList<>();
         for (SceneRecordBo sceneRecordBo : sceneRecordBos) {
             List<StepRecordBo> stepRecordBos = sceneRecordBo.getStepRecordBos();
             SceneExecuteRecordDto sceneExecuteRecordDto = sceneRecordBo.getSceneExecuteRecordDto();
             SceneExeRecordVo sceneExeRecordVo = new SceneExeRecordVo();
+            sceneExeRecordVo.setSceneRecordId(sceneExecuteRecordDto.getRecordId());
             sceneExeRecordVo.setSceneId(sceneRecordBo.getSceneExecuteRecordDto().getSceneId());
             sceneExeRecordVo.setStepNum(stepRecordBos.size());
             SceneExeInfoVo sceneExeInfoVo = SceneExeInfoVo.build(sceneExecuteRecordDto);

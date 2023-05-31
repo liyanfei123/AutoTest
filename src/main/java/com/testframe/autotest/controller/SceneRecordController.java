@@ -1,6 +1,7 @@
 package com.testframe.autotest.controller;
 
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.meta.vo.SceneExeRecordVo;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
 import com.testframe.autotest.service.impl.SceneRecordServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -37,5 +38,11 @@ public class SceneRecordController {
         } catch (Exception e) {
             return HttpResult.error(e.getMessage());
         }
+    }
+
+    @GetMapping("/detail")
+    public HttpResult<SceneExeRecordVo> detailRecord(@RequestParam(required = true) Long recordId) {
+        SceneExeRecordVo sceneExeRecordVo = sceneRecordService.recordDetail(recordId);
+        return HttpResult.ok(sceneExeRecordVo);
     }
 }

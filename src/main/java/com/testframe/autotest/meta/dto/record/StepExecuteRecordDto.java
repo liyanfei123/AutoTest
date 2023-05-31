@@ -17,6 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 public class StepExecuteRecordDto {
 
+    private Long stepRecordId;
+
     private Long stepId;
 
     // 子场景的执行记录id

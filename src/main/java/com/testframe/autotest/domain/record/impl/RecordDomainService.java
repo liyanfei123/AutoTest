@@ -101,6 +101,23 @@ public class RecordDomainService implements RecordDomain, SetRecordDomain {
     }
 
 
+    @Override
+    public SceneRecordBo sceneExeRecordDetail(Long sceneRecordId) {
+        log.info("[SceneListInterImpl:sceneExeRecordDetail] sceneRecordId = {}", sceneRecordId);
+        SceneExecuteRecordDo sceneExecuteRecordDo = sceneExecuteRecordRepository.getSceneExeRecordById(sceneRecordId);
+        if (sceneExecuteRecordDo == null) {
+            return null;
+        }
+        SceneRecordBo sceneRecordBo = new SceneRecordBo();
+        SceneExecuteRecordDto sceneExecuteRecordDto = sceneExecuteRecordConverter.DoToDto(sceneExecuteRecordDo);
+        Long recordId = sceneExecuteRecordDto.getRecordId();
+        List<Long> stepOrderList = sceneExecuteRecordDto.getStepOrderList();
+        List<StepRecordBo> stepRecordBos = this.getStepExeInRecord(recordId,stepOrderList);
+        sceneRecordBo.setSceneExecuteRecordDto(sceneExecuteRecordDto);
+        sceneRecordBo.setStepRecordBos(stepRecordBos);
+        return sceneRecordBo;
+    }
+
     /**
      * 获取当前执行记录下的所有步骤的执行信息
      * @param recordId 场景执行记录id

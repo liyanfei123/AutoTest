@@ -7,7 +7,7 @@ import lombok.Data;
 public class SceneExeInfoVo {
 
     // 执行id，调试用
-    private Long recordId;
+//    private Long recordId;
 
     // 场景名称
     private String sceneName;
@@ -28,7 +28,7 @@ public class SceneExeInfoVo {
 
     public static SceneExeInfoVo build(SceneExecuteRecordDto sceneExecuteRecordDto) {
         SceneExeInfoVo sceneExeInfoVo = new SceneExeInfoVo();
-        sceneExeInfoVo.setRecordId(sceneExecuteRecordDto.getRecordId());
+//        sceneExeInfoVo.setRecordId(sceneExecuteRecordDto.getRecordId());
         sceneExeInfoVo.setSceneName(sceneExecuteRecordDto.getSceneName());
         sceneExeInfoVo.setTestUrl(sceneExecuteRecordDto.getUrl());
         sceneExeInfoVo.setWaitType(sceneExecuteRecordDto.getWaitType());

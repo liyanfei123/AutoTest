@@ -27,7 +27,7 @@ public class SetRecordController {
     private SetRecordService setRecordService;
 
     @GetMapping("list")
-    public HttpResult<SceneRecordListVo> listRecord(@RequestParam(required = true) Long setId) {
+    public HttpResult<SetExecuteRecordDto> listRecord(@RequestParam(required = true) Long setId) {
         List<SetExecuteRecordDto> setExecuteRecordDtos = setRecordService.records(setId);
         return HttpResult.ok(setExecuteRecordDtos);
     }

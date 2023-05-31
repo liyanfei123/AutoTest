@@ -23,6 +23,9 @@ public interface RecordDomain {
      * @return
      */
     List<SceneRecordBo> sceneExeRecord(Long sceneId, Boolean needSet, RecordQry recordQry);
+
+    SceneRecordBo sceneExeRecordDetail(Long sceneRecordId);
+
     HashMap<Long, List<SceneRecordBo>> listSceneExeRecord(List<Long> sceneIds, Boolean needSet, RecordQry recordQry);
 
     Long updateSceneExeRecord(SceneExecuteRecordDto sceneExecuteRecordDto,

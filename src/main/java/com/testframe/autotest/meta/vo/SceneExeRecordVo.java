@@ -13,6 +13,8 @@ import java.util.List;
 @Data
 public class SceneExeRecordVo {
 
+    private Long sceneRecordId;
+
     private Long sceneId;
 
     private Integer stepNum;

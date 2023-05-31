@@ -80,6 +80,11 @@ public class SceneExecuteRecordRepository {
         return this.convert(sceneRecords);
     }
 
+    public List<SceneExecuteRecordDo> querySceneExecuteRecordBySceneRecordId(Long setRecordId) {
+        List<SceneRecord> sceneRecords = sceneExecuteRecordDao.getSceneRecordsBySetRecordId(setRecordId);
+        return this.convert(sceneRecords);
+    }
+
     public List<SceneExecuteRecordDo> querySceneExecuteRecordBySetRecordId(Long setRecordId) {
         List<SceneRecord> sceneRecords = sceneExecuteRecordDao.getSceneRecordsBySetRecordId(setRecordId);
         return this.convert(sceneRecords);

@@ -15,4 +15,6 @@ public interface SceneRecordService {
 
     SceneRecordListVo records(Long sceneId);
 
+    SceneExeRecordVo recordDetail(Long sceneRecordId);
+
 }
