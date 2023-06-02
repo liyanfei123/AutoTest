@@ -60,7 +60,6 @@ CREATE TABLE AUTO_TEST_SET_EXECUTE_RECORD(
   PRIMARY KEY (id)
 ) COMMENT = '执行集执行记录表 ';
 
--- todo 增加setId字段关联执行集，creatTime从小到大即为执行顺序
 -- todo 添加updateTime
 CREATE TABLE AUTO_TEST_SCENE_EXECUTE_RECORD(
    id BIGINT NOT NULL AUTO_INCREMENT  COMMENT '执行记录id' ,

@@ -19,7 +19,7 @@ public interface SceneSetService {
 
     ExeSetDto querySet(Long setId);
 
-    List<ExeSetDto> queryRelByStepId(Long stepId, Long sceneId);
+    List<ExeSetDto> queryRelByStepIdOrSceneId(Long stepId, Long sceneId);
 
     Boolean deleteSceneSet(Long setId);
 

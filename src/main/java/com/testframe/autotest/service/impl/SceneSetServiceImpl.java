@@ -8,7 +8,6 @@ import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
-import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
 import com.testframe.autotest.core.meta.common.http.HttpStatus;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.meta.vo.common.PageVO;
@@ -25,13 +24,12 @@ import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
-import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
+import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.validator.CategoryValidator;
 import com.testframe.autotest.meta.validator.SceneSetValidator;
-import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.validator.StepValidator;
 import com.testframe.autotest.meta.vo.SetRelListVo;
 import com.testframe.autotest.service.SceneSetService;
@@ -51,7 +49,7 @@ public class SceneSetServiceImpl implements SceneSetService {
     private SceneSetValidator sceneSetValidator;
 
     @Autowired
-    private SceneValidator sceneValidator;
+    private SceneValidators sceneValidators;
 
     @Autowired
     private StepValidator stepValidator;
@@ -122,26 +120,8 @@ public class SceneSetServiceImpl implements SceneSetService {
     }
 
     @Override
-    public List<ExeSetDto> queryRelByStepId(Long stepId, Long sceneId) {
-        List<SceneSetRelDo> sceneSetRelDos = new ArrayList<>();
-        List<ExeSetDto> exeSetDtos = new ArrayList<>();
-        if (sceneId > 0) {
-            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(0L, sceneId);
-        } else if (stepId > 0) {
-            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(stepId, 0L);
-        }
-        sceneSetRelDos.forEach(sceneSetRelDo -> {
-            Long setId = sceneSetRelDo.getSetId();
-            ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
-            if (exeSetDo != null) {
-                ExeSetDto exeSetDto = new ExeSetDto();
-                exeSetDto.setSetId(exeSetDo.getSetId());
-                exeSetDto.setSetName(exeSetDo.getSetName());
-                exeSetDto.setStatus(exeSetDo.getStatus());
-                exeSetDtos.add(exeSetDto);
-            }
-        });
-        return exeSetDtos;
+    public List<ExeSetDto> queryRelByStepIdOrSceneId(Long stepId, Long sceneId) {
+        return sceneSetDomain.queryRelByStepIdOrSceneId(stepId, sceneId);
     }
 
     @Override

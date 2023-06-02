@@ -14,7 +14,7 @@ import com.testframe.autotest.meta.bo.SceneRecordBo;
 import com.testframe.autotest.meta.bo.StepRecordBo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import com.testframe.autotest.meta.query.RecordQry;
-import com.testframe.autotest.meta.validator.SceneValidator;
+import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.vo.SceneExeInfoVo;
 import com.testframe.autotest.meta.vo.SceneExeRecordVo;
 import com.testframe.autotest.meta.vo.SceneRecordListVo;
@@ -40,7 +40,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     private AutoTestConfig autoTestConfig;
 
     @Autowired
-    private SceneValidator sceneValidator;
+    private SceneValidators sceneValidators;
 
     @Autowired
     private SceneExecuteRecordRepository sceneExecuteRecordRepository;
@@ -71,7 +71,7 @@ public class SceneRecordServiceImpl implements SceneRecordService {
     public SceneRecordListVo records(Long sceneId) {
         try {
             log.info("[SceneDetailImpl:query] query execute records in sceneId {}", sceneId);
-            sceneValidator.sceneIsExist(sceneId);
+            sceneValidators.sceneIsExist(sceneId);
 
             SceneRecordListVo sceneRecordListVo = new SceneRecordListVo();
             sceneRecordListVo.setSceneId(sceneId);

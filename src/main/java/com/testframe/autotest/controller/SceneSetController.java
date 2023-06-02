@@ -43,7 +43,6 @@ public class SceneSetController {
         return HttpResult.ok(sceneSetService.querySet(setId));
     }
 
-    // TODO: 2023/5/19 添加执行集列表查询，关联类目功能
 
     @GetMapping("/delete")
     public HttpResult<Long> deleteSet(@RequestParam("setId") Long setId) {
@@ -103,7 +102,7 @@ public class SceneSetController {
         if (stepId == null || stepId < 0) {
             throw new AutoTestException("请输入正确的参数");
         }
-        return HttpResult.ok(sceneSetService.queryRelByStepId(stepId, 0L));
+        return HttpResult.ok(sceneSetService.queryRelByStepIdOrSceneId(stepId, 0L));
     }
 
     /**
@@ -116,7 +115,7 @@ public class SceneSetController {
         if (sceneId == null || sceneId < 0) {
             throw new AutoTestException("请输入正确的参数");
         }
-        return HttpResult.ok(sceneSetService.queryRelByStepId(0L, sceneId));
+        return HttpResult.ok(sceneSetService.queryRelByStepIdOrSceneId(0L, sceneId));
     }
 
     /**

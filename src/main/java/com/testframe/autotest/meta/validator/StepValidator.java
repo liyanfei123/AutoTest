@@ -132,7 +132,13 @@ public class StepValidator {
             throw new AutoTestException("当前元素检验类型不被支持");
         }
     }
-    // 验证单独场景为子场景
+
+    /**
+     * 验证单独场景为子场景
+     * @param fatherSceneId 需要判断的父场景id
+     * @param stepUpdateCmd 子场景id
+     * @return
+     */
     public SceneDetailDo checkStepIsSon(Long fatherSceneId, StepUpdateCmd stepUpdateCmd) {
         // 判断是否存在循环引用
         checkRecycle(fatherSceneId, stepUpdateCmd.getSonSceneId());

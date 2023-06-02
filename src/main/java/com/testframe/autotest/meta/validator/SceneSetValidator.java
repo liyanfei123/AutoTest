@@ -3,21 +3,19 @@ package com.testframe.autotest.meta.validator;
 import com.testframe.autotest.core.enums.ExeOrderEnum;
 import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
-import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.core.repository.ExeSetRepository;
 import com.testframe.autotest.meta.command.ExeSetUpdateCmd;
-import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
+import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.service.impl.SceneCategoryServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -31,7 +29,7 @@ public class SceneSetValidator {
     private CategorySceneRepository categorySceneRepository;
 
     @Autowired
-    private SceneValidator sceneValidator;
+    private SceneValidators sceneValidators;
 
     @Autowired
     private StepValidator stepValidator;
@@ -61,7 +59,7 @@ public class SceneSetValidator {
             if (!ExeOrderEnum.getTypes().contains(sceneSetRelSceneDto.getSort())) {
                 throw new AutoTestException("关联场景执行顺序错误");
             }
-            sceneValidator.sceneIsExist(sceneSetRelSceneDto.getSceneId());
+            sceneValidators.sceneIsExist(sceneSetRelSceneDto.getSceneId());
         }
         for (SceneSetRelStepDto sceneSetRelStepDto : sceneSetRelStepDtos) {
             if (!ExeOrderEnum.getTypes().contains(sceneSetRelStepDto.getSort())) {
@@ -81,7 +79,7 @@ public class SceneSetValidator {
             if (!ExeOrderEnum.getTypes().contains(sceneSetRelSceneDto.getSort())) {
                 throw new AutoTestException("关联场景执行顺序错误");
             }
-            sceneValidator.sceneIsExist(sceneSetRelSceneDto.getSceneId());
+            sceneValidators.sceneIsExist(sceneSetRelSceneDto.getSceneId());
         }
         for (SceneSetRelStepDto sceneSetRelStepDto : sceneSetRelStepDtos) {
             if (!OpenStatusEnum.getTypes().contains(sceneSetRelStepDto.getStatus())) {

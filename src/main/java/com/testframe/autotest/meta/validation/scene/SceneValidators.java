@@ -1,9 +1,10 @@
-package com.testframe.autotest.meta.validator;
+package com.testframe.autotest.meta.validation.scene;
 
 import com.testframe.autotest.cache.ao.SceneDetailCache;
 import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
+import com.testframe.autotest.core.meta.vo.common.Response;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.domain.category.CategoryDomain;
 import com.testframe.autotest.meta.bo.CategoryDetailBo;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 // 用于与场景相关的参数验证
 @Component
 @Slf4j
-public class SceneValidator {
+public class SceneValidators {
 
     @Autowired
     private SceneDetailRepository sceneDetailRepository;
@@ -40,7 +41,27 @@ public class SceneValidator {
     @Autowired
     private CategoryDomain categoryDomain;
 
-    public void validateCreate(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
+    public Response<SceneDetailDto> validateCreateNew(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
+        try {
+            if (sceneCreateCmd.getType() == null) {
+                return Response.fail("type不允许为空!!!!");
+            }
+            checkSceneType(sceneCreateCmd);
+            if (sceneCreateCmd.getCategoryId() == null || sceneCreateCmd.getCategoryId() == 0) {
+                throw new AutoTestException("请输入正确的类目");
+            }
+            checkSceneCategoryId(sceneCreateCmd.getCategoryId());
+            if (sceneCreateCmd.getTitle() == null) {
+                throw new AutoTestException("title不允许为空");
+            }
+            checkSceneTitle(sceneCreateCmd.getTitle(), sceneCreateCmd.getCategoryId(), null);
+        } catch (AutoTestException e) {
+            throw new AutoTestException(e.getMessage());
+        }
+        return Response.success(this.build(sceneCreateCmd));
+    }
+
+    public Response<SceneDetailDto> validateCreate(SceneCreateCmd sceneCreateCmd) throws AutoTestException {
         try {
             if (sceneCreateCmd.getType() == null) {
                 throw new AutoTestException("type不允许为空");
@@ -57,6 +78,7 @@ public class SceneValidator {
         } catch (AutoTestException e) {
             throw new AutoTestException(e.getMessage());
         }
+        return Response.success(this.build(sceneCreateCmd));
     }
 
     public void validateUpdate(SceneUpdateCmd sceneUpdateCmd) throws AutoTestException {
@@ -132,5 +154,14 @@ public class SceneValidator {
             sceneDetailDtos.add(sceneDetailDto);
         }
         return sceneDetailDtos;
+    }
+
+    private SceneDetailDto build(SceneCreateCmd sceneCreateCmd) {
+        SceneDetailDto sceneDetailDto = new SceneDetailDto();
+        sceneDetailDto.setSceneName(sceneCreateCmd.getTitle());
+        sceneDetailDto.setSceneDesc(sceneCreateCmd.getDesc());
+        sceneDetailDto.setType(sceneCreateCmd.getType());
+        sceneDetailDto.setCategoryId(sceneCreateCmd.getCategoryId());
+        return sceneDetailDto;
     }
 }

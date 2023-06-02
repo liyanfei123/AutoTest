@@ -5,13 +5,12 @@ import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.query.SceneQry;
-import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.vo.SceneDetailVo;
 import com.testframe.autotest.meta.vo.SceneListVO;
+import com.testframe.autotest.meta.vo.SceneRelListVO;
 import com.testframe.autotest.service.SceneDetailService;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.service.SceneListService;
-import com.testframe.autotest.ui.enums.BrowserEnum;
 import com.testframe.autotest.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -131,6 +130,13 @@ public class SceneController {
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }
+    }
+
+    // 获取场景所关联的场景和执行集
+    @GetMapping("/rel")
+    public HttpResult<SceneRelListVO> sceneRels(@RequestParam(name = "sceneId") Long sceneId) {
+        SceneRelListVO sceneRelListVO = sceneDetailService.sceneRels(sceneId);
+        return HttpResult.ok(sceneRelListVO);
     }
 
 }

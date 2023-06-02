@@ -243,6 +243,28 @@ public class SceneSetDomainImpl implements SceneSetDomain {
     }
 
 
+    public List<ExeSetDto> queryRelByStepIdOrSceneId(Long stepId, Long sceneId) {
+        List<SceneSetRelDo> sceneSetRelDos = new ArrayList<>();
+        List<ExeSetDto> exeSetDtos = new ArrayList<>();
+        if (sceneId > 0) {
+            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(0L, sceneId);
+        } else if (stepId > 0) {
+            sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(stepId, 0L);
+        }
+        sceneSetRelDos.forEach(sceneSetRelDo -> {
+            Long setId = sceneSetRelDo.getSetId();
+            ExeSetDo exeSetDo = exeSetRepository.queryExeSetById(setId);
+            if (exeSetDo != null) {
+                ExeSetDto exeSetDto = new ExeSetDto();
+                exeSetDto.setSetId(exeSetDo.getSetId());
+                exeSetDto.setSetName(exeSetDo.getSetName());
+                exeSetDto.setStatus(exeSetDo.getStatus());
+                exeSetDtos.add(exeSetDto);
+            }
+        });
+        return exeSetDtos;
+    }
+
     /**
      * 查找所有关联的场景，然后再进行分页
      * todo 添加缓存机制

@@ -20,4 +20,6 @@ public interface SceneSetDomain {
 
     public SceneSetBo querySetBySetId(Long setId, Integer type, Integer status, PageQry pageQry);
 
+    List<ExeSetDto> queryRelByStepIdOrSceneId(Long stepId, Long sceneId);
+
 }

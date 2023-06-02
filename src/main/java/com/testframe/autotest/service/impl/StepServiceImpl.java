@@ -21,7 +21,7 @@ import com.testframe.autotest.meta.command.UpdateStepsCmd;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import com.testframe.autotest.meta.dto.step.StepSaveAndUpdateDto;
 import com.testframe.autotest.meta.dto.step.StepsDto;
-import com.testframe.autotest.meta.validator.SceneValidator;
+import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.validator.StepValidator;
 import com.testframe.autotest.service.StepService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class StepServiceImpl implements StepService {
     private StepValidator stepValidator;
 
     @Autowired
-    private SceneValidator sceneValidator;
+    private SceneValidators sceneValidators;
 
     @Autowired
     private SceneDomain sceneDomain;
@@ -87,7 +87,7 @@ public class StepServiceImpl implements StepService {
                     stepUpdateCmd -> stepUpdateCmd.getStepId() == 0 || stepUpdateCmd.getStepId() == null)
                     .collect(Collectors.toList());
 
-            sceneValidator.sceneIsExist(sceneId);
+            sceneValidators.sceneIsExist(sceneId);
             if (!needSaveSteps.isEmpty()) {
                 stepValidator.checkStepSave(sceneId, needSaveSteps);
             }
@@ -164,7 +164,7 @@ public class StepServiceImpl implements StepService {
             throw new AutoTestException("请输入正确的值");
         }
         try {
-            sceneValidator.sceneIsExist(sceneId);
+            sceneValidators.sceneIsExist(sceneId);
             stepValidator.checkStepId(stepId);
             List<Long> stepIds = new ArrayList<>(Arrays.asList(stepId));
             return stepDomain.deleteSteps(sceneId, stepIds);
@@ -188,7 +188,7 @@ public class StepServiceImpl implements StepService {
             if (!reSelf.isEmpty()) {
                 throw new AutoTestException("子场景不可引用自己");
             }
-            sceneValidator.sceneIsExist(sceneId);
+            sceneValidators.sceneIsExist(sceneId);
             stepValidator.checkStepSave(sceneId, stepUpdateCmds);
             StepsDto stepsDto = new StepsDto();
             stepsDto.setSceneId(sceneId);
@@ -252,7 +252,7 @@ public class StepServiceImpl implements StepService {
     public Boolean changeStepOrderList(StepOrderUpdateCmd stepOrderUpdateCmd) {
         log.info("[StepServiceImpl:changeStepOrder] change step order, stepOrderUpdateCmd = {}",
                 JSON.toJSONString(stepOrderUpdateCmd));
-        sceneValidator.sceneIsExist(stepOrderUpdateCmd.getSceneId());
+        sceneValidators.sceneIsExist(stepOrderUpdateCmd.getSceneId());
         // 判断是否传入错误的步骤id
         List<Long> oldStepOrder = stepOrderDomain.stepOrderList(stepOrderUpdateCmd.getSceneId(),
                 StepOrderEnum.BEFORE.getType());
@@ -278,7 +278,7 @@ public class StepServiceImpl implements StepService {
     public Boolean changeStepOrder(Long sceneId, Long beforeStepId, Long stepId, Long afterStepId) {
         log.info("[StepServiceImpl:changeStepOrder] change step order in sceneId = {}, stepId = {}, before = {}, after = {}",
                 sceneId, beforeStepId, stepId, afterStepId);
-        sceneValidator.sceneIsExist(sceneId);
+        sceneValidators.sceneIsExist(sceneId);
         // 判断是否传入错误的步骤id
         List<Long> stepOrder = stepOrderDomain.stepOrderList(sceneId, StepOrderEnum.BEFORE.getType());
         log.info("[StepServiceImpl:changeStepOrder] origin step order = {}", JSON.toJSONString(stepOrder));
@@ -328,7 +328,7 @@ public class StepServiceImpl implements StepService {
         stepValidator.checkStepStatus(stepStatusUpdateCmd);
         try {
             Long sceneId = stepStatusUpdateCmd.getSceneId();
-            sceneValidator.sceneIsExist(sceneId);
+            sceneValidators.sceneIsExist(sceneId);
             if (stepStatusUpdateCmd.getType()  == 1) {
                 // 修改单个步骤状态
                 SceneStepRelDo sceneStepRelDo = sceneStepRepository.queryByStepIdAndSceneId(

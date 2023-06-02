@@ -3,33 +3,36 @@ package com.testframe.autotest.service.impl;
 import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
-import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.meta.vo.common.Response;
 import com.testframe.autotest.core.repository.*;
 import com.testframe.autotest.domain.category.CategorySceneDomain;
 import com.testframe.autotest.domain.scene.SceneDomain;
+import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
+import com.testframe.autotest.domain.sceneStep.SceneStepDomain;
 import com.testframe.autotest.domain.step.StepDomain;
 import com.testframe.autotest.meta.command.SceneCreateCmd;
 import com.testframe.autotest.meta.command.SceneUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
+import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import com.testframe.autotest.meta.dto.step.StepsDto;
+import com.testframe.autotest.meta.validation.scene.SceneValidation;
+import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.validator.CategoryValidator;
-import com.testframe.autotest.meta.vo.SceneDetailVo;
-import com.testframe.autotest.meta.vo.StepInfoVo;
+import com.testframe.autotest.meta.vo.*;
 import com.testframe.autotest.service.SceneDetailService;
-import com.testframe.autotest.meta.validator.SceneValidator;
 import com.testframe.autotest.meta.validator.StepValidator;
 import com.testframe.autotest.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 
@@ -38,7 +41,10 @@ import java.util.stream.Collectors;
 public class SceneDetailImpl implements SceneDetailService {
 
     @Autowired
-    private SceneValidator sceneValidator;
+    private SceneValidators sceneValidators;
+
+    @Autowired
+    private SceneValidation sceneValidation;
 
     @Autowired
     private StepValidator stepValidator;
@@ -61,21 +67,30 @@ public class SceneDetailImpl implements SceneDetailService {
     @Autowired
     private CategorySceneDomain categorySceneDomain;
 
+    @Autowired
+    private SceneStepDomain sceneStepDomain;
+
+    @Autowired
+    private SceneSetDomain sceneSetDomain;
+
     // 创建测试场景
     @Override
     public Long create(SceneCreateCmd sceneCreateCmd) {
         log.info("[SceneDetailImpl:create] create scene, sceneCreateCmd = {}", JSON.toJSONString(sceneCreateCmd));
-        try {
-            sceneValidator.validateCreate(sceneCreateCmd);
-            SceneDetailDto sceneDetailDto = this.build(sceneCreateCmd);
+//        try {
+            Response<SceneDetailDto> response = sceneValidation.validate(sceneCreateCmd);
+            if (response.isFail()) {
+                throw new AutoTestException(response.getCode(), response.getMsg());
+            }
+            SceneDetailDto sceneDetailDto = response.getResult();
             // todo:获取当前登录的用户信息
             sceneDetailDto.setCreateBy(1234L);
             log.info("[SceneDetailImpl:create] create scene, scene = {}", JSON.toJSONString(sceneDetailDto));
             return sceneDomain.updateScene(sceneDetailDto);
-        } catch (AutoTestException e) {
-            log.error("[SceneDetailImpl:create] create scene error, reason: {}", e.getMessage());
-            throw new AutoTestException(e.getMessage());
-        }
+//        } catch (AutoTestException e) {
+//            log.error("[SceneDetailImpl:create] create scene error, reason: {}", e.getMessage());
+//            throw new AutoTestException(e.getMessage());
+//        }
     }
 
     @Override
@@ -90,7 +105,7 @@ public class SceneDetailImpl implements SceneDetailService {
             if (sceneUpdateCmd.getCategoryId() == null) {
                 sceneUpdateCmd.setCategoryId(sceneDetailDto.getCategoryId());
             }
-            sceneValidator.validateUpdate(sceneUpdateCmd);
+            sceneValidators.validateUpdate(sceneUpdateCmd);
             sceneDetailDto = this.buildUpdate(sceneDetailDto, sceneUpdateCmd);
             if (sceneDetailDto == null) {
                 return true;
@@ -198,13 +213,13 @@ public class SceneDetailImpl implements SceneDetailService {
         }
         categoryValidator.checkCategoryId(newCategoryId);
         categoryValidator.checkCategoryId(oldCategoryId);
-        List<SceneDetailDto> sceneDetailDtos = sceneValidator.sceneIsExistInCategoryId(sceneIds, oldCategoryId);
+        List<SceneDetailDto> sceneDetailDtos = sceneValidators.sceneIsExistInCategoryId(sceneIds, oldCategoryId);
         List<CategorySceneDto> categorySceneDtos = new ArrayList<>();
         List<Long> repeatSceneIds = new ArrayList<>();
         for (SceneDetailDto sceneDetailDto : sceneDetailDtos) {
             // 标题重复的会自动过滤，不进行迁移
             try {
-                sceneValidator.checkSceneTitle(sceneDetailDto.getSceneName(), newCategoryId, sceneDetailDto.getSceneId());
+                sceneValidators.checkSceneTitle(sceneDetailDto.getSceneName(), newCategoryId, sceneDetailDto.getSceneId());
                 CategorySceneDto categorySceneDto = new CategorySceneDto();
                 categorySceneDto.setSceneId(sceneDetailDto.getSceneId());
                 categorySceneDto.setCategoryId(newCategoryId);
@@ -216,6 +231,40 @@ public class SceneDetailImpl implements SceneDetailService {
         }
         categorySceneDomain.batchUpdateCategoryScene(oldCategoryId, categorySceneDtos, CategoryRelEnum.SCENE.getType());
         return repeatSceneIds;
+    }
+
+    @Override
+    public SceneRelListVO sceneRels(Long sceneId) {
+        sceneValidators.sceneIsExist(sceneId);
+        // 关联场景
+        CompletableFuture<List<SceneDetailDto>> relSceneFuture = CompletableFuture
+                .supplyAsync(() -> sceneStepDomain.fatherScene(sceneId));
+        // 关联执行集
+        CompletableFuture<List<ExeSetDto>> relSetFuture = CompletableFuture
+                .supplyAsync(() -> sceneSetDomain.queryRelByStepIdOrSceneId(0L, sceneId));
+        SceneRelListVO sceneRelListVO = new SceneRelListVO();
+        sceneRelListVO.setSceneId(sceneId);
+        List<RelSceneVO> scenes = new ArrayList<>();
+        List<RelSetVO> sets = new ArrayList<>();
+        return CompletableFuture.allOf(relSceneFuture, relSetFuture).thenApply( e -> {
+            List<SceneDetailDto> sceneDetailDtos = relSceneFuture.join();
+            List<ExeSetDto> setDtos = relSetFuture.join();
+            sceneDetailDtos.forEach(sceneDetailDto -> {
+                RelSceneVO relSceneVO = new RelSceneVO();
+                relSceneVO.setSceneId(sceneDetailDto.getSceneId());
+                relSceneVO.setSceneName(sceneDetailDto.getSceneName());
+                scenes.add(relSceneVO);
+            });
+            setDtos.forEach(setDto -> {
+                RelSetVO relSetVO = new RelSetVO();
+                relSetVO.setSetId(setDto.getSetId());
+                relSetVO.setSetName(setDto.getSetName());
+                sets.add(relSetVO);
+            });
+            sceneRelListVO.setScenes(scenes);
+            sceneRelListVO.setSets(sets);
+            return sceneRelListVO;
+        }).join();
     }
 
     private SceneDetailDto build(SceneCreateCmd sceneCreateCmd) {
