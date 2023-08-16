@@ -41,7 +41,7 @@ public class ExeSetDao {
     }
 
     public List<ExeSet> querySetByName(String name) {
-        List<ExeSet> exeSets = exeSetMapper.selectBySetName(name);
+        List<ExeSet> exeSets = exeSetMapper.querySetLikeName(name);
         if (CollectionUtils.isEmpty(exeSets)) {
             return Collections.EMPTY_LIST;
         }

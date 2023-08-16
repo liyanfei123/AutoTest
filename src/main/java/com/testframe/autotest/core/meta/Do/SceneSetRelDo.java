@@ -15,6 +15,8 @@ public class SceneSetRelDo {
 
     public Integer type;
 
+    public String extInfo;
+
     public Integer status;
 
     public Integer sort;

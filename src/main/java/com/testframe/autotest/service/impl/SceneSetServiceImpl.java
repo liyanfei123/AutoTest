@@ -9,6 +9,7 @@ import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.meta.common.http.HttpStatus;
+import com.testframe.autotest.core.meta.convertor.ExeSetConverter;
 import com.testframe.autotest.core.meta.request.PageQry;
 import com.testframe.autotest.core.meta.vo.common.PageVO;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
@@ -27,10 +28,12 @@ import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.validator.CategoryValidator;
 import com.testframe.autotest.meta.validator.SceneSetValidator;
 import com.testframe.autotest.meta.validator.StepValidator;
+import com.testframe.autotest.meta.vo.SetListVo;
 import com.testframe.autotest.meta.vo.SetRelListVo;
 import com.testframe.autotest.service.SceneSetService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +43,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,6 +75,9 @@ public class SceneSetServiceImpl implements SceneSetService {
 
     @Autowired
     private CategorySceneRepository categorySceneRepository;
+
+    @Autowired
+    private ExeSetConverter exeSetConverter;
 
     @Override
     public Long updateSceneSet(ExeSetUpdateCmd exeSetUpdateCmd) {
@@ -117,6 +124,55 @@ public class SceneSetServiceImpl implements SceneSetService {
             exeSetDto.setCategoryId(categorySceneDo.getCategoryId());
         }
         return exeSetDto;
+    }
+
+    // 根据名称搜索
+    @Override
+    public SetListVo querySetByName(String setName, Integer categoryId, Integer page, Integer size) {
+        SetListVo setListVo = new SetListVo();
+        if (setName == null || setName.equals("")) {
+            setListVo.setPageVO(null);
+            setListVo.setSets(null);
+            return setListVo;
+        }
+        List<ExeSetDo> exeSetDos = exeSetRepository.queryExeSetsByName(setName);
+        List<ExeSetDto> exeSetDtos = exeSetDos.stream().map(exeSetDo -> exeSetConverter.DoToDto(exeSetDo))
+                .collect(Collectors.toList());
+        exeSetDtos.forEach(exeSetDto -> {
+            CategorySceneDo categorySceneDo =  categorySceneRepository.queryBySetId(exeSetDto.getSetId());
+            exeSetDto.setCategoryId(categorySceneDo.getCategoryId());
+        });
+        if (categoryId != null && categoryId > 0) {
+            categoryValidator.checkCategoryId(categoryId);
+            // 过滤执行集
+            exeSetDtos = exeSetDtos.stream().filter(exeSetDto -> exeSetDto.getCategoryId() == categoryId)
+                    .collect(Collectors.toList());
+        }
+        Integer total = exeSetDtos.size();
+        // 计算页数 同时判断是否有下一页
+        Integer totalPage = total / size + (total % size == 0 ? 1 : 0);
+        Boolean hasNext = true;
+        if (total <= size) {
+            hasNext = false;
+        }
+
+        PageVO pageVO = new PageVO();
+        pageVO.setPageSize(size);
+        pageVO.setTotalCount(Long.valueOf(total));
+        pageVO.setHasNext(hasNext);
+        pageVO.setTotalPage(totalPage);
+        pageVO.setPageNum(page);
+        int startIndex = (page-1)*size;
+        if (startIndex >= total) {
+            exeSetDtos = Collections.EMPTY_LIST;
+        } else {
+            int sub = total - (page - 1) * size >= size ? size : total - (page - 1) * size;
+            int endIndex = startIndex + sub;
+            // 包装数据
+            exeSetDtos = exeSetDtos.subList(startIndex, endIndex);
+        }
+        setListVo.setSets(exeSetDtos);
+        return setListVo;
     }
 
     @Override
@@ -195,6 +251,13 @@ public class SceneSetServiceImpl implements SceneSetService {
                 }
                 if (sceneSetRelSceneDto.getSort() == null) {
                     sceneSetRelSceneDto.setSort(ExeOrderEnum.NORMAL.getType());
+                }
+                // 场景关联时的额外配置
+                SceneSetConfigModel sceneSetConfigModel = sceneSetRelSceneDto.getSceneSetConfigModel();
+                if (sceneSetConfigModel != null) {
+                    if (sceneSetConfigModel.getTimeOutTime() == null) {
+                        sceneSetConfigModel.setTimeOutTime(0);
+                    }
                 }
             });
             sceneSetRelStepDtos.forEach(sceneSetRelStepDto -> {

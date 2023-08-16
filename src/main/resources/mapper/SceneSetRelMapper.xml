@@ -8,13 +8,14 @@
     <result column="sceneId" property="sceneId" jdbcType="BIGINT" />
     <result column="sort" property="sort" jdbcType="INTEGER" />
     <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="extInfo" property="type" jdbcType="VARCHAR" />
     <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, setId, stepId, sceneId, sort, type, isDelete, status, createTime, updateTime
+    id, setId, stepId, sceneId, sort, type, extInfo, isDelete, status, createTime, updateTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -108,11 +109,11 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into AUTO_TEST_SCENE_SET_REL (setId, stepId, sceneId, 
-      sort, type, isDelete, 
+      sort, type, extInfo, isDelete,
       status, createTime, updateTime
       )
     values (#{setId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{sceneId,jdbcType=BIGINT},
-      #{sort,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, 
+      #{sort,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{extInfo,jdbcType=VARCHAR}, #{isDelete,jdbcType=INTEGER},
       #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT}
       )
   </insert>
@@ -136,6 +137,9 @@
       </if>
       <if test="type != null" >
         type,
+      </if>
+      <if test="extInfo != null" >
+        extInfo,
       </if>
       <if test="isDelete != null" >
         isDelete,
@@ -165,6 +169,9 @@
       </if>
       <if test="type != null" >
         #{type,jdbcType=INTEGER},
+      </if>
+      <if test="extInfo != null" >
+        #{extInfo,jdbcType=VARCHAR},
       </if>
       <if test="isDelete != null" >
         #{isDelete,jdbcType=INTEGER},
@@ -198,6 +205,9 @@
       <if test="type != null" >
         type = #{type,jdbcType=INTEGER},
       </if>
+      <if test="extInfo != null" >
+        extInfo = #{extInfo,jdbcType=VARCHAR},
+      </if>
       <if test="isDelete != null" >
         isDelete = #{isDelete,jdbcType=INTEGER},
       </if>
@@ -220,6 +230,7 @@
       sceneId = #{sceneId,jdbcType=BIGINT},
       sort = #{sort,jdbcType=INTEGER},
       type = #{type,jdbcType=INTEGER},
+      extInfo = #{extInfo,jdbcType=VARCHAR},
       isDelete = #{isDelete,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
       createTime = #{createTime,jdbcType=BIGINT},

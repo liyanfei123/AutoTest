@@ -306,7 +306,7 @@ public class SeleniumEventHandler implements EventHandlerI<SeleniumRunEvent> {
                                 JSON.toJSONString(stepExe));
                         SeleniumRunEvent seleniumRunEvent = null;
                         try {
-                            seleniumRunEvent = sceneExecuteService.generateEvent(setRecordId, stepExe.getStepSceneId(),
+                            seleniumRunEvent = sceneExecuteService.generateEvent(setRecordId, stepExe.getStepSceneId(), null,
                                     SceneExecuteEnum.BELOW.getType());
                             // 修改子场景执行记录id
                             Long sonSceneRecordId = seleniumRunEvent.getSceneRunRecordInfo().getRecordId();

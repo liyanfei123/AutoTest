@@ -13,6 +13,8 @@ public class SceneSetRel {
 
     private Integer type;
 
+    private String extInfo;
+
     private Integer isDelete;
 
     private Integer status;
@@ -69,6 +71,13 @@ public class SceneSetRel {
         this.type = type;
     }
 
+    public String getExtInfo() {
+        return extInfo;
+    }
+
+    public void setExtInfo(String extInfo) {
+        this.extInfo = extInfo;
+    }
     public Integer getIsDelete() {
         return isDelete;
     }

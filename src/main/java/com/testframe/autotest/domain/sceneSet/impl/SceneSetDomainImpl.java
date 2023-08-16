@@ -27,6 +27,7 @@ import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
 import com.testframe.autotest.meta.dto.step.StepDetailDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.query.SceneSetRelQry;
 import com.testframe.autotest.meta.vo.SceneSimpleInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -166,6 +167,10 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                                     sceneSetRelSceneDto.getSort() == ExeOrderEnum.NORMAL.getType())) ) { // 顺序未变, 但是操作置顶和置后时需要更新updateTime
                         continue;
                     }
+                    // 判断额外设置的参数是否有变化
+                    if (!this.checkSceneSetConfigDiff(sceneSetRelDo, sceneSetRelSceneDto)) {
+                        continue;
+                    }
                     sceneSetRelDo.setType(SetMemTypeEnum.SCENE.getType());
                     sceneSetRelDo.setStatus(sceneSetRelSceneDto.getStatus());
                     sceneSetRelDo.setSort(sceneSetRelSceneDto.getSort());
@@ -273,7 +278,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
      * @param pageQry
      */
     private SceneSetBo querySceneRel(SceneSetBo sceneSetBo, Long setId, Integer type, Integer status, PageQry pageQry) {
-        HashMap<Integer, List<SceneSetRelDo>> diffSortSceneMap = new HashMap<>();
+        HashMap<Integer, List<SceneSetRelDo>> diffSortSceneMap;
         if (type == SetMemTypeEnum.SCENE.getType()) {
             diffSortSceneMap = sceneSetRelRepository.querySetRelBySetIdWithTypeAndStatus
                     (setId, SetMemTypeEnum.SCENE.getType(), status);
@@ -351,6 +356,12 @@ public class SceneSetDomainImpl implements SceneSetDomain {
             SceneDetailDto sceneDetailDto = sceneDetailDtoMap.get(sceneSetRelDo.getSceneId());
             sceneSetRelSceneBo.setSceneName(sceneDetailDto.getSceneName());
             sceneSetRelSceneBo.setStepNum(sceneDetailDto.getStepNum());
+            if (sceneSetRelDo.getExtInfo() == null || sceneSetRelDo.getExtInfo().equals("")) {
+                sceneSetRelSceneBo.setSceneSetConfigModel(null);
+            } else {
+                sceneSetRelSceneBo.setSceneSetConfigModel(JSON.parseObject(sceneSetRelDo.getExtInfo(),
+                        SceneSetConfigModel.class));
+            }
             sceneSetRelSceneBos.add(sceneSetRelSceneBo);
         }
         sceneSetBo.setSceneSetRelSceneBos(sceneSetRelSceneBos);
@@ -425,8 +436,6 @@ public class SceneSetDomainImpl implements SceneSetDomain {
 
 
 
-
-
         // 先查顶部
 
             PageQry headPageQry = new PageQry(pageQry.getPage(), offset, pageQry.getSize()+1);
@@ -464,6 +473,15 @@ public class SceneSetDomainImpl implements SceneSetDomain {
         return null;
     }
 
+    private boolean checkSceneSetConfigDiff(SceneSetRelDo sceneSetRelDo, SceneSetRelSceneDto sceneSetRelSceneDto) {
+        String extInfo = sceneSetRelDo.getExtInfo();
+        SceneSetConfigModel sceneSetConfigModel = JSON.parseObject(extInfo, SceneSetConfigModel.class);
+        SceneSetConfigModel sceneSetConfigModelDto = sceneSetRelSceneDto.getSceneSetConfigModel();
+        if (sceneSetConfigModel.getTimeOutTime() == sceneSetConfigModelDto.getTimeOutTime()) {
+            return false;
+        }
+        return true;
+    }
 
 
 }

@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.dto.sceneSet;
 
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import lombok.Data;
 
 /**
@@ -15,5 +16,7 @@ public class SceneSetRelSceneDto {
     public Integer status;
 
     public Integer sort;
+
+    public SceneSetConfigModel sceneSetConfigModel;
 
 }

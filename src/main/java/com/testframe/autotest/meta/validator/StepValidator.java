@@ -2,6 +2,7 @@ package com.testframe.autotest.meta.validator;
 
 
 import com.alibaba.fastjson.JSON;
+import com.testframe.autotest.cache.service.StepCacheService;
 import com.testframe.autotest.core.enums.OpenStatusEnum;
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.Do.SceneStepRelDo;
@@ -12,6 +13,7 @@ import com.testframe.autotest.meta.command.StepUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.repository.SceneStepRepository;
 import com.testframe.autotest.core.repository.StepDetailRepository;
+import com.testframe.autotest.meta.dto.step.StepDetailDto;
 import com.testframe.autotest.meta.model.StepInfoModel;
 import com.testframe.autotest.ui.enums.OperateTypeEnum;
 import com.testframe.autotest.ui.enums.check.AssertModeEnum;
@@ -42,6 +44,16 @@ public class StepValidator {
 
     @Autowired
     private SceneStepDomain sceneStepDomain;
+
+    @Autowired
+    private StepCacheService stepCacheService;
+    public StepDetailDto stepIsExist(Long stepId) {
+        StepDetailDto stepDetailDto = stepCacheService.getStepInfoFromCache(stepId);
+        if (stepDetailDto == null) {
+            throw new AutoTestException("当前步骤id错误");
+        }
+        return stepDetailDto;
+    }
 
     public void checkStepSave(Long sceneId, List<StepUpdateCmd> stepUpdateCmds) {
         for (StepUpdateCmd stepUpdateCmd : stepUpdateCmds) {

@@ -23,8 +23,10 @@ import com.testframe.autotest.meta.dto.step.StepSaveAndUpdateDto;
 import com.testframe.autotest.meta.dto.step.StepsDto;
 import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.meta.validator.StepValidator;
+import com.testframe.autotest.meta.vo.StepInfoVo;
 import com.testframe.autotest.service.StepService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +65,19 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private SceneStepRepository sceneStepRepository;
 
+
+    @Override
+    public StepInfoVo queryStepInfo(Long stepId) {
+        log.info("[StepDetailImpl:queryStepInfo] query step, stepId={}", stepId);
+        StepDetailDto stepDetailDto = stepValidator.stepIsExist(stepId);
+        if (stepDetailDto == null) {
+            return null;
+        }
+        StepInfoVo stepInfoVo = new StepInfoVo();
+        BeanUtils.copyProperties(stepDetailDto, stepInfoVo);
+        stepInfoVo.setSonSteps(new ArrayList<>());
+        return stepInfoVo;
+    }
 
     // 仅可更新步骤，不可更新执行顺序
     @Override

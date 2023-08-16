@@ -1,5 +1,6 @@
 package com.testframe.autotest.core.meta.convertor;
 
+import com.alibaba.fastjson.JSON;
 import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
 import com.testframe.autotest.core.meta.po.SceneSetRel;
@@ -19,6 +20,7 @@ public class SceneSetRelConvertor {
         sceneSetRelDo.setSceneId(sceneSetRel.getSceneId());
         sceneSetRelDo.setStepId(sceneSetRel.getStepId());
         sceneSetRelDo.setType(sceneSetRel.getType());
+        sceneSetRelDo.setExtInfo(sceneSetRel.getExtInfo());
         sceneSetRelDo.setStatus(sceneSetRel.getStatus());
         sceneSetRelDo.setSort(sceneSetRel.getSort());
         sceneSetRelDo.setUpdateTime(sceneSetRel.getUpdateTime());
@@ -32,6 +34,7 @@ public class SceneSetRelConvertor {
         sceneSetRel.setSceneId(sceneSetRelDo.getSceneId());
         sceneSetRel.setStepId(sceneSetRelDo.getStepId());
         sceneSetRel.setType(sceneSetRelDo.getType());
+        sceneSetRel.setExtInfo(sceneSetRelDo.getExtInfo());
         sceneSetRel.setStatus(sceneSetRelDo.getStatus());
         sceneSetRel.setSort(sceneSetRelDo.getSort());
         return sceneSetRel;
@@ -43,6 +46,7 @@ public class SceneSetRelConvertor {
         sceneSetRelDo.setSceneId(sceneSetRelSceneDto.getSceneId());
         sceneSetRelDo.setStatus(sceneSetRelSceneDto.getStatus());
         sceneSetRelDo.setType(SetMemTypeEnum.SCENE.getType());
+        sceneSetRelDo.setExtInfo(JSON.toJSONString(sceneSetRelSceneDto.getSceneSetConfigModel()));
         sceneSetRelDo.setSort(sceneSetRelSceneDto.getSort());
         return sceneSetRelDo;
     }

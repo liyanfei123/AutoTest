@@ -6,6 +6,7 @@ import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.meta.command.UpdateStepsCmd;
+import com.testframe.autotest.meta.vo.StepInfoVo;
 import com.testframe.autotest.service.StepService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -34,6 +35,16 @@ public class StepController {
             }
             List<Long> stepIds = stepService.addStepDetail(updateStepsCmd);
             return HttpResult.ok(stepIds);
+        } catch (AutoTestException e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/query")
+    public HttpResult<StepInfoVo> stepSave(@RequestParam("stepId") Long stepId) {
+        try {
+            StepInfoVo stepInfoVo = stepService.queryStepInfo(stepId);
+            return HttpResult.ok(stepInfoVo);
         } catch (AutoTestException e) {
             return HttpResult.error(e.getMessage());
         }

@@ -1,5 +1,6 @@
 package com.testframe.autotest.service;
 
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.ui.handler.event.SeleniumRunEvent;
 
 public interface SceneExecuteService {
@@ -8,6 +9,6 @@ public interface SceneExecuteService {
 
     public void executeSet(Long setId, Integer browserType);
 
-    public SeleniumRunEvent generateEvent(Long setRecordId, Long sceneId, Integer type);
+    public SeleniumRunEvent generateEvent(Long setRecordId, Long sceneId, SceneSetConfigModel sceneSetConfigModel, Integer type);
 
 }

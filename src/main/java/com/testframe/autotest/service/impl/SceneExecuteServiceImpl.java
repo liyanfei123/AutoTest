@@ -19,6 +19,7 @@ import com.testframe.autotest.meta.bo.SceneSetBo;
 import com.testframe.autotest.meta.bo.SceneSetRelSceneBo;
 import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
 import com.testframe.autotest.meta.dto.record.SetExecuteRecordDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.query.RecordQry;
 import com.testframe.autotest.ui.meta.StepUIInfo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
@@ -90,7 +91,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             if (SceneTypeEnum.getByType(browserType) == null) {
                 throw new AutoTestException("浏览器选择错误");
             }
-            SeleniumRunEvent seleniumRunEvent = generateEvent(0L, sceneId, SceneExecuteEnum.SINGLE.getType());
+            SeleniumRunEvent seleniumRunEvent = generateEvent(0L, sceneId, null, SceneExecuteEnum.SINGLE.getType());
             seleniumRunEvent.setBrowserType(browserType);
             log.info("[SceneExecuteServiceImpl:executeScene] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
             eventBus.post(seleniumRunEvent);
@@ -136,8 +137,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
         // 执行集场景初始化失败
         List<SeleniumRunEvent> seleniumRunEvents = new ArrayList<>();
         try {
-            for (Long sceneId : sceneIds) {
-                SeleniumRunEvent seleniumRunEvent = generateEvent(setRecordId, sceneId, SceneExecuteEnum.SINGLE.getType());
+            for (SceneSetRelSceneBo sceneSetRelSceneBo : sceneSetRelSceneBos) {
+                Long sceneId = sceneSetRelSceneBo.getSceneId();
+                SceneSetConfigModel sceneSetConfigModel = sceneSetRelSceneBo.getSceneSetConfigModel();
+                SeleniumRunEvent seleniumRunEvent = generateEvent(setRecordId, sceneId, sceneSetConfigModel, SceneExecuteEnum.SINGLE.getType());
                 seleniumRunEvent.setBrowserType(browserType);
                 seleniumRunEvent.setSetRunRecordInfo(setRunRecordInfo);
                 seleniumRunEvents.add(seleniumRunEvent);
@@ -165,7 +168,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
      * @param type SceneExecuteEnum，若是作为子场景执行，传2
      * @return
      */
-    public SeleniumRunEvent generateEvent(Long setRecordId, Long sceneId, Integer type) {
+    @Override
+    public SeleniumRunEvent generateEvent(Long setRecordId, Long sceneId, SceneSetConfigModel sceneSetConfigModel, Integer type) {
         try {
             SceneDetailDto sceneDetailDto = sceneCacheService.getSceneDetailFromCache(sceneId);
             if (sceneDetailDto == null) {
@@ -192,6 +196,9 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             StepOrderDo stepOrderDo = stepOrderRepository.queryBeforeStepRunOrder(sceneId);
             List<Long> stepOrderList = stepOrderDo.getOrderList();
             SceneExecuteRecordDto sceneExecuteRecordDto = this.buildInit(setRecordId, sceneDetailDto);
+            if (sceneSetConfigModel != null) {
+                sceneExecuteRecordDto.setWaitTime(sceneSetConfigModel.getTimeOutTime());
+            }
             sceneExecuteRecordDto.setStatus(SceneStatusEnum.INT.getType());
             sceneExecuteRecordDto.setType(type);
             sceneExecuteRecordDto.setStepOrderList(stepOrderList);
@@ -218,7 +225,8 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
                     }
                 });
                 // 生成执行事件
-                SeleniumRunEvent seleniumRunEvent = buildRunEvent(sceneDetailDto, stepDetailDtos, recordId, stepOrderList);
+                SeleniumRunEvent seleniumRunEvent = buildRunEvent(sceneDetailDto, stepDetailDtos,
+                        sceneSetConfigModel, recordId, stepOrderList);
                 return seleniumRunEvent;
             } catch (AutoTestException e) {
                 // 这边当事件执行失败时，需要将该场景的初始化更新为失败
@@ -253,7 +261,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     }
 
     private SeleniumRunEvent buildRunEvent(SceneDetailDto sceneDetailDto, List<StepDetailDto> stepDetailDtos,
-                                           Long recordId, List<Long> stepOrderList) {
+                                           SceneSetConfigModel sceneSetConfigModel, Long recordId, List<Long> stepOrderList) {
         SeleniumRunEvent seleniumRunEvent = new SeleniumRunEvent();
         log.info("[SceneExecuteServiceImpl:buildRunEvent] start build run event, scene = {}",
                 JSON.toJSONString(sceneDetailDto));
@@ -264,6 +272,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             sceneRunRecordInfo.setRecordId(recordId);
             seleniumRunEvent.setSceneRunRecordInfo(sceneRunRecordInfo);
             WaitInfo waitInfo = new WaitInfo(sceneDetailDto.getWaitType(), sceneDetailDto.getWaitTime());
+            // 执行集中关联的场景配置
+            if (sceneSetConfigModel != null) {
+                waitInfo.setWaitTime(sceneSetConfigModel.getTimeOutTime());
+            }
             seleniumRunEvent.setWaitInfo(waitInfo);
             // 转换为stepExe
             List<StepExe> stepExes = new ArrayList<>(stepDetailDtos.size());

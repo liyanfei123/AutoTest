@@ -1,6 +1,7 @@
 package com.testframe.autotest.core.repository.mapper;
 
 import com.testframe.autotest.core.meta.po.ExeSet;
+import com.testframe.autotest.core.meta.request.PageQry;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,6 +18,8 @@ public interface ExeSetMapper {
     ExeSet selectByPrimaryKey(Long id);
 
     List<ExeSet> selectBySetName(@Param("setName") String setName);
+
+    List<ExeSet> querySetLikeName(@Param("setName") String setName);
 
     int updateByPrimaryKeySelective(ExeSet record);
 

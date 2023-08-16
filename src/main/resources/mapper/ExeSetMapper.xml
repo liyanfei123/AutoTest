@@ -108,4 +108,10 @@
     from AUTO_TEST_SET
     where setName = #{title,jdbcType=VARCHAR} AND isDelete = 0
   </select>
+
+  <select id="querySetLikeName" resultMap="BaseResultMap"><![CDATA[
+    select *
+    from AUTO_TEST_SET
+    where setName like '%${setName}%'
+    ]]></select>
 </mapper>

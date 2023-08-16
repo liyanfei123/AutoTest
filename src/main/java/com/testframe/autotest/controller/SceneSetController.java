@@ -7,6 +7,7 @@ import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
+import com.testframe.autotest.meta.vo.SetListVo;
 import com.testframe.autotest.meta.vo.SetRelListVo;
 import com.testframe.autotest.service.impl.SceneSetServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,14 @@ public class SceneSetController {
     @GetMapping("/query")
     public HttpResult<ExeSetDto> querySet(@RequestParam("setId") Long setId) {
         return HttpResult.ok(sceneSetService.querySet(setId));
+    }
+
+    @GetMapping("/queryByName")
+    public HttpResult<SetListVo> querySetByName(@RequestParam("name") String setName,
+                                                @RequestParam("categoryId") Integer categoryId,
+                                                @RequestParam("page") Integer page,
+                                                @RequestParam("size") Integer size) {
+        return HttpResult.ok(sceneSetService.querySetByName(setName, categoryId, page, size));
     }
 
 
@@ -97,7 +106,7 @@ public class SceneSetController {
      * @param stepId
      * @return
      */
-    @GetMapping("/rel/step")
+    @GetMapping("/query/rel/step")
     public HttpResult<List<ExeSetDto>> stepRelSet(@RequestParam("stepId") Long stepId) {
         if (stepId == null || stepId < 0) {
             throw new AutoTestException("请输入正确的参数");
@@ -110,7 +119,7 @@ public class SceneSetController {
      * @param sceneId
      * @return
      */
-    @GetMapping("/rel/scene")
+    @GetMapping("/query/rel/scene")
     public HttpResult<List<ExeSetDto>> sceneRelSet(@RequestParam("sceneId") Long sceneId) {
         if (sceneId == null || sceneId < 0) {
             throw new AutoTestException("请输入正确的参数");

@@ -10,6 +10,7 @@ import com.testframe.autotest.meta.command.ExeSetUpdateCmd;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelSceneDto;
 import com.testframe.autotest.meta.dto.sceneSet.SceneSetRelStepDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.validation.scene.SceneValidators;
 import com.testframe.autotest.service.impl.SceneCategoryServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +79,12 @@ public class SceneSetValidator {
             }
             if (!ExeOrderEnum.getTypes().contains(sceneSetRelSceneDto.getSort())) {
                 throw new AutoTestException("关联场景执行顺序错误");
+            }
+            SceneSetConfigModel sceneSetConfigModel = sceneSetRelSceneDto.getSceneSetConfigModel();
+            if (sceneSetConfigModel != null) {
+                if (sceneSetConfigModel.getTimeOutTime() < 0) {
+                    throw new AutoTestException("超时时间设置错误");
+                }
             }
             sceneValidators.sceneIsExist(sceneSetRelSceneDto.getSceneId());
         }

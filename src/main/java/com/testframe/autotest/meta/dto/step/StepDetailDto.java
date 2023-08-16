@@ -1,5 +1,6 @@
 package com.testframe.autotest.meta.dto.step;
 
+import com.testframe.autotest.meta.model.StepInfoModel;
 import lombok.Data;
 
 @Data
@@ -20,6 +21,10 @@ public class StepDetailDto {
     // 用于区分当前步骤是否是子场景还是单步骤
     private Integer type;
 
+
+    /**
+     * @see StepInfoModel
+     */
     private String stepUIInfo;
 
 }

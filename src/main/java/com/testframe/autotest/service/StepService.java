@@ -3,6 +3,7 @@ package com.testframe.autotest.service;
 import com.testframe.autotest.meta.command.StepOrderUpdateCmd;
 import com.testframe.autotest.meta.command.StepStatusUpdateCmd;
 import com.testframe.autotest.meta.command.UpdateStepsCmd;
+import com.testframe.autotest.meta.vo.StepInfoVo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.List;
 public interface StepService {
 
     List<Long> addStepDetail(UpdateStepsCmd stepUpdateCmd);
+
+    StepInfoVo queryStepInfo(Long stepId);
 
     Boolean updateStepDetail(UpdateStepsCmd updateStepsCmd);
 

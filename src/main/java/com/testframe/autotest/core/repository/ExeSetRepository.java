@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -73,5 +76,18 @@ public class ExeSetRepository {
             return null;
         }
         return exeSetConverter.PoToDo(exeSet);
+    }
+
+    public List<ExeSetDo> queryExeSetsByName(String setName) {
+        List<ExeSet> exeSets = exeSetDao.querySetByName(setName);
+        if (exeSets.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        List<ExeSetDo> exeSetDos = new ArrayList<>();
+        exeSets.forEach(exeSet -> {
+            ExeSetDo exeSetDo = exeSetConverter.PoToDo(exeSet);
+            exeSetDos.add(exeSetDo);
+        });
+        return exeSetDos;
     }
 }

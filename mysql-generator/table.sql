@@ -116,6 +116,9 @@ CREATE TABLE AUTO_TEST_SCENE_SET_REL(
   PRIMARY KEY (id)
 ) COMMENT = '执行集关联场景表 ';
 
+alter table AUTO_TEST_SCENE_SET_REL add column `extInfo` VARCHAR(10000) NOT NULL DEFAULT ''  COMMENT '额外数据' after `type`;
+-- 添加额外信息的json字符串
+
 alter table AUTO_TEST_STEP_EXECUTE_RECORD add column `stepName` VARCHAR(1024) NOT NULL DEFAULT ''  COMMENT '步骤名称' after `stepId`;
 -- 步骤执行记录表中需增加步骤名称，用于返回执行结果记录
 
