@@ -6,7 +6,9 @@ import com.testframe.autotest.core.enums.*;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
 import com.testframe.autotest.core.meta.Do.StepOrderDo;
+import com.testframe.autotest.core.meta.channel.ExecuteChannel;
 import com.testframe.autotest.core.meta.request.PageQry;
+import com.testframe.autotest.core.meta.vo.common.Response;
 import com.testframe.autotest.core.repository.ExeSetRepository;
 import com.testframe.autotest.core.repository.SetExecuteRecordRepository;
 import com.testframe.autotest.core.repository.StepOrderRepository;
@@ -15,12 +17,16 @@ import com.testframe.autotest.domain.record.SetRecordDomain;
 import com.testframe.autotest.domain.scene.SceneDomain;
 import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
 import com.testframe.autotest.domain.step.StepDomain;
+import com.testframe.autotest.handler.HandlerHolder;
 import com.testframe.autotest.meta.bo.SceneSetBo;
 import com.testframe.autotest.meta.bo.SceneSetRelSceneBo;
+import com.testframe.autotest.meta.command.ExecuteCmd;
 import com.testframe.autotest.meta.dto.record.SceneSimpleExecuteDto;
 import com.testframe.autotest.meta.dto.record.SetExecuteRecordDto;
 import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.query.RecordQry;
+import com.testframe.autotest.meta.validation.execute.ExecuteValidation;
+import com.testframe.autotest.ui.enums.BrowserEnum;
 import com.testframe.autotest.ui.meta.StepUIInfo;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
@@ -81,6 +87,12 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
     @Autowired
     private SceneCacheService sceneCacheService;
 
+    @Autowired
+    private HandlerHolder handlerHolder;
+
+    @Autowired
+    private ExecuteValidation executeValidation;
+
 //    public void execute() {
 //        log.info("开始发送消息");
 //        eventBus.post(SeleniumRunEvent.builder().sceneId(123L).build());
@@ -88,9 +100,10 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 
     public void executeScene(Long sceneId, Integer browserType) {
         try {
-            if (SceneTypeEnum.getByType(browserType) == null) {
+            if (BrowserEnum.getByType(browserType) == null) {
                 throw new AutoTestException("浏览器选择错误");
             }
+            // todo 判断场景状态
             SeleniumRunEvent seleniumRunEvent = generateEvent(0L, sceneId, null, SceneExecuteEnum.SINGLE.getType());
             seleniumRunEvent.setBrowserType(browserType);
             log.info("[SceneExecuteServiceImpl:executeScene] post event, event = {}", JSON.toJSONString(seleniumRunEvent));
@@ -103,7 +116,7 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
 
     @Override
     public void executeSet(Long setId, Integer browserType) {
-        if (SceneTypeEnum.getByType(browserType) == null) {
+        if (BrowserEnum.getByType(browserType) == null) {
             throw new AutoTestException("浏览器选择错误");
         }
         // 检验执行集是否存在
@@ -160,6 +173,36 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             throw new AutoTestException(e.getMessage());
         }
     }
+
+    @Override
+    public void executeV2(ExecuteCmd executeCmd) {
+        log.info("[SceneExecuteServiceImpl:executeV2] execute, executeCmd = {}", JSON.toJSONString(executeCmd));
+        if (executeCmd.getBrowserType() == null) {
+            executeCmd.setBrowserType(BrowserEnum.CHROME.getType());
+        }
+        if (BrowserEnum.getByType(executeCmd.getBrowserType()) == null) {
+            throw new AutoTestException("浏览器选择错误");
+        }
+        try {
+            ExecuteChannel executeChannel = new ExecuteChannel();
+            executeChannel.setExecuteCmd(executeCmd);
+            if (executeCmd.getSetId() != null && executeCmd.getSetId() > 0) {
+                executeChannel.setType(SceneExecuteEnum.SET.getType());
+            } else {
+                executeChannel.setType(SceneExecuteEnum.SINGLE.getType());
+            }
+            Response<ExecuteChannel> response = executeValidation.validate(executeChannel);
+            handlerHolder.getSeleniumEventChain().process(response.getResult());
+            List<SeleniumRunEvent> seleniumRunEvents = executeChannel.getSeleniumRunEvents();
+            log.info("[SceneExecuteServiceImpl:executeV2] post event, events = {}", JSON.toJSONString(seleniumRunEvents));
+            eventBus.post(seleniumRunEvents);
+        } catch (Exception e) {
+            log.error("[SceneExecuteServiceImpl:executeV2] execute error, e = ", e);
+            throw new AutoTestException(e.getMessage());
+        }
+
+    }
+
 
     /**
      * 生成执行事件内容

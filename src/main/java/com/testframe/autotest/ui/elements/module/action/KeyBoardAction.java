@@ -95,7 +95,7 @@ public class KeyBoardAction extends BaseAction implements ActionI {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
             // TODO: 2022/11/25 区分mac和win的复制键
             // window用robot组件，mac使用Action
-            log.info("[KeyBoardAction:input] start input value 4");
+//            log.info("[KeyBoardAction:input] start input value 4");
             Actions action = new Actions(driver);
             action.keyDown(Keys.COMMAND).sendKeys("v").keyUp(Keys.COMMAND).build().perform();
 

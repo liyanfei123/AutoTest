@@ -224,7 +224,7 @@ public class RecordDomainService implements RecordDomain, SetRecordDomain {
                 return sceneExecuteRecordDo.getRecordId();
            }
         } catch (Exception e) {
-            log.error("[RecordDomainService:updateSceneExeRecord] error, reason = {}", e);
+            log.error("[RecordDomainService:updateSceneExeRecord] error, reason = ", e);
             return 0L;
         }
     }

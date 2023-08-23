@@ -2,6 +2,7 @@ package com.testframe.autotest.core.meta.convertor;
 
 import com.testframe.autotest.core.meta.Do.SceneDetailDo;
 import com.testframe.autotest.core.meta.po.SceneDetail;
+import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import org.springframework.stereotype.Component;
 

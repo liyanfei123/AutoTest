@@ -10,7 +10,6 @@ public interface SetRecordDomain {
 
     Long updateSetExeRecord(SetExecuteRecordDto setExecuteRecordDto);
 
-
     List<SceneRecordBo> sceneExeRecordWithSetRecord(Long setRecordId);
 
     List<SetExecuteRecordDto> setExeRecord(Long setId, RecordQry recordQry);

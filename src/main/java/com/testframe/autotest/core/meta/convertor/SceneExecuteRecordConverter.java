@@ -3,6 +3,7 @@ package com.testframe.autotest.core.meta.convertor;
 import com.testframe.autotest.core.meta.Do.SceneExecuteRecordDo;
 import com.testframe.autotest.core.meta.po.SceneRecord;
 import com.testframe.autotest.meta.dto.record.SceneExecuteRecordDto;
+import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import org.springframework.stereotype.Component;
 
 
@@ -78,6 +79,24 @@ public class SceneExecuteRecordConverter {
         sceneExecuteRecordDto.setType(sceneExecuteRecordDo.getType());
         sceneExecuteRecordDto.setExecuteTime(sceneExecuteRecordDo.getExecuteTime());
         sceneExecuteRecordDto.setStepOrderList(sceneExecuteRecordDo.getStepOrderList());
+        return sceneExecuteRecordDto;
+    }
+
+    public SceneExecuteRecordDto buildSceneExecuteRecord(SceneDetailDto sceneDetailDto) {
+        SceneExecuteRecordDto sceneExecuteRecordDto = new SceneExecuteRecordDto();
+        sceneExecuteRecordDto.setRecordId(null);
+        sceneExecuteRecordDto.setSetRecordId(null); // 记得在后续进行添加
+        sceneExecuteRecordDto.setSceneId(sceneDetailDto.getSceneId());
+        sceneExecuteRecordDto.setSceneName(sceneDetailDto.getSceneName());
+        sceneExecuteRecordDto.setUrl(sceneDetailDto.getUrl());
+        sceneExecuteRecordDto.setWaitType(sceneDetailDto.getWaitType());
+        sceneExecuteRecordDto.setWaitTime(sceneDetailDto.getWaitTime());
+        sceneExecuteRecordDto.setStatus(null);
+        sceneExecuteRecordDto.setType(null);
+        Long currentTime = System.currentTimeMillis();
+        sceneExecuteRecordDto.setExecuteTime(currentTime);
+        sceneExecuteRecordDto.setExtInfo(null);
+        sceneExecuteRecordDto.setStepOrderList(null);
         return sceneExecuteRecordDto;
     }
 

@@ -24,7 +24,11 @@ public class SceneRunInfo {
     public static SceneRunInfo build(SceneDetailDto sceneDetailDto, List<Long> runOrderList) {
         SceneRunInfo sceneRunInfo = new SceneRunInfo();
         sceneRunInfo.setSceneId(sceneDetailDto.getSceneId());
-        sceneRunInfo.setUrl(sceneDetailDto.getUrl());
+        String url = sceneDetailDto.getUrl();
+        if (!url.startsWith("https")) {
+            url = "https://" + url;
+        }
+        sceneRunInfo.setUrl(url);
         sceneRunInfo.setRunOrderList(runOrderList);
         return sceneRunInfo;
     }

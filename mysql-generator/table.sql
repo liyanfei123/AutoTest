@@ -109,6 +109,7 @@ CREATE TABLE AUTO_TEST_SCENE_SET_REL(
   sceneId INT NULL DEFAULT 0  COMMENT '场景id' ,
   sort INT NULL DEFAULT 0 COMMENT '排序' ,
   type INT NULL DEFAULT 0 COMMENT '是否删除 0:场景,1:单步骤' ,
+  extInfo VARCHAR(10000) NOT NULL DEFAULT ''  COMMENT '额外数据',
   isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
   status INT NULL DEFAULT 0  COMMENT '执行状态 0:未开启 1:开启' ,
   createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,

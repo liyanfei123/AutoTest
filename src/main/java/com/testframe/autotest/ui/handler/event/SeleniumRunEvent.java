@@ -1,6 +1,7 @@
 package com.testframe.autotest.ui.handler.event;
 
 import com.testframe.autotest.ui.meta.*;
+import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class SeleniumRunEvent {
+
+    private Integer type;
 
     // 浏览器类型
     private Integer browserType;

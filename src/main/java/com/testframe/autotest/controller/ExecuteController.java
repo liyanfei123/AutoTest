@@ -2,14 +2,12 @@ package com.testframe.autotest.controller;
 
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
+import com.testframe.autotest.meta.command.ExecuteCmd;
 import com.testframe.autotest.service.SceneExecuteService;
 import com.testframe.autotest.ui.enums.BrowserEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -48,4 +46,14 @@ public class ExecuteController {
         return HttpResult.ok();
     }
 
+
+    @PostMapping("/executeV2")
+    public HttpResult<Boolean> execute(@RequestBody ExecuteCmd executeCmd) {
+        try {
+            sceneExecuteService.executeV2(executeCmd);
+            return HttpResult.ok();
+        } catch (Exception e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
 }

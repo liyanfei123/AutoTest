@@ -9,5 +9,5 @@ public class SetRunRecordInfo {
 
     Long setId;
 
-    Long setRunTime;
+//    Long setRunTime;
 }

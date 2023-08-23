@@ -14,7 +14,8 @@ public enum SceneStatusEnum {
     SUCCESS(3, "执行成功"),
     FAIL(4, "执行失败"),
     STOP(5, "手动终止"),
-    INTFAIL(6, "初始化失败");
+    INTFAIL(6, "初始化失败"),
+    NONE(7, "未执行"); // 即未开启，执行集中需要使用的状态
 
     private int type;
 
