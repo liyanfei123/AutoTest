@@ -160,6 +160,8 @@ public class RecordDomainService implements RecordDomain, SetRecordDomain {
                 SceneRecordBo sceneRecordBo = new SceneRecordBo();
                 sceneRecordBo.setSceneExecuteRecordDto(sonSceneExeDto);
                 List<StepRecordBo> sonStepRecordBos = this.getStepExeInRecord(sonRecordId, order);
+                // 记录子场景执行记录id
+                sonStepRecordBos.forEach(e -> e.getStepExecuteRecordDto().setSceneRecordId(sonRecordId));
                 sceneRecordBo.setStepRecordBos(sonStepRecordBos);
                 stepRecordBo.setSceneRecordBo(sceneRecordBo);
             } else {

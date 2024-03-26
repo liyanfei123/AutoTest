@@ -109,7 +109,6 @@ public class ExecuteValidators {
             throw new AutoTestException("请输入正确的场景id");
         }
         List<SceneDetailDto> sceneDetailDtos = Arrays.asList(sceneDetailDto);
-
         List sceneIds = sceneDetailDtos.stream().map(e -> e.getSceneId())
                 .collect(Collectors.toList());
         // 判断当前是否有正常进行中的场景

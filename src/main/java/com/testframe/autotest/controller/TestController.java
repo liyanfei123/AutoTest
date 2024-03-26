@@ -2,6 +2,7 @@ package com.testframe.autotest.controller;
 
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.exception.AutoTestException;
+import com.testframe.autotest.core.meta.context.UserContext;
 import com.testframe.autotest.core.meta.vo.common.http.HttpResult;
 import com.testframe.autotest.domain.sceneStep.SceneStepDomain;
 import com.testframe.autotest.service.SceneExecuteService;
@@ -10,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -66,7 +64,8 @@ public class TestController {
     public String cookie(HttpServletResponse response) {
         // 拦截器通过后，添加cookie
         CookieUtil.addCookie(response, "hello", "world");
-        return "Hello World!";
+        Long userId = UserContext.getUserId();
+        return "Hello World! " + userId;
     }
 
     @GetMapping("fatherScene")
@@ -81,5 +80,10 @@ public class TestController {
         throw new AutoTestException(12345, "自定义测试");
     }
 
+
+    @PostMapping("login")
+    public HttpResult userLogin(@RequestBody User user) {
+        return HttpResult.ok("成功");
+    }
 
 }

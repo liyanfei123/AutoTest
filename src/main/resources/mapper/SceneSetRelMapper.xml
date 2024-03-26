@@ -11,11 +11,12 @@
     <result column="extInfo" property="type" jdbcType="VARCHAR" />
     <result column="isDelete" property="isDelete" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="createBy" property="createBy" jdbcType="BIGINT" />
     <result column="createTime" property="createTime" jdbcType="BIGINT" />
     <result column="updateTime" property="updateTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, setId, stepId, sceneId, sort, type, extInfo, isDelete, status, createTime, updateTime
+    id, setId, stepId, sceneId, sort, type, extInfo, isDelete, status, createBy, createTime, updateTime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 'false' as QUERYID,
@@ -98,6 +99,12 @@
     where sceneId = #{sceneId} and isDelete = 0
   </select>
 
+  <select id="queryRelById" resultType="com.testframe.autotest.core.meta.po.SceneSetRel">
+    select *
+    from AUTO_TEST_SCENE_SET_REL
+    where id = #{id} and isDelete = 0
+  </select>
+
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from AUTO_TEST_SCENE_SET_REL
@@ -110,11 +117,11 @@
     </selectKey>
     insert into AUTO_TEST_SCENE_SET_REL (setId, stepId, sceneId, 
       sort, type, extInfo, isDelete,
-      status, createTime, updateTime
+      status, createBy, createTime, updateTime
       )
     values (#{setId,jdbcType=BIGINT}, #{stepId,jdbcType=BIGINT}, #{sceneId,jdbcType=BIGINT},
       #{sort,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{extInfo,jdbcType=VARCHAR}, #{isDelete,jdbcType=INTEGER},
-      #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT}
+      #{status,jdbcType=INTEGER}, #{createBy,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.testframe.autotest.core.meta.po.SceneSetRel" >
@@ -147,6 +154,9 @@
       <if test="status != null" >
         status,
       </if>
+      <if test="createBy != null" >
+        createBy,
+      </if>
       <if test="createTime != null" >
         createTime,
       </if>
@@ -178,6 +188,9 @@
       </if>
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=BIGINT},
@@ -215,6 +228,9 @@
         status = #{status,jdbcType=INTEGER},
       </if>
       <if test="createTime != null" >
+        createBy = #{createBy,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
         createTime = #{createTime,jdbcType=BIGINT},
       </if>
       <if test="updateTime != null" >
@@ -233,9 +249,11 @@
       extInfo = #{extInfo,jdbcType=VARCHAR},
       isDelete = #{isDelete,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
+      createBy = #{createBy,jdbcType=BIGINT},
       createTime = #{createTime,jdbcType=BIGINT},
       updateTime = #{updateTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
 
 </mapper>

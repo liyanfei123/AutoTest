@@ -225,7 +225,7 @@
     <if test="sceneName != null" >
       <![CDATA[and sceneName like '%${sceneName}%']]>
     </if>
-    <if test="sceneId != null" >
+    <if test="sceneId != null and sceneId > 0" >
       and id= #{sceneId}
     </if>
     </select>

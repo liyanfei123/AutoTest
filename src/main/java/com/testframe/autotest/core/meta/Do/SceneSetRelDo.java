@@ -21,5 +21,7 @@ public class SceneSetRelDo {
 
     public Integer sort;
 
+    public Long createBy;
+
     public Long updateTime;
 }

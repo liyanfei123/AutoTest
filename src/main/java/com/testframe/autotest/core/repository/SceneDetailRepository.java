@@ -5,6 +5,7 @@ import com.testframe.autotest.cache.ao.CategoryCache;
 import com.testframe.autotest.cache.ao.SceneDetailCache;
 import com.testframe.autotest.cache.ao.SceneStepRelCache;
 import com.testframe.autotest.cache.ao.StepOrderCache;
+import com.testframe.autotest.core.enums.SceneStatusEnum;
 import com.testframe.autotest.core.enums.StepOrderEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
@@ -95,7 +96,7 @@ public class SceneDetailRepository {
         if (!stepOrderDao.saveStepOrder(stepOrder)) {
             throw new AutoTestException("步骤执行顺序添加失败");
         }
-        countScene(sceneId, null);
+        changeSceneCount(null, null);
         return sceneId;
     }
 
@@ -186,7 +187,6 @@ public class SceneDetailRepository {
      * @param
      * @return
      */
-    // TODO: 2023/2/27 添加场景状态查询，需要先查询最近执行状态的场景
     public List<SceneDetailDo> queryScenes(Long sceneId, String sceneName,
                                            Integer categoryId, Integer status,
                                            PageQry pageQry) {
@@ -204,6 +204,9 @@ public class SceneDetailRepository {
                 sceneDetailList = sceneDao.querySceneLikeTitle(sceneName, pageQry);
             }
             scenes = sceneDetailList.stream().map(sceneDetailConvertor::PoToDo).collect(Collectors.toList());
+        } else if (status != null && SceneStatusEnum.getByType(status) != null) {
+            // 仅针对单独执行和执行集执行触发的场景
+            return new ArrayList<>();
         } else {
             // 全局无区别搜索列表
             sceneDetailList = sceneDao.queryScenes(pageQry);
@@ -213,7 +216,7 @@ public class SceneDetailRepository {
     }
 
     // 添加缓存计数
-    private void countScene(Long sceneId, String sceneName) {
+    public void changeSceneCount(Long sceneId, String sceneName) {
         Long count = sceneDetailCache.getSceneCount();
         if (count == null) {
             count = sceneDao.countScenes(sceneId, sceneName);

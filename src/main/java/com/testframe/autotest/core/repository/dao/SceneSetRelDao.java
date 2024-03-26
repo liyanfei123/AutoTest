@@ -36,6 +36,10 @@ public class SceneSetRelDao {
         return 0L;
     }
 
+    public SceneSetRel queryRelById(Long relId) {
+        return sceneSetRelMapper.queryRelById(relId);
+    }
+
     public SceneSetRel querySetRelBySceneId(Long setId, Long sceneId) {
         return sceneSetRelMapper.queryRelBySetIdAndSceneId(setId, sceneId);
     }

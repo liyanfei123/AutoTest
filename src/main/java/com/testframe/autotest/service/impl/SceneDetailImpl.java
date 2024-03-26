@@ -3,6 +3,7 @@ package com.testframe.autotest.service.impl;
 import com.testframe.autotest.cache.service.SceneCacheService;
 import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.enums.StepTypeEnum;
+import com.testframe.autotest.core.meta.context.UserContext;
 import com.testframe.autotest.core.meta.vo.common.Response;
 import com.testframe.autotest.core.repository.*;
 import com.testframe.autotest.domain.category.CategorySceneDomain;
@@ -84,7 +85,8 @@ public class SceneDetailImpl implements SceneDetailService {
             }
             SceneDetailDto sceneDetailDto = response.getResult();
             // todo:获取当前登录的用户信息
-            sceneDetailDto.setCreateBy(1234L);
+            Long userId = UserContext.getUserId();
+            sceneDetailDto.setCreateBy(userId);
             log.info("[SceneDetailImpl:create] create scene, scene = {}", JSON.toJSONString(sceneDetailDto));
             return sceneDomain.updateScene(sceneDetailDto);
 //        } catch (AutoTestException e) {
@@ -201,6 +203,7 @@ public class SceneDetailImpl implements SceneDetailService {
 
     @Override
     public Boolean deleteScene(Long sceneId) {
+        // TODO: 2023/8/25 判断是否是同一个人，以及当前场景是否被引用
         return sceneDomain.deleteScene(sceneId);
     }
 

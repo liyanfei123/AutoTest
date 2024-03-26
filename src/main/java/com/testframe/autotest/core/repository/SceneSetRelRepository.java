@@ -106,6 +106,14 @@ public class SceneSetRelRepository {
         }
     }
 
+    public SceneSetRelDo querySceneSetRelById(Long relId) {
+        SceneSetRel sceneSetRel = sceneSetRelDao.queryRelById(relId);
+        if (sceneSetRel == null) {
+            return null;
+        }
+        return sceneSetRelConvertor.PoToDo(sceneSetRel);
+    }
+
     public List<SceneSetRelDo> querySetRelBySetId(Long setId, Integer sort, PageQry pageQry) {
         List<SceneSetRel> sceneSetRels = sceneSetRelDao.querySetRelBySetId(setId, sort, pageQry);
         if (sceneSetRels.isEmpty()) {

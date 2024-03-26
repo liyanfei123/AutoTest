@@ -42,6 +42,15 @@ public enum SceneStatusEnum {
         return allTypes;
     }
 
+    public static SceneStatusEnum getByType(int type) {
+        for (SceneStatusEnum sceneStatusEnum : values()) {
+            if (sceneStatusEnum.getType() == type) {
+                return sceneStatusEnum;
+            }
+        }
+        return null;
+    }
+
     public static Integer sceneStatusToStepStatus(Integer sceneStatus) {
         if (sceneStatus == SceneStatusEnum.NEVER.getType()) {
             return StepRunResultEnum.NORUN.getType();

@@ -9,12 +9,11 @@ import com.testframe.autotest.core.enums.CategoryRelEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.*;
 import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
+import com.testframe.autotest.core.meta.convertor.SceneSetRelConvertor;
 import com.testframe.autotest.core.meta.request.PageQry;
-import com.testframe.autotest.core.repository.CategorySceneRepository;
-import com.testframe.autotest.core.repository.SceneDetailRepository;
-import com.testframe.autotest.core.repository.SceneStepRepository;
-import com.testframe.autotest.core.repository.StepOrderRepository;
+import com.testframe.autotest.core.repository.*;
 import com.testframe.autotest.domain.scene.SceneDomain;
+import com.testframe.autotest.domain.sceneSet.SceneSetDomain;
 import com.testframe.autotest.meta.dto.category.CategorySceneDto;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import com.testframe.autotest.meta.dto.scene.SceneSearchListDto;
@@ -42,6 +41,9 @@ public class SceneDomainImpl implements SceneDomain {
 
     @Autowired
     private SceneStepRepository sceneStepRepository;
+
+    @Autowired
+    private SceneSetRelRepository sceneSetRelRepository;
 
     @Autowired
     private CategoryCache categoryCache;
@@ -121,6 +123,10 @@ public class SceneDomainImpl implements SceneDomain {
 
     @Override
     public Boolean deleteScene(Long sceneId) {
+        List<SceneSetRelDo> sceneSetRelDos = sceneSetRelRepository.querySetRelByStepIdOrSceneId(0L, sceneId);
+        if (!sceneSetRelDos.isEmpty()) {
+            throw new AutoTestException("当前场景已被其他执行集引用");
+        }
         if (sceneCacheService.getSceneDetailFromCache(sceneId) == null) {
             return true;
         }

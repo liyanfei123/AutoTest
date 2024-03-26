@@ -24,7 +24,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     public void addInterceptors(InterceptorRegistry registry) {
         String[] addPathPatterns = {
-                "/test/*",
+//                "/test/*",
+                "/autotest/scene/create"
         };
         String[] excludePathPatterns = {};
 

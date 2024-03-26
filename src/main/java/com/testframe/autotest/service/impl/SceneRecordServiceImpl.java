@@ -151,6 +151,8 @@ public class SceneRecordServiceImpl implements SceneRecordService {
                 stepExeRecordInfo.setStepExecuteRecordDto(null);
 
                 SceneExeRecordVo sonSceneExeRecordVo = new SceneExeRecordVo();
+                sonSceneExeRecordVo.setSceneId(stepRecordBo.getSceneRecordBo().getSceneExecuteRecordDto().getSceneId()); // 设置子场景id
+                sonSceneExeRecordVo.setSceneRecordId(stepRecordBo.getStepExecuteRecordDto().getSceneRecordId()); // 设置子场景执行记录id
                 SceneExeInfoVo sonSceneExeInfoVo = SceneExeInfoVo.build(stepRecordBo.getSceneRecordBo().getSceneExecuteRecordDto()); // 子场景执行信息
                 sonSceneExeRecordVo.setSceneExeInfo(sonSceneExeInfoVo);
                 List<StepExeRecordInfo> sonStepExes = this.getStepExeInfos(stepRecordBo.getSceneRecordBo().getStepRecordBos());

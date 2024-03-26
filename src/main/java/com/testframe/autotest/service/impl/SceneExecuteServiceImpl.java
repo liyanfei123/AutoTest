@@ -103,7 +103,6 @@ public class SceneExecuteServiceImpl implements SceneExecuteService {
             if (BrowserEnum.getByType(browserType) == null) {
                 throw new AutoTestException("浏览器选择错误");
             }
-            // todo 判断场景状态
             SeleniumRunEvent seleniumRunEvent = generateEvent(0L, sceneId, null, SceneExecuteEnum.SINGLE.getType());
             seleniumRunEvent.setBrowserType(browserType);
             log.info("[SceneExecuteServiceImpl:executeScene] post event, event = {}", JSON.toJSONString(seleniumRunEvent));

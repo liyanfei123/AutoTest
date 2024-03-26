@@ -6,14 +6,8 @@ import lombok.Data;
  * 执行集关联步骤
  */
 @Data
-public class SceneSetRelStepDto {
+public class SceneSetRelStepDto extends BaseSetRelDto {
 
     public Long stepId;
-
-    public Long setId;
-
-    public Integer status;
-
-    public Integer sort;
 
 }

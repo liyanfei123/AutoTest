@@ -80,12 +80,7 @@ public class SceneSetValidator {
             if (!ExeOrderEnum.getTypes().contains(sceneSetRelSceneDto.getSort())) {
                 throw new AutoTestException("关联场景执行顺序错误");
             }
-            SceneSetConfigModel sceneSetConfigModel = sceneSetRelSceneDto.getSceneSetConfigModel();
-            if (sceneSetConfigModel != null) {
-                if (sceneSetConfigModel.getTimeOutTime() < 0) {
-                    throw new AutoTestException("超时时间设置错误");
-                }
-            }
+            this.checkSceneSetConfig(sceneSetRelSceneDto.getSceneSetConfigModel());
             sceneValidators.sceneIsExist(sceneSetRelSceneDto.getSceneId());
         }
         for (SceneSetRelStepDto sceneSetRelStepDto : sceneSetRelStepDtos) {
@@ -99,6 +94,15 @@ public class SceneSetValidator {
         }
     }
 
+    public void checkSceneSetConfig(SceneSetConfigModel sceneSetConfigModel) {
+        if (sceneSetConfigModel == null) {
+            return;
+        }
+        if (sceneSetConfigModel.getTimeOutTime() < 0) {
+            throw new AutoTestException("超时时间设置错误");
+        }
+
+    }
     public void checkTitleInCategory(String name, Integer categoryId) {
         if (name == null || name == "") {
             return;

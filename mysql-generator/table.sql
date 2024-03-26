@@ -70,7 +70,7 @@ CREATE TABLE AUTO_TEST_SCENE_EXECUTE_RECORD(
    waitType INT NULL  DEFAULT 1 COMMENT '等待方式 执行时所定义的超时等待方式' ,
    waitTime INT NULL  DEFAULT 0 COMMENT '等待时间 执行时所定义的超时等待时间' ,
    status INT NULL  DEFAULT 0 COMMENT '执行结果 0:成功,1:失败,2:中止' ,
-   type INT NULL  DEFAULT 0 COMMENT '执行类型 1:单独执行,2:子场景执行' ,
+   type INT NULL  DEFAULT 0 COMMENT '执行类型 1:单独执行,2:子场景执行,3:执行集执行' ,
    orderList VARCHAR(10000) NULL  DEFAULT '[]' COMMENT '步骤执行顺序' ,
    extInfo VARCHAR(10000) NULL  DEFAULT '' COMMENT '失败原因' ,
    createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
@@ -112,10 +112,13 @@ CREATE TABLE AUTO_TEST_SCENE_SET_REL(
   extInfo VARCHAR(10000) NOT NULL DEFAULT ''  COMMENT '额外数据',
   isDelete INT NULL  DEFAULT 0 COMMENT '是否删除 0:未删除,1:已删除' ,
   status INT NULL DEFAULT 0  COMMENT '执行状态 0:未开启 1:开启' ,
+  createBy BIGINT NULL  DEFAULT 0 COMMENT '创建人 uid' ,
   createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
   updateTime BIGINT NULL  DEFAULT 0 COMMENT '更新时间' ,
   PRIMARY KEY (id)
 ) COMMENT = '执行集关联场景表 ';
+
+alter table AUTO_TEST_SCENE_SET_REL add column `createBy` BIGINT NULL  DEFAULT 0 COMMENT '创建人 uid' after `status`;;
 
 alter table AUTO_TEST_SCENE_SET_REL add column `extInfo` VARCHAR(10000) NOT NULL DEFAULT ''  COMMENT '额外数据' after `type`;
 -- 添加额外信息的json字符串
@@ -158,3 +161,16 @@ CREATE TABLE AUTO_TEST_CATEGORY_SCENE(
 
 alter table AUTO_TEST_CATEGORY_SCENE ADD COLUMN `stepId` BIGINT NULL DEFAULT 0  COMMENT '步骤id' after `categoryId`;
 alter table AUTO_TEST_CATEGORY_SCENE ADD COLUMN `setId` BIGINT NULL DEFAULT 0  COMMENT '执行集id' after `sceneId`;
+
+
+CREATE TABLE AUTO_TEST_USER(
+  id BIGINT NOT NULL AUTO_INCREMENT  COMMENT '用户id' ,
+  userName VARCHAR(1024) NULL DEFAULT '' COMMENT '用户名',
+  recordId BIGINT NOT NULL DEFAULT 0  COMMENT '场景执行记录id' ,
+  stepId BIGINT NOT NULL DEFAULT 0  COMMENT '步骤id' ,
+  sceneRecordId BIGINT NOT NULL DEFAULT 0  COMMENT '子场景执行记录id' ,
+  reason VARCHAR(10000) NULL DEFAULT ''  COMMENT '失败原因' ,
+  status INT NULL DEFAULT 0  COMMENT '执行结果 0:成功，1:失败，2:跳过，3:中止' ,
+  createTime BIGINT NULL  DEFAULT 0 COMMENT '创建时间' ,
+  PRIMARY KEY (id)
+) COMMENT = '步骤执行记录表 ';

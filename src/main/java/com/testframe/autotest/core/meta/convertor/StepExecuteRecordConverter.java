@@ -51,6 +51,7 @@ public class StepExecuteRecordConverter {
 
     public StepExecuteRecordDto DoToDto(StepExecuteRecordDo stepExecuteRecordDo) {
         StepExecuteRecordDto stepExecuteRecordDto = new StepExecuteRecordDto();
+        stepExecuteRecordDto.setStepRecordId(stepExecuteRecordDo.getStepRecordId());
         stepExecuteRecordDto.setStepId(stepExecuteRecordDo.getStepId());
         stepExecuteRecordDto.setSceneRecordId(stepExecuteRecordDo.getSceneRecordId());
         stepExecuteRecordDto.setStepName(stepExecuteRecordDo.getStepName());

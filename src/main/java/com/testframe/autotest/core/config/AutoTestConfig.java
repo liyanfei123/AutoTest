@@ -23,7 +23,7 @@ public class AutoTestConfig {
     private Boolean userSwitch;
 
     // 用户身份白名单
-    @Value("${white.userIds:1,2,3}")
+    @Value("${white.userIds:1,2,3,15988}")
     private List<Long> whiteUserIds;
 
     // 场景执行记录展示的默认条数

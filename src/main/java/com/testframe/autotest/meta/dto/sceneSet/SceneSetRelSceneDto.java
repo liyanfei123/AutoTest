@@ -7,15 +7,9 @@ import lombok.Data;
  * 执行集关联场景
  */
 @Data
-public class SceneSetRelSceneDto {
+public class SceneSetRelSceneDto extends BaseSetRelDto {
 
     public Long sceneId;
-
-    public Long setId;
-
-    public Integer status;
-
-    public Integer sort;
 
     public SceneSetConfigModel sceneSetConfigModel;
 

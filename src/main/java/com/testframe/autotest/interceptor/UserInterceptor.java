@@ -3,6 +3,7 @@ package com.testframe.autotest.interceptor;
 import com.testframe.autotest.core.config.AutoTestConfig;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.common.http.HttpStatus;
+import com.testframe.autotest.core.meta.context.UserContext;
 import com.testframe.autotest.util.CookieUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +30,29 @@ public class UserInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("[UserInterceptor:preHandle] start...");
+        handleUserId(request);
+        return true;
+    }
+
+    private void handleUserId(HttpServletRequest request) {
         if (!autoTestConfig.getUserSwitch()){
-            return true;
+            return;
         }
-        String userId = CookieUtil.getCookieValue(request, "autoUserId");
+        long userId;
+        String userIdStr = request.getHeader("userId");
+        if (userIdStr == null || userIdStr.equals("")) {
+            userIdStr = CookieUtil.getCookieValue(request, "autoUserId");
+        }
+        if (userIdStr == null) {
+            userId = 0;
+        } else {
+            userId = Long.parseLong(userIdStr);
+        }
+        // TODO: 2023/9/8 判断当前用户是否有注册 
+        UserContext.setUserId(userId);
         // 白名单用户
-        if (userId != null && autoTestConfig.getWhiteUserIds().contains(Long.valueOf(userId))) {
-            return true;
+        if (autoTestConfig.getWhiteUserIds().contains(Long.valueOf(userId))) {
+            return;
         }
         // todo 授权用户，需要单独进行判断
         throw new AutoTestException(HttpStatus.SC_BAD_REQUEST, "未授权");
@@ -48,6 +65,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
+        UserContext.clearUserId();
     }
 
 }

@@ -21,7 +21,7 @@ public class StepExecuteRecordDto {
 
     private Long stepId;
 
-    // 子场景的执行记录id
+    // 子场景的执行记录id 若为0或null，则表面不是子场景执行的
     private Long sceneRecordId;
 
     private String stepName;

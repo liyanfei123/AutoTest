@@ -362,6 +362,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
                 sceneSetRelSceneBo.setSceneSetConfigModel(JSON.parseObject(sceneSetRelDo.getExtInfo(),
                         SceneSetConfigModel.class));
             }
+            sceneSetRelSceneBo.setCreateBy(sceneSetRelDo.getCreateBy() == 0 ? null : sceneSetRelDo.getCreateBy());
             sceneSetRelSceneBos.add(sceneSetRelSceneBo);
         }
         sceneSetBo.setSceneSetRelSceneBos(sceneSetRelSceneBos);
@@ -378,6 +379,7 @@ public class SceneSetDomainImpl implements SceneSetDomain {
             sceneSetRelStepBo.setStatus(sceneSetRelDo.getStatus());
             sceneSetRelStepBo.setSort(sceneSetRelDo.getSort());
             sceneSetRelStepBo.setStepName(stepDetailDtoMap.get(sceneSetRelDo.getStepId()).getStepName());
+            sceneSetRelStepBo.setCreateBy(sceneSetRelDo.getCreateBy() == 0 ? null : sceneSetRelDo.getCreateBy());
             sceneSetRelStepBos.add(sceneSetRelStepBo);
         }
         sceneSetBo.setSceneSetRelStepBos(sceneSetRelStepBos);
@@ -433,24 +435,20 @@ public class SceneSetDomainImpl implements SceneSetDomain {
             return null;
         }
 
-
-
-
         // 先查顶部
 
-            PageQry headPageQry = new PageQry(pageQry.getPage(), offset, pageQry.getSize()+1);
-            List<SceneSetRelDo> headSceneSetRelDos = sceneSetRelRepository.querySetRelBySetId(setId, ExeOrderEnum.HEAD.getType(), headPageQry);
-            if (sceneSetRelDos.size() == pageQry.getSize()) {
-                // 说明多找了一个
-                return headSceneSetRelDos;
-            } else if (sceneSetRelDos.size() == needSize) {
-                // 正好找到了满足要求的个数
-                return headSceneSetRelDos;
-            }
-            if (!headSceneSetRelDos.isEmpty()) {
-                sceneSetRelDos.addAll(headSceneSetRelDos);
-            }
-
+        PageQry headPageQry = new PageQry(pageQry.getPage(), offset, pageQry.getSize()+1);
+        List<SceneSetRelDo> headSceneSetRelDos = sceneSetRelRepository.querySetRelBySetId(setId, ExeOrderEnum.HEAD.getType(), headPageQry);
+        if (sceneSetRelDos.size() == pageQry.getSize()) {
+            // 说明多找了一个
+            return headSceneSetRelDos;
+        } else if (sceneSetRelDos.size() == needSize) {
+            // 正好找到了满足要求的个数
+            return headSceneSetRelDos;
+        }
+        if (!headSceneSetRelDos.isEmpty()) {
+            sceneSetRelDos.addAll(headSceneSetRelDos);
+        }
 
 
         // 查找正常的

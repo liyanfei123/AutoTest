@@ -24,7 +24,7 @@ public class ActionFactory {
     private static Map<String, ActionI> actionFactory = new HashMap<>();
 
     @Autowired
-    private List<ActionI> actions;
+    private List<ActionI> actions;  // 引入所有具体的实现
 
     @PostConstruct
     public void init() {

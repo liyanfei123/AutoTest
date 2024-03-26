@@ -23,7 +23,7 @@ public class CookieUtil {
 
     public static String getCookieValue(HttpServletRequest request, String key) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null || cookies.length < 0) {
+        if (cookies == null || cookies.length == 0) {
             return null;
         }
         for (Cookie cookie : cookies) {

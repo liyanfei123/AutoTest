@@ -11,4 +11,6 @@ public interface SceneCacheService {
 
     HashMap<Long, SceneDetailDto> getSceneDetailsFromCache(List<Long> sceneIds);
 
+    Long countScene();
+
 }

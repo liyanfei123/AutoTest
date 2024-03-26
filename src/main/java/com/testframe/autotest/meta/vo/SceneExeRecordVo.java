@@ -13,8 +13,10 @@ import java.util.List;
 @Data
 public class SceneExeRecordVo {
 
+    // 场景执行记录id or 子场景执行记录id
     private Long sceneRecordId;
 
+    // 场景id or 子场景id
     private Long sceneId;
 
     private Integer stepNum;

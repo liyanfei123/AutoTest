@@ -19,6 +19,8 @@ public class SceneSetRel {
 
     private Integer status;
 
+    private Long createBy;
+
     private Long createTime;
 
     private Long updateTime;
@@ -92,6 +94,14 @@ public class SceneSetRel {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Long createBy) {
+        this.createBy = createBy;
     }
 
     public Long getCreateTime() {

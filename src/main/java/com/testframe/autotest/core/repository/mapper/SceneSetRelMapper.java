@@ -20,6 +20,8 @@ public interface SceneSetRelMapper {
 
     int updateByPrimaryKey(SceneSetRel record);
 
+    SceneSetRel queryRelById(Long Id);
+
     SceneSetRel queryRelBySetIdAndSceneId(Long setId, Long sceneId);
 
     SceneSetRel queryRelBySetIdAndStepId(Long setId, Long stepId);

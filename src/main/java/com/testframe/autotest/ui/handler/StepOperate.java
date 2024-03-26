@@ -70,7 +70,12 @@ public class StepOperate {
                             JSON.toJSONString(stepExe));
                 }
             }
-            switch (OperateTypeEnum.getOperateByType(operateType)) {
+            OperateTypeEnum ope = OperateTypeEnum.getOperateByType(operateType);
+            if (ope == null) {
+                log.info("[SeleniumEventHandler:handler] operate type error, {}", operateType);
+                throw new SeleniumRunException(String.format("暂不支持 operateType=%s 操作类型", operateType));
+            }
+            switch (ope) {
                 case OPERATE:
                     runOperate(driver, element, operateData);
                     break;

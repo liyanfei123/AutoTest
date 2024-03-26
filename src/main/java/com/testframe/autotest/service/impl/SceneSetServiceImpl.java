@@ -8,6 +8,7 @@ import com.testframe.autotest.core.enums.SetMemTypeEnum;
 import com.testframe.autotest.core.exception.AutoTestException;
 import com.testframe.autotest.core.meta.Do.CategorySceneDo;
 import com.testframe.autotest.core.meta.Do.ExeSetDo;
+import com.testframe.autotest.core.meta.Do.SceneSetRelDo;
 import com.testframe.autotest.core.meta.common.http.HttpStatus;
 import com.testframe.autotest.core.meta.convertor.ExeSetConverter;
 import com.testframe.autotest.core.meta.request.PageQry;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -285,6 +287,24 @@ public class SceneSetServiceImpl implements SceneSetService {
             log.error("[SceneSetServiceImpl:updateSceneSetRel] update scene set rel error, reason = {}", e);
             return false;
         }
+    }
+
+    @Override
+    public void updateSceneSetConfig(Long relId, SceneSetConfigModel sceneSetConfigModel) {
+        sceneSetValidator.checkSceneSetConfig(sceneSetConfigModel);
+        SceneSetRelDo sceneSetRelDo = sceneSetRelRepository.querySceneSetRelById(relId);
+        if (sceneSetRelDo == null) {
+            throw new AutoTestException("关联id错误");
+        }
+        SceneSetConfigModel oldSceneSetConfigModel = JSON.parseObject(sceneSetRelDo.getExtInfo(), SceneSetConfigModel.class);
+        if (oldSceneSetConfigModel != null) {
+            // 判断是否需要更新
+            if (oldSceneSetConfigModel.getTimeOutTime() == sceneSetConfigModel.getTimeOutTime()) {
+                return;
+            }
+        }
+        sceneSetRelDo.setExtInfo(JSON.toJSONString(sceneSetConfigModel));
+        sceneSetRelRepository.updateSceneSetRelWithScenes(Arrays.asList(sceneSetRelDo));
     }
 
     @Override

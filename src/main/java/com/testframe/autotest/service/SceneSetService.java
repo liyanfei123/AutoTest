@@ -6,6 +6,7 @@ import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.vo.SetListVo;
 import com.testframe.autotest.meta.vo.SetRelListVo;
 
@@ -29,6 +30,8 @@ public interface SceneSetService {
     Boolean deleteSceneSetRel(SceneSetRelDelCmd sceneSetRelDelCmd);
 
     Boolean updateSceneSetRel(SceneSetRelCmd sceneSetRelCmd);
+
+    void updateSceneSetConfig(Long relId, SceneSetConfigModel sceneSetConfigModel);
 
     Boolean topSetSceneOrStepRel(SceneSetRelTopCmd sceneSetRelTopCmd);
 

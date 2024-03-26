@@ -7,6 +7,7 @@ import com.testframe.autotest.meta.command.SceneSetRelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelDelCmd;
 import com.testframe.autotest.meta.command.SceneSetRelTopCmd;
 import com.testframe.autotest.meta.dto.sceneSet.ExeSetDto;
+import com.testframe.autotest.meta.model.SceneSetConfigModel;
 import com.testframe.autotest.meta.vo.SetListVo;
 import com.testframe.autotest.meta.vo.SetRelListVo;
 import com.testframe.autotest.service.impl.SceneSetServiceImpl;
@@ -72,6 +73,16 @@ public class SceneSetController {
     public HttpResult<Boolean> updateSetRel(@RequestBody SceneSetRelCmd sceneSetRelCmd) {
         try {
             return HttpResult.ok(sceneSetService.updateSceneSetRel(sceneSetRelCmd));
+        } catch (Exception e) {
+            return HttpResult.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/rel/addConfig")
+    public HttpResult<Boolean> addConfig(@RequestParam("relId") Long relId, @RequestBody SceneSetConfigModel sceneSetConfigModel) {
+        try {
+            sceneSetService.updateSceneSetConfig(relId, sceneSetConfigModel);
+            return HttpResult.ok();
         } catch (Exception e) {
             return HttpResult.error(e.getMessage());
         }

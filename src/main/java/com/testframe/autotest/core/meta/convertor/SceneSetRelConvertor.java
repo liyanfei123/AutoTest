@@ -23,6 +23,7 @@ public class SceneSetRelConvertor {
         sceneSetRelDo.setExtInfo(sceneSetRel.getExtInfo());
         sceneSetRelDo.setStatus(sceneSetRel.getStatus());
         sceneSetRelDo.setSort(sceneSetRel.getSort());
+        sceneSetRelDo.setCreateBy(sceneSetRel.getCreateBy());
         sceneSetRelDo.setUpdateTime(sceneSetRel.getUpdateTime());
         return sceneSetRelDo;
     }
@@ -37,6 +38,7 @@ public class SceneSetRelConvertor {
         sceneSetRel.setExtInfo(sceneSetRelDo.getExtInfo());
         sceneSetRel.setStatus(sceneSetRelDo.getStatus());
         sceneSetRel.setSort(sceneSetRelDo.getSort());
+        sceneSetRel.setCreateBy(sceneSetRelDo.getCreateBy());
         return sceneSetRel;
     }
 
@@ -48,6 +50,7 @@ public class SceneSetRelConvertor {
         sceneSetRelDo.setType(SetMemTypeEnum.SCENE.getType());
         sceneSetRelDo.setExtInfo(JSON.toJSONString(sceneSetRelSceneDto.getSceneSetConfigModel()));
         sceneSetRelDo.setSort(sceneSetRelSceneDto.getSort());
+        sceneSetRelDo.setCreateBy(sceneSetRelSceneDto.getCreateBy());
         return sceneSetRelDo;
     }
 
@@ -60,6 +63,7 @@ public class SceneSetRelConvertor {
         sceneSetRelDo.setStatus(sceneSetRelStepDto.getStatus());
         sceneSetRelDo.setType(SetMemTypeEnum.SCENE.getType());
         sceneSetRelDo.setSort(sceneSetRelStepDto.getSort());
+        sceneSetRelDo.setCreateBy(sceneSetRelStepDto.getCreateBy());
         return sceneSetRelDo;
     }
 
@@ -69,6 +73,7 @@ public class SceneSetRelConvertor {
         sceneSetRelStepDto.setStepId(sceneSetRelDo.getSceneId());
         sceneSetRelStepDto.setStatus(sceneSetRelDo.getStatus());
         sceneSetRelStepDto.setSort(sceneSetRelDo.getSort());
+        sceneSetRelStepDto.setCreateBy(sceneSetRelDo.getCreateBy());
         return sceneSetRelStepDto;
     }
 }

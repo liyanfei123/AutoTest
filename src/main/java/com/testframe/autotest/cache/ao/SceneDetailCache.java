@@ -78,7 +78,26 @@ public class SceneDetailCache {
         return null;
     }
 
-    // TODO: 2023/3/12  增加刷新数量的定时调度job
+    public void updateSceneCount(Long count) {
+        try {
+            if (count == null || count == 0) {
+                return;
+            }
+            String key = SceneDetailCacheKeys.genSceneCount();
+            stringRedisTemplate.opsForValue().set(key, String.valueOf(count));
+        } catch (Exception ex) {
+            log.error("[SceneDetailCache:updateSceneCount] catch-exception, keyInfo = {}, ex = {}",
+                    JSON.toJSONString(count), ex);
+        }
+    }
+
+    public void clearSceneCountCache() {
+        String key = SceneDetailCacheKeys.genSceneCount();
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            stringRedisTemplate.delete(key);
+        }
+    }
+
     public Boolean incrCount(long i) {
         String key = SceneDetailCacheKeys.genSceneCount();
         try {

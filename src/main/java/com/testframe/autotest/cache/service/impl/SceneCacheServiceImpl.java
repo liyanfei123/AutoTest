@@ -12,6 +12,7 @@ import com.testframe.autotest.core.meta.convertor.SceneDetailConvertor;
 import com.testframe.autotest.core.repository.CategorySceneRepository;
 import com.testframe.autotest.core.repository.SceneDetailRepository;
 import com.testframe.autotest.core.repository.SceneStepRepository;
+import com.testframe.autotest.core.repository.dao.SceneDetailDao;
 import com.testframe.autotest.meta.dto.scene.SceneDetailDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class SceneCacheServiceImpl implements SceneCacheService {
 
     @Autowired
     private CategorySceneRepository categorySceneRepository;
+
+    @Autowired
+    private SceneDetailDao sceneDetailDao;
 
     @Autowired
     private SceneDetailConvertor sceneDetailConvertor;
@@ -69,5 +73,15 @@ public class SceneCacheServiceImpl implements SceneCacheService {
             sceneDetailDtoMap.put(sceneId, this.getSceneDetailFromCache(sceneId));
         }
         return sceneDetailDtoMap;
+    }
+
+    @Override
+    public Long countScene() {
+        Long count = sceneDetailCache.getSceneCount();
+        if (count == null) {
+            count = sceneDetailDao.countScenes(null, null);
+            sceneDetailCache.updateSceneCount(count);
+        }
+        return count;
     }
 }
